@@ -9,7 +9,7 @@ React Native（Expo）で開発されています。
 
 | ツール       | バージョン          |
 |--------------|---------------------|
-| Node.js      | `v22.x`（必須）     |
+| Node.js      | `v22.11.0`（必須）     |
 | npm          | `v10.x` 以上        |
 | direnv       | 最新（Node自動切替用） |
 | nvm          | Node Version Manager |
@@ -80,7 +80,7 @@ direnv: loading .../voicebooklm-frontend/.envrc
 ```
 バージョン確認：
 ```
-node -v   # → v22.x.x
+node -v   # → v22.11.x
 npm -v    # → 10.x.x 以上
 ```
 2. 環境変数の設定
