@@ -119,7 +119,7 @@ Ctrl + C:開発サーバー停止
 
 症状確認ポイントnpm install でエラーNode.js が v22 か？ direnv allow 済みか？実機で接続できない同一Wi-Fiか？ VPNオフ？ ファイアウォール設定？.env が反映されない.env 作成済みか？ npm run dev 再起動したか？
 
-ディレクトリ構成（抜粋）
+ディレクトリ構成（仮？）
 
 text
 ```
