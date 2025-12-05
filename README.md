@@ -20,8 +20,6 @@ React Native（Expo）で開発されています。
 
 ### 1. direnv のインストール
 
-<details><summary>インストールコマンドを表示</summary>
-
 **Arch Linux**
 
 ```
