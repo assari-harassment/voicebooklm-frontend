@@ -1,96 +1,139 @@
-フロントエンド環境構築手順
+# VoiceBookLM Frontend
 
-前提条件
+AIボイスメモアプリケーション「VoiceBookLM」のフロントエンドリポジトリです。  
+React Native（Expo）で開発されています。
 
-Node.js: v22.x
-npm: v10.x以上
-direnv: プロジェクトディレクトリに入ると自動的にNode.jsバージョンを切り替え
-nvm (Node Version Manager): Node.jsバージョン管理ツール
+## 前提条件
 
-環境セットアップ
+開発環境の一貫性を保つため、以下のバージョンを導入
 
+| ツール       | バージョン          |
+|--------------|---------------------|
+| Node.js      | `v22.x`（必須）     |
+| npm          | `v10.x` 以上        |
+| direnv       | 最新（Node自動切替用） |
+| nvm          | Node Version Manager |
 
-1. direnvのインストール（一度だけ）
+## 環境セットアップ（初回のみ）
 
-# Arch Linux
+チーム開発でのバージョン差異トラブル防止のため、**direnv + nvm の導入を必須**としています。
+
+### 1. direnv のインストール
+
+<details><summary>インストールコマンドを表示</summary>
+
+**Arch Linux**
+
 ```
 sudo pacman -S direnv
 ```
-# macOS
+
+macOS
 ```
 brew install direnv
 ```
-2. シェルに統合（一度だけ）
 
-~/.zshrc または ~/.bashrc に以下を手動で追加：
+2. シェルへの設定追加
 
-# zshの場合
+.zshrc または .bashrc に以下を追記してください。
+
+zsh の場合
 ```zsh
 eval "$(direnv hook zsh)"
 ```
-# bashの場合
+bash の場合
 ```bash
 eval "$(direnv hook bash)"
 ```
-
-設定後、ターミナルを再起動またはソースを再読み込み：
-source ~/.zshrc  # または source ~/.bashrc
-
-3. nvmのインストール（未インストールの場合）
-
-# Arch Linux
-```bash
-sudo pacman -S nvm
-source /usr/share/nvm/init-nvm.sh  # 現在のターミナルに適用
-```
-# macOS/Linux
+設定後、ターミナルを再起動するか以下を実行：
 ```zsh
-curl -o- curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | zsh
+source ~/.zshrc   
 ```
-4. プロジェクトのセットアップ
+```bash
+source ~/.bashrc
+```
 
-# プロジェクトディレクトリに移動
+3. nvm のインストール（未インストールの場合）
+
+インストールコマンドを表示
+
+Arch Linux
+```zsh
+sudo pacman -S nvm
+source /usr/share/nvm/init-nvm.sh
 ```
+macOS / その他 Linux
+```zsh
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | zsh
+```
+プロジェクトセットアップ
+
+```
+git clone git@github.com:assari-harassment/voicebooklm-frontend.git
 cd voicebooklm-frontend
 ```
-# direnvを許可（初回のみ）
+1. Node.js バージョンの自動適用
+```
 direnv allow
-
-# 自動的にNode.js v22がインストール・切り替えされます
-# "direnv: loading .../voicebooklm-frontend/.envrc" と表示されればOK
-
-5. バージョン確認
-
-node -v   # v22.x.x と表示されることを確認
-npm -v    # v10.x.x と表示されることを確認
-
-代替: 手動でバージョン切り替え
-
-direnvを使わない場合は、毎回手動で切り替えが必要です。
-
-# プロジェクトディレクトリで実行
-
-nvm install  # .nvmrcに記載されたバージョンをインストール
-
-# ~/.npmrcにprefixが設定されている場合
 ```
-nvm use --delete-prefix
+成功例：
 ```
-# 通常の場合
+direnv: loading .../voicebooklm-frontend/.envrc
 ```
-nvm use
+バージョン確認：
 ```
-動作
+node -v   # → v22.x.x
+npm -v    # → 10.x.x 以上
+```
+2. 環境変数の設定
+```
+cp .env.example .env
+```
+.env を開き、ローカル環境に必要な値を設定してください。
 
-注意: Node.js v22以外ではインストールがエラーになるよう制限されています。
+注意: .env は Git にコミットしないでください（.gitignore に記載済み）
 
-1. 依存パッケージのインストール
+3. 依存パッケージのインストール
 ```
 npm install
 ```
-# React Native本体、Expo SDK、周辺ライブラリがすべてインストールされます。
-
-2. アプリ起動
+アプリ起動（開発サーバー）
 ```
 npm run dev
 ```
+動作確認方法
+
+環境操作方法実機（iOS/Android）Expo Go アプリで表示された QR コードを読み取るiOS Simulator（macOSのみ）ターミナルで i キー押下Android Emulatorターミナルで a キー押下
+
+※ PC とスマホは同一 Wi-Fiに接続してください（VPN はオフ推奨）
+
+よく使うコマンド（開発サーバー起動中に）
+
+キー説明
+```
+r:アプリをリロード
+m:開発メニューを表示
+Ctrl + C:開発サーバー停止
+```
+トラブルシューティング
+
+症状確認ポイントnpm install でエラーNode.js が v22 か？ direnv allow 済みか？実機で接続できない同一Wi-Fiか？ VPNオフ？ ファイアウォール設定？.env が反映されない.env 作成済みか？ npm run dev 再起動したか？
+
+ディレクトリ構成（抜粋）
+
+text
+```
+voicebooklm-frontend/
+├── app/                 # Expo Router ページコンポーネント
+├── components/          # 再利用可能なUIコンポーネント
+├── hooks/               # カスタム React Hooks
+├── services/            # API通信・外部サービスロジック
+├── assets/              # 画像・フォントなどの静的資産
+├── .env.example         # 環境変数テンプレート
+├── .envrc               # direnv 設定ファイル
+├── .nvmrc               # Node.js バージョン指定
+└── README.md            # このファイル
+```
+ライセンス
+
+（必要に応じて追記してください）
