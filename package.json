@@ -7,7 +7,8 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "generate:api": "swagger-typescript-api -p http://localhost:8080/v3/api-docs -o ./src/api/generated -n apiSchema.ts --axios"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -38,6 +39,7 @@
   "devDependencies": {
     "@types/react": "~19.1.0",
     "react-test-renderer": "19.1.0",
+    "swagger-typescript-api": "^13.2.16",
     "typescript": "~5.9.2"
   },
   "private": true
