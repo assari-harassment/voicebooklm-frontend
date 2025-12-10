@@ -8,7 +8,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "generate:api": "swagger-typescript-api -p http://localhost:8080/v3/api-docs -o ./src/api/generated -n apiSchema.ts --axios"
+    "generate:api": "swagger-typescript-api generate -p http://localhost:8080/v3/api-docs -o ./api/generated -n apiSchema.ts --axios"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
