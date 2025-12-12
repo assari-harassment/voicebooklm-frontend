@@ -95,6 +95,39 @@ cp .env.example .env
 ```
 npm install
 ```
+
+## コード品質チェック
+
+### ESLint
+
+プロジェクトではESLintを使用してコード品質をチェックしています。
+
+#### 使用方法
+
+```bash
+# コードの静的解析を実行
+npm run lint
+
+# 自動修正可能な問題を修正
+npm run lint -- --fix
+```
+
+#### コミット前のチェック
+
+**コミットまたはプッシュする前に、必ず以下を実行してください：**
+
+```bash
+npm run lint
+```
+
+エラーや警告がある場合は、修正してからコミットしてください。自動修正可能な問題は`npm run lint -- --fix`で修正できます。
+
+#### ESLint設定
+
+- ESLint 9のflat config形式を使用
+- TypeScript、React、JSX A11y（アクセシビリティ）に対応
+- 既存の動作するコードに影響しないようルールを調整
+
 アプリ起動（開発サーバー）
 ```
 npm run dev

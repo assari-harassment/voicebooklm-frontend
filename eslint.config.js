@@ -1,20 +1,19 @@
 /** @type {import("eslint").Linter.Config[]} */
-const { defineConfig } = require('eslint/config');
 const expoConfig = require("eslint-config-expo/flat");
 const js = require("@eslint/js");
 const tseslint = require("typescript-eslint");
-const reactPlugin = require("eslint-plugin-react");
-const reactHooksPlugin = require("eslint-plugin-react-hooks");
 const jsxA11yPlugin = require("eslint-plugin-jsx-a11y");
-const importPlugin = require("eslint-plugin-import");
 
-module.exports = defineConfig([
-  expoConfig,
+module.exports = [
+  ...expoConfig,
   js.configs.recommended,
   {
     ignores: [
       "dist/*",
       "babel.config.js",
+      "eslint.config.js",
+      "node_modules/**",
+      ".expo/**",
     ],
   },
   ...tseslint.configs.recommendedTypeChecked.map(config => ({
@@ -25,6 +24,22 @@ module.exports = defineConfig([
     ...config,
     files: ["**/*.{ts,tsx}"],
   })),
+  {
+    settings: {
+      react: {
+        version: "detect",
+      },
+      "import/resolver": {
+        typescript: {
+          alwaysTryTypes: true,
+          project: "./tsconfig.json",
+        },
+        node: {
+          extensions: [".js", ".jsx", ".ts", ".tsx"],
+        },
+      },
+    },
+  },
   {
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
@@ -41,20 +56,6 @@ module.exports = defineConfig([
     plugins: {
       "@typescript-eslint": tseslint.plugin,
       "jsx-a11y": jsxA11yPlugin,
-    },
-    settings: {
-      react: {
-        version: "detect",
-      },
-      "import/resolver": {
-        typescript: {
-          alwaysTryTypes: true,
-          project: "./tsconfig.json",
-        },
-        node: {
-          extensions: [".js", ".jsx", ".ts", ".tsx"],
-        },
-      },
     },
     rules: {
       "@typescript-eslint/array-type": "off",
@@ -108,4 +109,4 @@ module.exports = defineConfig([
       },
     },
   },
-]);
+];
