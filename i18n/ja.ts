@@ -1,3 +1,3 @@
 export default {
-  tabOne: 'タブ1',
+  tabOne: "タブ1",
 };
