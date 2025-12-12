@@ -8,7 +8,6 @@ const prettierConfig = require("eslint-config-prettier");
 module.exports = [
   ...expoConfig,
   js.configs.recommended,
-  prettierConfig,
   {
     ignores: [
       "dist/*",
@@ -114,4 +113,5 @@ module.exports = [
       },
     },
   },
+  prettierConfig,
 ];
