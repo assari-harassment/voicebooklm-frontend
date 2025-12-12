@@ -1,16 +1,52 @@
+# Dependencies
 node_modules/
+
+# Expo
 .expo/
 dist/
 web-build/
+expo-env.d.ts
 
-# 環境変数や秘密鍵（重要）
-.env
-.env*.local
+# Native builds
+.kotlin/
+*.orig.*
 *.jks
+*.p8
 *.p12
 *.key
 *.mobileprovision
 
-# ネイティブフォルダ
-android
-ios
+# Generated native folders
+/ios
+/android
+
+# Metro
+.metro-health-check*
+
+# Debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# direnv
+.direnv/
+
+# macOS
+.DS_Store
+*.pem
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# TypeScript
+*.tsbuildinfo
+
+# Testing
+coverage/
