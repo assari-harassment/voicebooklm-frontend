@@ -3,10 +3,12 @@ const expoConfig = require("eslint-config-expo/flat");
 const js = require("@eslint/js");
 const tseslint = require("typescript-eslint");
 const jsxA11yPlugin = require("eslint-plugin-jsx-a11y");
+const prettierConfig = require("eslint-config-prettier");
 
 module.exports = [
   ...expoConfig,
   js.configs.recommended,
+  prettierConfig,
   {
     ignores: [
       "dist/*",
@@ -16,11 +18,11 @@ module.exports = [
       ".expo/**",
     ],
   },
-  ...tseslint.configs.recommendedTypeChecked.map(config => ({
+  ...tseslint.configs.recommendedTypeChecked.map((config) => ({
     ...config,
     files: ["**/*.{ts,tsx}"],
   })),
-  ...tseslint.configs.stylisticTypeChecked.map(config => ({
+  ...tseslint.configs.stylisticTypeChecked.map((config) => ({
     ...config,
     files: ["**/*.{ts,tsx}"],
   })),
@@ -61,7 +63,10 @@ module.exports = [
       "@typescript-eslint/array-type": "off",
       "@typescript-eslint/consistent-type-definitions": "off",
       "@typescript-eslint/consistent-type-imports": "off",
-      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_" },
+      ],
       "@typescript-eslint/require-await": "off",
       "@typescript-eslint/no-floating-promises": "off",
       "@typescript-eslint/no-misused-promises": [

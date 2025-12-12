@@ -1,0 +1,11 @@
+node_modules
+.expo
+dist
+web-build
+*.log
+package-lock.json
+coverage
+.idea
+.vscode
+*.tsbuildinfo
+
