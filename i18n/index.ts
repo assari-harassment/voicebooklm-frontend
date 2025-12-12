@@ -1,7 +1,7 @@
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
 
-import ja from './ja';
+import ja from "./ja";
 
 const resources = {
   ja: {
@@ -9,16 +9,14 @@ const resources = {
   },
 };
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources,
-    lng: 'ja',          
-    fallbackLng: 'ja',
-    interpolation: {
-      escapeValue: false,
-    },
-    compatibilityJSON: 'v4',
-  });
+i18n.use(initReactI18next).init({
+  resources,
+  lng: "ja",
+  fallbackLng: "ja",
+  interpolation: {
+    escapeValue: false,
+  },
+  compatibilityJSON: "v4",
+});
 
 export default i18n;
