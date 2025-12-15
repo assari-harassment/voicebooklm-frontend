@@ -1,13 +1,20 @@
-node_modules
-.expo/
-.DS_Store
-dist
-build
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Production
+dist/
+build/
+web-build/
+
+# Local env files
 .env
-*.pem
+.env*.local
 
 # IDE
 .idea/
+.DS_Store
 *.swp
 *.swo
 
@@ -16,3 +23,14 @@ build
 
 # Testing
 coverage/
+
+# Security & Keys (developから採用：非常に重要)
+*.pem
+*.jks
+*.p12
+*.key
+*.mobileprovision
+
+# Native Folders (developから採用：Expo Prebuild運用の場合は必須)
+/android
+/ios
