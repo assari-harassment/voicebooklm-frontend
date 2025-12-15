@@ -1,4 +1,4 @@
-package com.anonymous.voicememolm
+package com.anonymous.voicebooklm
 
 import android.os.Build
 import android.os.Bundle
