@@ -17,8 +17,47 @@
 # Node.js 依存関係のインストール
 npm install
 
-# 開発サーバーの起動
-npm start
+# ネイティブアプリのビルドと起動（初回必須）
+# iOS (Macのみ)
+npm run ios
+# Android
+npm run android
+
+# 2回目以降、サーバーのみ起動する場合
+npx expo start --dev-client
+```
+
+## 開発ガイド
+このプロジェクトは **Expo Dev Client (Prebuild)** を使用しています。
+Expo Go アプリではなく、プロジェクト専用のカスタムアプリをビルドして実機/シミュレーターにインストールする必要があります。
+
+### 主なコマンド
+| コマンド | 説明 |
+| --- | --- |
+| `npm run ios` | iOSアプリをビルド・インストールして起動 |
+| `npm run android` | Androidアプリをビルド・インストールして起動 |
+| `npx expo start --dev-client` | 開発サーバーを起動（アプリインストール済みの場合） |
+| `npx expo prebuild --clean` | ネイティブフォルダ(android/ios)を再生成 |
+
+### トラブルシューティング
+ビルドエラーが発生した場合や、ネイティブ設定を変更した場合は、以下を試してください。
+
+**ネイティブフォルダの再生成（推奨）**
+```bash
+# iOS
+npx expo prebuild --platform ios --clean
+
+# Android
+npx expo prebuild --platform android --clean
+```
+
+**キャッシュのクリア**
+```bash
+# Metro Bundlerのキャッシュクリア
+npx expo start --clear
+
+# Watchmanのリセット（ファイルが見つからないエラー等の場合）
+watchman watch-del-all
 ```
 
 ## 環境構築
