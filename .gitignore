@@ -12,5 +12,5 @@ web-build/
 *.mobileprovision
 
 # ネイティブフォルダ
-/android
-/ios
+android
+ios
