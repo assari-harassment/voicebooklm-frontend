@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "VoiceMemoLM",
-    "slug": "voicememolm",
+    "name": "VoiceBookLM",
+    "slug": "voicebooklm",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -16,14 +16,14 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.voicememolm"
+      "bundleIdentifier": "com.anonymous.voicebooklm"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.anonymous.voicememolm"
+      "package": "com.anonymous.voicebooklm"
     },
     "web": {
       "favicon": "./assets/favicon.png"
