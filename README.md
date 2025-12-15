@@ -65,6 +65,54 @@ npx expo start --clear
 watchman watch-del-all
 ```
 
+## コード品質チェック
+このプロジェクトでは、コードの品質維持とフォーマット統一のために **ESLint** と **Prettier** を導入しています。
+
+### ESLint
+静的解析ツールです。バグの温床となるコードや、推奨されない書き方をチェックします。
+
+```bash
+# コードの静的解析を実行
+npm run lint
+
+# 自動修正可能な問題を修正
+npm run lint -- --fix
+```
+
+### Prettier
+コードフォーマッターです。インデントや改行などのスタイルを自動で統一します。
+
+```bash
+# すべてのファイルをフォーマット
+npm run format
+
+# フォーマットが必要かチェック（CI/CDで使用）
+npm run format:check
+```
+
+### 開発フロー・コミット前のルール
+コミットまたはプッシュする前に、必ず以下を実行してください。
+エラーや警告がある場合は修正してからコミットしてください。
+
+```bash
+# 1. ESLintチェック
+npm run lint
+
+# 2. 必要に応じて自動修正・フォーマット
+npm run lint -- --fix
+npm run format
+```
+
+### VSCode設定
+VSCodeを使用している場合、保存時に自動でフォーマット・Lint修正が行われるように設定済みです。
+
+1. **推奨拡張機能のインストール**
+    *   VSCodeを開くと推奨拡張機能の通知が表示されるので、「インストール」を選択してください。
+    *   手動で入れる場合: [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint), [Prettier - Code formatter](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+
+2. **自動フォーマット**
+    *   `.vscode/settings.json` に設定が含まれており、ファイル保存時に自動で Prettier と ESLint が実行されます。
+
 ## 環境構築
 ### Node.js & Watchman のインストール
 Homebrew を使用する場合（推奨）
