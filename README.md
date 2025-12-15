@@ -17,7 +17,11 @@
 # Node.js 依存関係のインストール
 npm install
 
-# ネイティブアプリのビルドと起動（初回必須）
+# ネイティブフォルダの生成（初回のみ必須）
+# これにより android/ および ios/ フォルダが生成されます
+npx expo prebuild
+
+# ネイティブアプリのビルドと起動
 # iOS (Macのみ)
 npm run ios
 # Android
@@ -28,16 +32,17 @@ npx expo start --dev-client
 ```
 
 ## 開発ガイド
-このプロジェクトは **Expo Dev Client (Prebuild)** を使用しています。
-Expo Go アプリではなく、プロジェクト専用のカスタムアプリをビルドして実機/シミュレーターにインストールする必要があります。
+このプロジェクトは **Expo Prebuild (CNG)** を採用しています。
+`android/` および `ios/` フォルダは Git 管理対象外となっており、ビルド時に自動生成されます。
 
 ### 主なコマンド
 | コマンド | 説明 |
 | --- | --- |
+| `npx expo prebuild` | ネイティブフォルダ(android/ios)を生成 |
 | `npm run ios` | iOSアプリをビルド・インストールして起動 |
 | `npm run android` | Androidアプリをビルド・インストールして起動 |
 | `npx expo start --dev-client` | 開発サーバーを起動（アプリインストール済みの場合） |
-| `npx expo prebuild --clean` | ネイティブフォルダ(android/ios)を再生成 |
+| `npx expo prebuild --clean` | ネイティブフォルダを一度削除して再生成 |
 
 ### トラブルシューティング
 ビルドエラーが発生した場合や、ネイティブ設定を変更した場合は、以下を試してください。
