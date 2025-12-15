@@ -1,43 +1,9 @@
-# Dependencies
-node_modules/
-
-# Expo
+node_modules
 .expo/
-dist/
-web-build/
-expo-env.d.ts
-
-# Native builds
-.kotlin/
-*.orig.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-
-# Generated native folders
-/ios
-/android
-
-# Metro
-.metro-health-check*
-
-# Debug
-npm-debug.*
-yarn-debug.*
-yarn-error.*
-
-# Environment variables
-.env
-.env.local
-.env.*.local
-
-# direnv
-.direnv/
-
-# macOS
 .DS_Store
+dist
+build
+.env
 *.pem
 
 # IDE

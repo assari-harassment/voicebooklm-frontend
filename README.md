@@ -1,79 +1,155 @@
-# VoicebookLM
+# VoiceBookLM Frontend
 
-音声メモを録音し、文字起こし・管理を行うReact Nativeアプリケーションです。
+AIボイスメモアプリケーション「VoiceBookLM」のフロントエンドリポジトリです。  
+React Native（Expo）で開発されています。
 
-## はじめに
+## 前提条件
 
-### 前提条件
+開発環境の一貫性を保つため、以下のバージョンを導入
 
-| ソフトウェア       | バージョン | 確認コマンド          |
-| ------------------ | ---------- | --------------------- |
-| **macOS**          | 13.0+      | `sw_vers`             |
-| **Xcode**          | 15.0+      | `xcodebuild -version` |
-| **Android Studio** | Latest     | -                     |
-| **Node.js**        | 18.x+      | `node -v`             |
-| **CocoaPods**      | 1.14+      | `pod --version`       |
-| **Java (JDK)**     | 17         | `java -version`       |
+| ツール  | バージョン             |
+| ------- | ---------------------- |
+| Node.js | `v22.11.0`（必須）     |
+| npm     | `v10.x` 以上           |
+| direnv  | 最新（Node自動切替用） |
+| nvm     | Node Version Manager   |
 
-### クイックスタート
+## 環境セットアップ（初回のみ）
+
+チーム開発でのバージョン差異トラブル防止のため、**direnv + nvm の導入を必須**としています。
+
+### 1. direnv のインストール
+
+**Arch Linux**
+
+```
+sudo pacman -S direnv
+```
+
+macOS
+
+```
+brew install direnv
+```
+
+2. シェルへの設定追加
+
+.zshrc または .bashrc に以下を追記してください。
+
+zsh の場合
+
+```zsh
+eval "$(direnv hook zsh)"
+```
+
+bash の場合
 
 ```bash
-# Node.js 依存関係のインストール
+eval "$(direnv hook bash)"
+```
+
+設定後、ターミナルを再起動するか以下を実行：
+
+```zsh
+source ~/.zshrc
+```
+
+**bash の場合 (`~/.bash_profile` または `~/.bashrc`):**
+
+```bash
+source ~/.bashrc
+```
+
+3. nvm のインストール（未インストールの場合）
+
+インストールコマンドを表示
+
+Arch Linux
+
+```zsh
+sudo pacman -S nvm
+source /usr/share/nvm/init-nvm.sh
+```
+
+macOS / その他 Linux
+
+```zsh
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | zsh
+```
+
+プロジェクトセットアップ
+
+```
+git clone git@github.com:assari-harassment/voicebooklm-frontend.git
+cd voicebooklm-frontend
+```
+
+1. Node.js バージョンの自動適用
+
+```
+direnv allow
+```
+
+成功例：
+
+```
+direnv: loading .../voicebooklm-frontend/.envrc
+```
+
+バージョン確認：
+
+```
+node -v   # → v22.11.x
+npm -v    # → 10.x.x 以上
+```
+
+2. 環境変数の設定
+
+```
+cp .env.example .env
+```
+
+.env を開き、ローカル環境に必要な値を設定してください。
+
+注意: .env は Git にコミットしないでください（.gitignore に記載済み）
+
+3. 依存パッケージのインストール
+
+```
 npm install
-
-# ネイティブフォルダの生成（初回のみ必須）
-# これにより android/ および ios/ フォルダが生成されます
-npx expo prebuild
-
-# ネイティブアプリのビルドと起動
-# iOS (Macのみ)
-npm run ios
-# Android
-npm run android
-
-# 2回目以降、サーバーのみ起動する場合
-npx expo start --dev-client
 ```
 
-## 開発ガイド
+アプリ起動（開発サーバー）
 
-このプロジェクトは **Expo Prebuild (CNG)** を採用しています。
-`android/` および `ios/` フォルダは Git 管理対象外となっており、ビルド時に自動生成されます。
-
-### 主なコマンド
-
-| コマンド                      | 説明                                               |
-| ----------------------------- | -------------------------------------------------- |
-| `npx expo prebuild`           | ネイティブフォルダ(android/ios)を生成              |
-| `npm run ios`                 | iOSアプリをビルド・インストールして起動            |
-| `npm run android`             | Androidアプリをビルド・インストールして起動        |
-| `npx expo start --dev-client` | 開発サーバーを起動（アプリインストール済みの場合） |
-| `npx expo prebuild --clean`   | ネイティブフォルダを一度削除して再生成             |
-
-### トラブルシューティング
-
-ビルドエラーが発生した場合や、ネイティブ設定を変更した場合は、以下を試してください。
-
-**ネイティブフォルダの再生成（推奨）**
-
-```bash
-# iOS
-npx expo prebuild --platform ios --clean
-
-# Android
-npx expo prebuild --platform android --clean
+```
+npm run dev
 ```
 
-**キャッシュのクリア**
+動作確認方法
 
-```bash
-# Metro Bundlerのキャッシュクリア
-npx expo start --clear
+環境操作方法実機（iOS/Android）Expo Go アプリで表示された QR コードを読み取るiOS Simulator（macOSのみ）ターミナルで i キー押下Android Emulatorターミナルで a キー押下
 
-# Watchmanのリセット（ファイルが見つからないエラー等の場合）
-watchman watch-del-all
+※ PC とスマホは同一 Wi-Fiに接続してください（VPN はオフ推奨）
+
+よく使うコマンド（開発サーバー起動中に）
+
+キー説明
+
+```
+r:アプリをリロード
+m:開発メニューを表示
+Ctrl + C:開発サーバー停止
 ```
 
+トラブルシューティング
+
+症状確認ポイントnpm install でエラーNode.js が v22 か？ direnv allow 済みか？実機で接続できない同一Wi-Fiか？ VPNオフ？ ファイアウォール設定？.env が反映されない.env 作成済みか？ npm run dev 再起動したか？
+
+ディレクトリ構成（仮？）
+
+text
+
+````
 ## コード品質チェック
 
 このプロジェクトでは、コードの品質維持とフォーマット統一のために **ESLint** と **Prettier** を導入しています。
@@ -90,7 +166,7 @@ npm run lint
 
 # 自動修正可能な問題を修正
 npm run lint -- --fix
-```
+````
 
 **重要**: コミットする前に必ず `npm run lint` を実行し、エラーがないことを確認してください。
 
@@ -132,218 +208,49 @@ npm run format:check
    npm run format
    ```
 
-3. **再度ESLintチェック**
-   ```bash
-   npm run lint
-   ```
+アプリ起動（開発サーバー）
 
-   - 修正後もエラーがないことを確認してください
-
-#### 注意事項
-
-- ESLintエラーがある状態でのコミットは避けてください
-- 自動修正できないエラーは手動で修正してください
-- チーム全体でコード品質を維持するため、このルールを遵守してください
-
-### VSCode設定
-
-VSCodeを使用している場合、保存時に自動でフォーマット・Lint修正が行われるように設定済みです。
-
-1. **推奨拡張機能のインストール**
-   - VSCodeを開くと推奨拡張機能の通知が表示されるので、「インストール」を選択してください。
-   - 手動で入れる場合: [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint), [Prettier - Code formatter](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
-
-2. **自動フォーマット**
-   - `.vscode/settings.json` に設定が含まれており、ファイル保存時に自動で Prettier と ESLint が実行されます。
-
-## 環境構築
-
-### Node.js & Watchman のインストール
-
-Homebrew を使用する場合（推奨）
-
-```bash
-# Homebrew のインストール（未インストールの場合）
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-# Node.js と Watchman のインストール
-brew install node
-brew install watchman
+```
+npm run dev
 ```
 
-### Android 開発環境のセットアップ
+動作確認方法
 
-1. **Android Studio** を公式サイトからダウンロードしてインストール。
-2. Android Studio の "SDK Manager" から以下をインストール:
-   - Android SDK Platform 34 (または最新)
-   - Intel x86 Atom_64 System Image
-   - Android SDK Build-Tools
-3. 環境変数の設定:
+環境操作方法実機（iOS/Android）Expo Go アプリで表示された QR コードを読み取るiOS Simulator（macOSのみ）ターミナルで i キー押下Android Emulatorターミナルで a キー押下
 
-**zsh の場合 (`~/.zshrc`):**
+※ PC とスマホは同一 Wi-Fiに接続してください（VPN はオフ推奨）
 
-```zsh
-echo 'export ANDROID_HOME=$HOME/Library/Android/sdk' >> ~/.zshrc
-echo 'export PATH=$PATH:$ANDROID_HOME/emulator' >> ~/.zshrc
-echo 'export PATH=$PATH:$ANDROID_HOME/platform-tools' >> ~/.zshrc
-source ~/.zshrc
+よく使うコマンド（開発サーバー起動中に）
+
+キー説明
+
+```
+r:アプリをリロード
+m:開発メニューを表示
+Ctrl + C:開発サーバー停止
 ```
 
-**bash の場合 (`~/.bash_profile` または `~/.bashrc`):**
+トラブルシューティング
 
-```bash
-echo 'export ANDROID_HOME=$HOME/Library/Android/sdk' >> ~/.bash_profile
-echo 'export PATH=$PATH:$ANDROID_HOME/emulator' >> ~/.bash_profile
-echo 'export PATH=$PATH:$ANDROID_HOME/platform-tools' >> ~/.bash_profile
-source ~/.bash_profile
+症状確認ポイントnpm install でエラーNode.js が v22 か？ direnv allow 済みか？実機で接続できない同一Wi-Fiか？ VPNオフ？ ファイアウォール設定？.env が反映されない.env 作成済みか？ npm run dev 再起動したか？
+
+ディレクトリ構成（仮？）
+
+text
+
+```
+voicebooklm-frontend/
+├── app/                 # Expo Router ページコンポーネント
+├── components/          # 再利用可能なUIコンポーネント
+├── hooks/               # カスタム React Hooks
+├── services/            # API通信・外部サービスロジック
+├── assets/              # 画像・フォントなどの静的資産
+├── .env.example         # 環境変数テンプレート
+├── .envrc               # direnv 設定ファイル
+├── .nvmrc               # Node.js バージョン指定
+└── README.md            # このファイル
 ```
 
-### Xcode のセットアップ
+ライセンス
 
-```bash
-# Xcode コマンドラインツールのインストール
-xcode-select --install
-
-# ライセンスの同意
-sudo xcodebuild -license accept
-
-# CocoaPods のインストール
-sudo gem install cocoapods
-```
-
-## プロジェクトのセットアップ
-
-```bash
-# リポジトリをクローン
-git clone git@github.com:Fuku-x/voicebook-app.git
-cd voicebook-app
-
-# パッケージのインストール
-npm install
-
-# ネイティブディレクトリの生成 (必要な場合)
-npx expo prebuild
-```
-
-## アプリケーションの実行
-
-### 開発サーバーの起動 (推奨)
-
-Metro Bundler を起動し、QRコードを表示します。実機 (Expo Go) での開発や、複数のプラットフォームを切り替えて開発する場合に便利です。
-
-```bash
-npm start
-# または
-npx expo start
-```
-
-- `i` を押すと iOS シミュレータで起動
-- `a` を押すと Android エミュレータで起動
-- `w` を押すと Web ブラウザで起動
-
-### iOS
-
-```bash
-# シミュレータで実行
-npm run ios
-
-# 特定のデバイスを指定して実行する場合
-npx expo run:ios --device "iPhone 15 Pro"
-```
-
-### Android
-
-```bash
-# エミュレータで実行 (エミュレータを事前に起動しておくか、コマンドが自動起動します)
-npm run android
-```
-
-## 技術スタック
-
-- **Framework**: React Native (Expo SDK 54)
-- **Language**: TypeScript
-- **Styling**: NativeWind (Tailwind CSS)
-- **Icons**: Lucide React Native
-- **Markdown**: react-native-markdown-display
-
-### 主要な依存関係
-
-- `expo`: ^54.0.0 - アプリケーションフレームワーク
-- `react-native`: 0.81.5 - モバイル開発プラットフォーム
-- `nativewind`: ^2.0.11 - ユーティリティファーストCSS
-- `lucide-react-native`: アイコンライブラリ
-
-### テストについて
-
-```bash
-# テストの実行 (Jest)
-npm test
-```
-
-## ビルド
-
-### iOS ビルド (ローカル)
-
-```bash
-# Expo CLI を使用してネイティブプロジェクトをビルド
-npx expo run:ios --configuration Release
-```
-
-### Android ビルド (ローカル)
-
-```bash
-# Expo CLI を使用してネイティブプロジェクトをビルド
-npx expo run:android --variant release
-```
-
-## 開発ガイドライン
-
-### ブランチ戦略
-
-- `main` - 本番リリース用
-- `develop` - 開発用メインブランチ
-- `feature/*` - 機能開発用
-- `fix/*` - バグ修正用
-
-### コミットメッセージ
-
-- `feat`: 新機能の追加
-- `fix`: バグ修正
-- `docs`: ドキュメント更新
-- `style`: コードスタイル修正
-- `refactor`: リファクタリング
-- `test`: テスト追加・修正
-
-## トラブルシューティング
-
-### よくある問題
-
-**シミュレータが見つからない場合**
-
-```bash
-# 利用可能なシミュレータを確認
-xcrun simctl list devices available
-```
-
-**依存関係のエラー (iOS)**
-
-```bash
-# Pods を再インストール
-cd ios
-pod deintegrate
-pod install
-cd ..
-```
-
-**依存関係のエラー (Android)**
-
-```bash
-# Gradle クリーン
-cd android
-./gradlew clean
-cd ..
-```
-
-## ライセンス
-
-Private - All rights reserved
+（必要に応じて追記してください）
