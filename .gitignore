@@ -31,6 +31,6 @@ coverage/
 *.key
 *.mobileprovision
 
-# Native Folders (developから採用：Expo Prebuild運用の場合は必須)
+# Native Folders 
 /android
 /ios
