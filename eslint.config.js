@@ -3,6 +3,8 @@ const expoConfig = require("eslint-config-expo/flat");
 const js = require("@eslint/js");
 const tseslint = require("typescript-eslint");
 const jsxA11yPlugin = require("eslint-plugin-jsx-a11y");
+const reactPlugin = require("eslint-plugin-react");
+const reactHooksPlugin = require("eslint-plugin-react-hooks");
 const prettierConfig = require("eslint-config-prettier");
 
 module.exports = [
@@ -20,16 +22,35 @@ module.exports = [
   ...tseslint.configs.recommendedTypeChecked.map((config) => ({
     ...config,
     files: ["**/*.{ts,tsx}"],
+    languageOptions: {
+      ...config.languageOptions,
+      parserOptions: {
+        ...config.languageOptions?.parserOptions,
+        project: true,
+      },
+    },
   })),
   ...tseslint.configs.stylisticTypeChecked.map((config) => ({
     ...config,
     files: ["**/*.{ts,tsx}"],
+    languageOptions: {
+      ...config.languageOptions,
+      parserOptions: {
+        ...config.languageOptions?.parserOptions,
+        project: true,
+      },
+    },
   })),
   {
     settings: {
       react: {
         version: "detect",
       },
+    },
+  },
+  {
+    files: ["**/*.{ts,tsx}"],
+    settings: {
       "import/resolver": {
         typescript: {
           alwaysTryTypes: true,
@@ -40,13 +61,9 @@ module.exports = [
         },
       },
     },
-  },
-  {
-    files: ["**/*.{ts,tsx}"],
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
-        project: true,
         ecmaVersion: "latest",
         sourceType: "module",
         ecmaFeatures: {
@@ -57,6 +74,8 @@ module.exports = [
     plugins: {
       "@typescript-eslint": tseslint.plugin,
       "jsx-a11y": jsxA11yPlugin,
+      "react": reactPlugin,
+      "react-hooks": reactHooksPlugin,
     },
     rules: {
       "@typescript-eslint/array-type": "off",
