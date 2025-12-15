@@ -1,6 +1,16 @@
-node_modules
+node_modules/
 .expo/
-.DS_Store
-dist
-build
+dist/
+web-build/
+
+# 環境変数や秘密鍵（重要）
 .env
+.env*.local
+*.jks
+*.p12
+*.key
+*.mobileprovision
+
+# ネイティブフォルダ
+/android
+/ios
