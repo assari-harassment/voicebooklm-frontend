@@ -17,8 +17,52 @@
 # Node.js 依存関係のインストール
 npm install
 
-# 開発サーバーの起動
-npm start
+# ネイティブフォルダの生成（初回のみ必須）
+# これにより android/ および ios/ フォルダが生成されます
+npx expo prebuild
+
+# ネイティブアプリのビルドと起動
+# iOS (Macのみ)
+npm run ios
+# Android
+npm run android
+
+# 2回目以降、サーバーのみ起動する場合
+npx expo start --dev-client
+```
+
+## 開発ガイド
+このプロジェクトは **Expo Prebuild (CNG)** を採用しています。
+`android/` および `ios/` フォルダは Git 管理対象外となっており、ビルド時に自動生成されます。
+
+### 主なコマンド
+| コマンド | 説明 |
+| --- | --- |
+| `npx expo prebuild` | ネイティブフォルダ(android/ios)を生成 |
+| `npm run ios` | iOSアプリをビルド・インストールして起動 |
+| `npm run android` | Androidアプリをビルド・インストールして起動 |
+| `npx expo start --dev-client` | 開発サーバーを起動（アプリインストール済みの場合） |
+| `npx expo prebuild --clean` | ネイティブフォルダを一度削除して再生成 |
+
+### トラブルシューティング
+ビルドエラーが発生した場合や、ネイティブ設定を変更した場合は、以下を試してください。
+
+**ネイティブフォルダの再生成（推奨）**
+```bash
+# iOS
+npx expo prebuild --platform ios --clean
+
+# Android
+npx expo prebuild --platform android --clean
+```
+
+**キャッシュのクリア**
+```bash
+# Metro Bundlerのキャッシュクリア
+npx expo start --clear
+
+# Watchmanのリセット（ファイルが見つからないエラー等の場合）
+watchman watch-del-all
 ```
 
 ## 環境構築
