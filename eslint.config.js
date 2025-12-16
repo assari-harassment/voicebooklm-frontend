@@ -73,7 +73,7 @@ module.exports = [
     plugins: {
       "@typescript-eslint": tseslint.plugin,
       "jsx-a11y": jsxA11yPlugin,
-      "react": reactPlugin,
+      react: reactPlugin,
     },
     rules: {
       "@typescript-eslint/array-type": "off",

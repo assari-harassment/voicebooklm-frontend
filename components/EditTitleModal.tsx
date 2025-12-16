@@ -1,7 +1,16 @@
-import { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Modal, TextInput, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import { X } from 'lucide-react-native';
-import type { Note } from '../App';
+import { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Modal,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+} from "react-native";
+import { X } from "lucide-react-native";
+import type { Note } from "../App";
 
 type EditTitleModalProps = {
   isOpen: boolean;
@@ -10,8 +19,13 @@ type EditTitleModalProps = {
   onTitleChange: (newTitle: string) => void;
 };
 
-export function EditTitleModal({ isOpen, note, onClose, onTitleChange }: EditTitleModalProps) {
-  const [title, setTitle] = useState(note?.title || '');
+export function EditTitleModal({
+  isOpen,
+  note,
+  onClose,
+  onTitleChange,
+}: EditTitleModalProps) {
+  const [title, setTitle] = useState(note?.title ?? "");
 
   // モーダルが開くたびにタイトルをリセット
   useEffect(() => {
@@ -37,12 +51,14 @@ export function EditTitleModal({ isOpen, note, onClose, onTitleChange }: EditTit
       <TouchableWithoutFeedback onPress={onClose}>
         <View className="flex-1 justify-center items-center bg-black/40 p-4">
           <TouchableWithoutFeedback>
-            <KeyboardAvoidingView 
+            <KeyboardAvoidingView
               behavior={Platform.OS === "ios" ? "padding" : "height"}
               className="w-full max-w-md bg-white rounded-2xl shadow-2xl"
             >
               <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-100">
-                <Text className="text-lg text-gray-900 font-medium">タイトルを編集</Text>
+                <Text className="text-lg text-gray-900 font-medium">
+                  タイトルを編集
+                </Text>
                 <TouchableOpacity
                   onPress={onClose}
                   className="w-8 h-8 items-center justify-center rounded-lg bg-gray-100"
@@ -73,7 +89,9 @@ export function EditTitleModal({ isOpen, note, onClose, onTitleChange }: EditTit
                 <TouchableOpacity
                   onPress={handleSave}
                   disabled={!title.trim()}
-                  className={`px-4 py-2 rounded-lg ${!title.trim() ? 'bg-gray-300' : 'bg-blue-600'}`}
+                  className={`px-4 py-2 rounded-lg ${
+                    !title.trim() ? "bg-gray-300" : "bg-blue-600"
+                  }`}
                 >
                   <Text className="text-white font-medium">保存</Text>
                 </TouchableOpacity>

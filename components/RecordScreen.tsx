@@ -1,6 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, Animated } from 'react-native';
-import { X, Pause, Play, ArrowLeft } from 'lucide-react-native';
+import { useState, useEffect, useRef } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  Animated,
+} from "react-native";
+import { Pause, Play, ArrowLeft } from "lucide-react-native";
 
 type RecordScreenProps = {
   isRecording: boolean;
@@ -24,7 +31,7 @@ export function RecordScreen({
 }: RecordScreenProps) {
   const [duration, setDuration] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [transcript, setTranscript] = useState('');
+  const [transcript, setTranscript] = useState("");
   const [waveformData, setWaveformData] = useState<number[]>([]);
   const scrollX = useRef(new Animated.Value(0)).current;
 
@@ -33,6 +40,7 @@ export function RecordScreen({
     if (!isRecording) {
       onStartRecording();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 波形データの更新（10ms毎で滑らか）
@@ -68,7 +76,7 @@ export function RecordScreen({
     return () => {
       if (waveformInterval) clearInterval(waveformInterval);
     };
-  }, [isRecording, isPaused]);
+  }, [isRecording, isPaused, scrollX]);
 
   // 秒数と文字起こしの更新
   useEffect(() => {
@@ -80,14 +88,15 @@ export function RecordScreen({
         // リアルタイム文字起こしのシミュレーション
         if (duration % 3 === 0) {
           const mockPhrases = [
-            'これは音声入力のテストです。',
-            '今日の会議では重要な決定事項がありました。',
-            'プロジェクトの進捗状況について報告します。',
-            '新しいアイデアを思いつきました。',
-            'この機能は非常に便利だと思います。',
+            "これは音声入力のテストです。",
+            "今日の会議では重要な決定事項がありました。",
+            "プロジェクトの進捗状況について報告します。",
+            "新しいアイデアを思いつきました。",
+            "この機能は非常に便利だと思います。",
           ];
-          const randomPhrase = mockPhrases[Math.floor(Math.random() * mockPhrases.length)];
-          setTranscript((prev) => prev + (prev ? ' ' : '') + randomPhrase);
+          const randomPhrase =
+            mockPhrases[Math.floor(Math.random() * mockPhrases.length)];
+          setTranscript((prev) => prev + (prev ? " " : "") + randomPhrase);
         }
       }, 1000);
     }
@@ -99,34 +108,36 @@ export function RecordScreen({
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
   };
 
   const handleCancel = () => {
-    Alert.alert(
-      '確認',
-      '録音を破棄しますか?',
-      [
-        { text: 'キャンセル', style: 'cancel' },
-        {
-          text: '破棄',
-          style: 'destructive',
-          onPress: () => {
-            onStopRecording();
-            setDuration(0);
-            setTranscript('');
-            setIsPaused(false);
-            onBack();
-          }
-        }
-      ]
-    );
+    Alert.alert("確認", "録音を破棄しますか?", [
+      { text: "キャンセル", style: "cancel" },
+      {
+        text: "破棄",
+        style: "destructive",
+        onPress: () => {
+          onStopRecording();
+          setDuration(0);
+          setTranscript("");
+          setIsPaused(false);
+          onBack();
+        },
+      },
+    ]);
   };
 
   const handleComplete = () => {
-    onComplete(transcript || 'サンプルの文字起こしテキストです。これは録音から生成された内容を表しています。実際の実装では、音声認識APIを使用して文字起こしを行います。', duration);
+    onComplete(
+      transcript ||
+        "サンプルの文字起こしテキストです。これは録音から生成された内容を表しています。実際の実装では、音声認識APIを使用して文字起こしを行います。",
+      duration
+    );
     setDuration(0);
-    setTranscript('');
+    setTranscript("");
     setIsPaused(false);
   };
 
@@ -147,7 +158,9 @@ export function RecordScreen({
         </TouchableOpacity>
         <View className="flex-row items-center px-3 py-2 bg-red-50 rounded-xl border border-red-100">
           <View className="w-2 h-2 bg-red-500 rounded-full" />
-          <Text className="text-sm text-red-700 ml-2 leading-none">{formatTime(duration)}</Text>
+          <Text className="text-sm text-red-700 ml-2 leading-none">
+            {formatTime(duration)}
+          </Text>
         </View>
         <View className="w-10" />
       </View>
@@ -155,14 +168,22 @@ export function RecordScreen({
       {/* 波形表示（iPhoneボイスメモ風） */}
       <View className="px-4 mb-4 mt-4">
         <View className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 overflow-hidden">
-          <View className="h-24 flex-row items-center" style={{ width: VISIBLE_BARS * BAR_TOTAL_WIDTH }}>
+          <View
+            className="h-24 flex-row items-center"
+            style={{ width: VISIBLE_BARS * BAR_TOTAL_WIDTH }}
+          >
             <Animated.View
               className="flex-row items-center"
               style={{
                 // 右端の枠外から始まるようにオフセット
-                transform: [{
-                  translateX: Animated.add(scrollX, (VISIBLE_BARS + 5) * BAR_TOTAL_WIDTH)
-                }]
+                transform: [
+                  {
+                    translateX: Animated.add(
+                      scrollX,
+                      (VISIBLE_BARS + 5) * BAR_TOTAL_WIDTH
+                    ),
+                  },
+                ],
               }}
             >
               {waveformData.map((height, i) => (
@@ -174,7 +195,7 @@ export function RecordScreen({
                     marginHorizontal: BAR_MARGIN,
                     borderRadius: 2,
                     opacity: isPaused ? 0.5 : 0.9,
-                    backgroundColor: isPaused ? '#6B7280' : '#3B82F6',
+                    backgroundColor: isPaused ? "#6B7280" : "#3B82F6",
                   }}
                 />
               ))}
@@ -188,11 +209,13 @@ export function RecordScreen({
         <View className="bg-white rounded-xl p-4 flex-1 shadow-sm border border-gray-100">
           <View className="mb-2 flex-row items-center gap-2">
             <View className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
-            <Text className="text-sm text-gray-600">リアルタイム文字起こし</Text>
+            <Text className="text-sm text-gray-600">
+              リアルタイム文字起こし
+            </Text>
           </View>
           <ScrollView className="flex-1">
             <Text className="text-gray-700 leading-relaxed">
-              {transcript || '音声を認識中...'}
+              {transcript || "音声を認識中..."}
             </Text>
           </ScrollView>
         </View>
@@ -214,7 +237,9 @@ export function RecordScreen({
           onPress={handleComplete}
           className="flex-1 ml-3 px-6 py-3 bg-blue-600 rounded-xl shadow-lg items-center justify-center"
         >
-          <Text className="text-white font-bold text-base">完了して要約する</Text>
+          <Text className="text-white font-bold text-base">
+            完了して要約する
+          </Text>
         </TouchableOpacity>
       </View>
     </View>

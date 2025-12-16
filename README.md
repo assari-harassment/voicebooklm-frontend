@@ -1,18 +1,18 @@
 # VoiceBookLM Frontend
 
-AIボイスメモアプリケーション「VoiceBookLM」のフロントエンドリポジトリです。  
+AI ボイスメモアプリケーション「VoiceBookLM」のフロントエンドリポジトリです。  
 React Native（Expo）で開発されています。
 
 ## 前提条件
 
 開発環境の一貫性を保つため、以下のバージョンを導入
 
-| ツール  | バージョン             |
-| ------- | ---------------------- |
-| Node.js | `v22.11.0`（必須）     |
-| npm     | `v10.x` 以上           |
-| direnv  | 最新（Node自動切替用） |
-| nvm     | Node Version Manager   |
+| ツール  | バージョン              |
+| ------- | ----------------------- |
+| Node.js | `v22.11.0`（必須）      |
+| npm     | `v10.x` 以上            |
+| direnv  | 最新（Node 自動切替用） |
+| nvm     | Node Version Manager    |
 
 ## 環境セットアップ（初回のみ）
 
@@ -127,9 +127,9 @@ npm run dev
 
 動作確認方法
 
-環境操作方法実機（iOS/Android）Expo Go アプリで表示された QR コードを読み取るiOS Simulator（macOSのみ）ターミナルで i キー押下Android Emulatorターミナルで a キー押下
+環境操作方法実機（iOS/Android）Expo Go アプリで表示された QR コードを読み取る iOS Simulator（macOS のみ）ターミナルで i キー押下 Android Emulator ターミナルで a キー押下
 
-※ PC とスマホは同一 Wi-Fiに接続してください（VPN はオフ推奨）
+※ PC とスマホは同一 Wi-Fi に接続してください（VPN はオフ推奨）
 
 よく使うコマンド（開発サーバー起動中に）
 
@@ -143,7 +143,7 @@ Ctrl + C:開発サーバー停止
 
 トラブルシューティング
 
-症状確認ポイントnpm install でエラーNode.js が v22 か？ direnv allow 済みか？実機で接続できない同一Wi-Fiか？ VPNオフ？ ファイアウォール設定？.env が反映されない.env 作成済みか？ npm run dev 再起動したか？
+症状確認ポイント npm install でエラー Node.js が v22 か？ direnv allow 済みか？実機で接続できない同一 Wi-Fi か？ VPN オフ？ ファイアウォール設定？.env が反映されない.env 作成済みか？ npm run dev 再起動したか？
 
 ディレクトリ構成（仮？）
 
@@ -184,18 +184,18 @@ npm run format:check
 
 ### 開発フロー・コミット前のルール
 
-**重要**: コミットまたはプッシュする前に、必ずESLintを実行してください。
+**重要**: コミットまたはプッシュする前に、必ず ESLint を実行してください。
 エラーや警告がある場合は修正してからコミットしてください。
 
 #### コミット前のチェックリスト
 
-1. **ESLintチェックを実行**
+1. **ESLint チェックを実行**
 
    ```bash
    npm run lint
    ```
 
-   - エラーが0件であることを確認してください
+   - エラーが 0 件であることを確認してください
    - 警告がある場合は、可能な限り修正してください
 
 2. **自動修正の実行（推奨）**
@@ -216,9 +216,9 @@ npm run dev
 
 動作確認方法
 
-環境操作方法実機（iOS/Android）Expo Go アプリで表示された QR コードを読み取るiOS Simulator（macOSのみ）ターミナルで i キー押下Android Emulatorターミナルで a キー押下
+環境操作方法実機（iOS/Android）Expo Go アプリで表示された QR コードを読み取る iOS Simulator（macOS のみ）ターミナルで i キー押下 Android Emulator ターミナルで a キー押下
 
-※ PC とスマホは同一 Wi-Fiに接続してください（VPN はオフ推奨）
+※ PC とスマホは同一 Wi-Fi に接続してください（VPN はオフ推奨）
 
 よく使うコマンド（開発サーバー起動中に）
 
@@ -232,7 +232,7 @@ Ctrl + C:開発サーバー停止
 
 トラブルシューティング
 
-症状確認ポイントnpm install でエラーNode.js が v22 か？ direnv allow 済みか？実機で接続できない同一Wi-Fiか？ VPNオフ？ ファイアウォール設定？.env が反映されない.env 作成済みか？ npm run dev 再起動したか？
+症状確認ポイント npm install でエラー Node.js が v22 か？ direnv allow 済みか？実機で接続できない同一 Wi-Fi か？ VPN オフ？ ファイアウォール設定？.env が反映されない.env 作成済みか？ npm run dev 再起動したか？
 
 ディレクトリ構成（仮？）
 
