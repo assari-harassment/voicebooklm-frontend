@@ -31,6 +31,10 @@ coverage/
 *.key
 *.mobileprovision
 
+# Expo
+.expo/
+.expo-shared/
+
 # Native Folders 
 /android
 /ios
