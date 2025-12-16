@@ -4,7 +4,6 @@ const js = require("@eslint/js");
 const tseslint = require("typescript-eslint");
 const jsxA11yPlugin = require("eslint-plugin-jsx-a11y");
 const reactPlugin = require("eslint-plugin-react");
-const reactHooksPlugin = require("eslint-plugin-react-hooks");
 const prettierConfig = require("eslint-config-prettier");
 
 module.exports = [
@@ -75,7 +74,6 @@ module.exports = [
       "@typescript-eslint": tseslint.plugin,
       "jsx-a11y": jsxA11yPlugin,
       "react": reactPlugin,
-      "react-hooks": reactHooksPlugin,
     },
     rules: {
       "@typescript-eslint/array-type": "off",
