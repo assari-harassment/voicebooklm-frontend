@@ -1,16 +1,40 @@
+# Dependencies
 node_modules/
-.expo/
+.pnp
+.pnp.js
+
+# Production
 dist/
+build/
 web-build/
 
-# 環境変数や秘密鍵（重要）
+# Local env files
 .env
 .env*.local
+
+# IDE
+.idea/
+.DS_Store
+*.swp
+*.swo
+
+# TypeScript
+*.tsbuildinfo
+
+# Testing
+coverage/
+
+# Security & Keys (developから採用：非常に重要)
+*.pem
 *.jks
 *.p12
 *.key
 *.mobileprovision
 
-# ネイティブフォルダ
-android
-ios
+# Expo
+.expo/
+.expo-shared/
+
+# Native Folders 
+/android
+/ios
