@@ -1,8 +1,23 @@
-import { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TextInput, Alert, Image } from 'react-native';
-import { Plus, X, ChevronRight, ArrowLeft, FileText, MoreVertical } from 'lucide-react-native';
-import Markdown from 'react-native-markdown-display';
-import type { Note } from '../App';
+import { useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  TextInput,
+  Alert,
+  Image,
+} from "react-native";
+import {
+  Plus,
+  X,
+  ChevronRight,
+  ArrowLeft,
+  FileText,
+  MoreVertical,
+} from "lucide-react-native";
+import Markdown from "react-native-markdown-display";
+import type { Note } from "../App";
 
 type NoteDetailScreenProps = {
   note: Note;
@@ -22,13 +37,13 @@ export function NoteDetailScreen({
   onBack,
 }: NoteDetailScreenProps) {
   const [isAddingTag, setIsAddingTag] = useState(false);
-  const [newTag, setNewTag] = useState('');
+  const [newTag, setNewTag] = useState("");
 
   const handleAddTag = () => {
     if (newTag.trim()) {
       const updatedTags = [...note.tags, newTag.trim()];
       onUpdateNote(note.id, { tags: updatedTags });
-      setNewTag('');
+      setNewTag("");
       setIsAddingTag(false);
     }
   };
@@ -51,42 +66,41 @@ export function NoteDetailScreen({
 
   const formatDate = (date: Date) => {
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
 
     return `${year}-${month}/${day} ${hours}:${minutes}`;
   };
 
   const handleMenuPress = () => {
-    Alert.alert(
-      'メニュー',
-      undefined,
-      [
-        { text: '編集', onPress: handleEditTranscriptClick },
-        {
-          text: '削除',
-          style: 'destructive',
-          onPress: () => {
-            Alert.alert(
-              '削除の確認',
-              'このメモを削除しますか？',
-              [
-                { text: 'キャンセル', style: 'cancel' },
-                { text: '削除', style: 'destructive', onPress: () => onDeleteNote(note.id) }
-              ]
-            );
-          }
+    Alert.alert("メニュー", undefined, [
+      { text: "編集", onPress: handleEditTranscriptClick },
+      {
+        text: "削除",
+        style: "destructive",
+        onPress: () => {
+          Alert.alert("削除の確認", "このメモを削除しますか？", [
+            { text: "キャンセル", style: "cancel" },
+            {
+              text: "削除",
+              style: "destructive",
+              onPress: () => onDeleteNote(note.id),
+            },
+          ]);
         },
-        { text: 'キャンセル', style: 'cancel' }
-      ]
-    );
+      },
+      { text: "キャンセル", style: "cancel" },
+    ]);
   };
 
   return (
     <View className="flex-1 bg-white">
-      <ScrollView className="flex-1 px-4 py-4" contentContainerStyle={{ paddingBottom: 32 }}>
+      <ScrollView
+        className="flex-1 px-4 py-4"
+        contentContainerStyle={{ paddingBottom: 32 }}
+      >
         {/* Header with Back Button and Menu */}
         <View className="flex-row items-center justify-between mb-4">
           <TouchableOpacity
@@ -108,13 +122,17 @@ export function NoteDetailScreen({
         </View>
 
         {/* タイトル */}
-        <Text className="mb-4 text-2xl font-bold text-gray-900">{note.title}</Text>
+        <Text className="mb-4 text-2xl font-bold text-gray-900">
+          {note.title}
+        </Text>
 
         {/* メタ情報 */}
         <View className="mb-4 flex-row items-center gap-3">
           <View className="flex-row items-center gap-2">
             <View className="w-1 h-1 rounded-full bg-gray-400" />
-            <Text className="text-sm text-gray-500">{formatDate(note.date)}</Text>
+            <Text className="text-sm text-gray-500">
+              {formatDate(note.date)}
+            </Text>
           </View>
           {note.folder && (
             <View className="flex-row items-center gap-2">
@@ -132,7 +150,9 @@ export function NoteDetailScreen({
                 key={tag}
                 className="flex-row items-center px-3 py-2 bg-gray-100 rounded-lg border border-gray-200 mr-2 mb-2"
               >
-                <Text className="text-sm text-gray-700 leading-none">#{tag}</Text>
+                <Text className="text-sm text-gray-700 leading-none">
+                  #{tag}
+                </Text>
                 <TouchableOpacity
                   onPress={() => handleRemoveTag(tag)}
                   className="rounded-full bg-gray-200 p-0.5 ml-1.5"
@@ -161,7 +181,9 @@ export function NoteDetailScreen({
                 style={{ height: 36 }}
               >
                 <Plus size={14} color="#4B5563" />
-                <Text className="text-sm text-gray-600 ml-1.5 leading-none">タグを追加</Text>
+                <Text className="text-sm text-gray-600 ml-1.5 leading-none">
+                  タグを追加
+                </Text>
               </TouchableOpacity>
             )}
           </View>
@@ -171,13 +193,47 @@ export function NoteDetailScreen({
         <View className="mb-4 bg-white rounded-xl">
           <Markdown
             style={{
-              body: { color: '#374151', fontSize: 16, lineHeight: 24 },
-              heading1: { fontSize: 24, fontWeight: 'bold', marginVertical: 10, color: '#111827' },
-              heading2: { fontSize: 20, fontWeight: 'bold', marginVertical: 8, color: '#1F2937' },
-              heading3: { fontSize: 18, fontWeight: 'bold', marginVertical: 6, color: '#374151' },
-              blockquote: { borderLeftWidth: 4, borderLeftColor: '#3B82F6', paddingLeft: 10, fontStyle: 'italic', color: '#4B5563', marginVertical: 8 },
-              code_inline: { backgroundColor: '#F3F4F6', borderRadius: 4, paddingHorizontal: 4, paddingVertical: 2, fontFamily: 'System' },
-              code_block: { backgroundColor: '#F3F4F6', borderRadius: 8, padding: 12, marginVertical: 8, fontFamily: 'System' },
+              body: { color: "#374151", fontSize: 16, lineHeight: 24 },
+              heading1: {
+                fontSize: 24,
+                fontWeight: "bold",
+                marginVertical: 10,
+                color: "#111827",
+              },
+              heading2: {
+                fontSize: 20,
+                fontWeight: "bold",
+                marginVertical: 8,
+                color: "#1F2937",
+              },
+              heading3: {
+                fontSize: 18,
+                fontWeight: "bold",
+                marginVertical: 6,
+                color: "#374151",
+              },
+              blockquote: {
+                borderLeftWidth: 4,
+                borderLeftColor: "#3B82F6",
+                paddingLeft: 10,
+                fontStyle: "italic",
+                color: "#4B5563",
+                marginVertical: 8,
+              },
+              code_inline: {
+                backgroundColor: "#F3F4F6",
+                borderRadius: 4,
+                paddingHorizontal: 4,
+                paddingVertical: 2,
+                fontFamily: "System",
+              },
+              code_block: {
+                backgroundColor: "#F3F4F6",
+                borderRadius: 8,
+                padding: 12,
+                marginVertical: 8,
+                fontFamily: "System",
+              },
               list_item: { marginVertical: 4 },
               bullet_list: { marginVertical: 8 },
             }}

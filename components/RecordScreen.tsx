@@ -1,13 +1,23 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, Animated, PermissionsAndroid, Platform } from 'react-native';
-import { Pause, Play, ArrowLeft } from 'lucide-react-native';
+import { useState, useEffect, useRef, useCallback } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  Animated,
+  PermissionsAndroid,
+  Platform,
+} from "react-native";
+import { Pause, Play, ArrowLeft } from "lucide-react-native";
+import { Audio } from "expo-av";
 import AudioRecorderPlayer, {
   AVEncoderAudioQualityIOSType,
   AudioEncoderAndroidType,
   AudioSet,
   AudioSourceAndroidType,
   type RecordBackType,
-} from 'react-native-audio-recorder-player';
+} from "react-native-audio-recorder-player";
 
 type RecordScreenProps = {
   isRecording: boolean;
@@ -31,10 +41,12 @@ export function RecordScreen({
 }: RecordScreenProps) {
   const [duration, setDuration] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [transcript, setTranscript] = useState('');
+  const [transcript, setTranscript] = useState("");
   const [waveformData, setWaveformData] = useState<number[]>([]);
   const scrollX = useRef(new Animated.Value(0)).current;
   const scrollPosition = useRef(0);
+  // AudioRecorderPlayerは既にインスタンス化された定数としてエクスポートされている
+  // そのため、useRefで直接参照する
   const recorderPlayerRef = useRef(AudioRecorderPlayer);
   const isRecorderRunning = useRef(false);
   const audioPathRef = useRef<string | null>(null);
@@ -57,20 +69,24 @@ export function RecordScreen({
   }, []);
 
   const ensurePermission = useCallback(async () => {
-    if (Platform.OS !== 'android') {
-      return true;
+    if (Platform.OS === "android") {
+      const status = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+        {
+          title: "マイクへのアクセス",
+          message: "音声を録音するためにマイクへのアクセスを許可してください。",
+          buttonPositive: "許可する",
+        }
+      );
+      return status === PermissionsAndroid.RESULTS.GRANTED;
+    } else if (Platform.OS === "ios") {
+      // iOS向けの権限要求
+      const { status } = await Audio.requestPermissionsAsync();
+      return status === "granted";
     }
 
-    const status = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-      {
-        title: 'マイクへのアクセス',
-        message: '音声を録音するためにマイクへのアクセスを許可してください。',
-        buttonPositive: '許可する',
-      }
-    );
-
-    return status === PermissionsAndroid.RESULTS.GRANTED;
+    // その他のプラットフォーム（webなど）
+    return false;
   }, []);
 
   const startRecorder = useCallback(async () => {
@@ -80,13 +96,21 @@ export function RecordScreen({
 
     const hasPermission = await ensurePermission();
     if (!hasPermission) {
-      Alert.alert('マイク権限が必要です', '録音を行うには設定からマイクアクセスを許可してください。');
+      Alert.alert(
+        "マイク権限が必要です",
+        "録音を行うには設定からマイクアクセスを許可してください。"
+      );
+      // 親コンポーネントの状態を更新
+      onStopRecording();
       return;
     }
 
     try {
+      // 既存のリスナーを削除（メモリリーク防止）
+      recorderInstance.removeRecordBackListener();
+
       setDuration(0);
-      setTranscript('');
+      setTranscript("");
       setIsPaused(false);
       setWaveformData([]);
       scrollPosition.current = 0;
@@ -97,10 +121,14 @@ export function RecordScreen({
         AudioSourceAndroid: AudioSourceAndroidType.MIC,
         AVEncoderAudioQualityKeyIOS: AVEncoderAudioQualityIOSType.high,
         AVNumberOfChannelsKeyIOS: 2,
-        AVFormatIDKeyIOS: 'aac',
+        AVFormatIDKeyIOS: "aac",
       };
 
-      const uri = await recorderInstance.startRecorder(undefined, audioSet, true);
+      const uri = await recorderInstance.startRecorder(
+        undefined,
+        audioSet,
+        true
+      );
       audioPathRef.current = uri;
       isRecorderRunning.current = true;
 
@@ -109,10 +137,17 @@ export function RecordScreen({
         return;
       });
     } catch (error) {
-      console.error('Failed to start recording', error);
-      Alert.alert('録音エラー', '録音の開始に失敗しました。もう一度お試しください。');
+      console.error("Failed to start recording", error);
+      Alert.alert(
+        "録音エラー",
+        "録音の開始に失敗しました。もう一度お試しください。"
+      );
+      // エラー時も親コンポーネントの状態を更新
+      onStopRecording();
     }
-  }, [ensurePermission, scrollX]);
+    // scrollXはAnimated.Valueで参照が変わらないため、依存配列に含める必要はない
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ensurePermission, onStopRecording]);
 
   const stopRecorder = useCallback(async () => {
     if (!recorderInstance || !isRecorderRunning.current) {
@@ -123,7 +158,7 @@ export function RecordScreen({
     try {
       path = await recorderInstance.stopRecorder();
     } catch (error) {
-      console.error('Failed to stop recording', error);
+      console.error("Failed to stop recording", error);
     }
 
     recorderInstance.removeRecordBackListener();
@@ -135,21 +170,33 @@ export function RecordScreen({
   useEffect(() => {
     if (isRecording) {
       startRecorder();
-    } else if (!isRecording && isRecorderRunning.current) {
+    } else if (isRecorderRunning.current) {
       stopRecorder();
     }
-  }, [isRecording, startRecorder, stopRecorder]);
+    // startRecorder と stopRecorder は useCallback で定義されており、
+    // 依存配列が更新されると参照が変わる可能性がある
+    // しかし、isRecording の変更にのみ反応したいため、依存配列から除外する
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isRecording]);
 
   useEffect(() => {
     return () => {
-      stopRecorder().finally(() => {
-        if (isRecorderRunning.current) {
-          isRecorderRunning.current = false;
-        }
-        onStopRef.current?.();
-      });
+      // クリーンアップ時は同期的に処理
+      if (isRecorderRunning.current && recorderInstance) {
+        // リスナーを削除（同期的）
+        recorderInstance.removeRecordBackListener();
+        // 状態をリセット（同期的）
+        isRecorderRunning.current = false;
+        // 録音を停止（非同期だが、完了を待たない）
+        void recorderInstance.stopRecorder().catch((error) => {
+          // エラーは無視（アンマウント後のエラーは問題ない）
+          console.error("Cleanup: Failed to stop recorder", error);
+        });
+      }
+      // 親コンポーネントへのコールバックは削除
+      // （アンマウント時に親の状態を変更するのは危険）
     };
-  }, [stopRecorder]);
+  }, [recorderInstance]);
 
   // 波形データの更新（10ms毎で滑らか）
   const barCount = useRef(0);
@@ -194,14 +241,15 @@ export function RecordScreen({
         tick += 1;
         if (tick % 3 === 0) {
           const mockPhrases = [
-            'これは音声入力のテストです。',
-            '今日の会議では重要な決定事項がありました。',
-            'プロジェクトの進捗状況について報告します。',
-            '新しいアイデアを思いつきました。',
-            'この機能は非常に便利だと思います。',
+            "これは音声入力のテストです。",
+            "今日の会議では重要な決定事項がありました。",
+            "プロジェクトの進捗状況について報告します。",
+            "新しいアイデアを思いつきました。",
+            "この機能は非常に便利だと思います。",
           ];
-          const randomPhrase = mockPhrases[Math.floor(Math.random() * mockPhrases.length)];
-          setTranscript((prev) => prev + (prev ? ' ' : '') + randomPhrase);
+          const randomPhrase =
+            mockPhrases[Math.floor(Math.random() * mockPhrases.length)];
+          setTranscript((prev) => prev + (prev ? " " : "") + randomPhrase);
         }
       }, 1000);
     }
@@ -213,12 +261,14 @@ export function RecordScreen({
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
   };
 
   const resetLocalState = () => {
     setDuration(0);
-    setTranscript('');
+    setTranscript("");
     setIsPaused(false);
     setWaveformData([]);
     scrollPosition.current = 0;
@@ -226,33 +276,56 @@ export function RecordScreen({
   };
 
   const handleCancel = () => {
-    Alert.alert(
-      '確認',
-      '録音を破棄しますか?',
-      [
-        { text: 'キャンセル', style: 'cancel' },
-        {
-          text: '破棄',
-          style: 'destructive',
-          onPress: async () => {
+    Alert.alert("確認", "録音を破棄しますか?", [
+      { text: "キャンセル", style: "cancel" },
+      {
+        text: "破棄",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            // 録音を停止（完了を待つ）
             await stopRecorder();
+            // stopRecorder が完了し、isRecorderRunning.current が false になったことを確認
+            // その後、親コンポーネントの状態を更新
+            onStopRecording();
+            resetLocalState();
+            onBack();
+          } catch (error) {
+            console.error("Failed to stop recorder in handleCancel", error);
+            // エラーが発生しても、親コンポーネントの状態は更新する
             onStopRecording();
             resetLocalState();
             onBack();
           }
-        }
-      ]
-    );
+        },
+      },
+    ]);
   };
 
   const handleComplete = async () => {
-    const path = await stopRecorder();
-    onStopRecording();
-    const finalTranscript =
-      transcript ||
-      `録音ファイルを保存しました: ${path ?? 'アプリ内ストレージに保存されています。'}\n\n実際の実装では音声認識APIで文字起こしを行います。`;
-    onComplete(finalTranscript, duration);
-    resetLocalState();
+    try {
+      // 録音を停止（完了を待つ）
+      const path = await stopRecorder();
+      // stopRecorder が完了し、isRecorderRunning.current が false になったことを確認
+      // その後、親コンポーネントの状態を更新
+      onStopRecording();
+      const finalTranscript =
+        transcript ||
+        `録音ファイルを保存しました: ${
+          path ?? "アプリ内ストレージに保存されています。"
+        }\n\n実際の実装では音声認識APIで文字起こしを行います。`;
+      onComplete(finalTranscript, duration);
+      resetLocalState();
+    } catch (error) {
+      console.error("Failed to stop recorder in handleComplete", error);
+      // エラーが発生しても、親コンポーネントの状態は更新する
+      onStopRecording();
+      const finalTranscript =
+        transcript ||
+        `録音ファイルを保存しました: アプリ内ストレージに保存されています。\n\n実際の実装では音声認識APIで文字起こしを行います。`;
+      onComplete(finalTranscript, duration);
+      resetLocalState();
+    }
   };
 
   const handleTogglePause = async () => {
@@ -269,8 +342,8 @@ export function RecordScreen({
         setIsPaused(true);
       }
     } catch (error) {
-      console.error('Failed to toggle pause', error);
-      Alert.alert('一時停止エラー', '録音の一時停止/再開に失敗しました。');
+      console.error("Failed to toggle pause", error);
+      Alert.alert("一時停止エラー", "録音の一時停止/再開に失敗しました。");
     }
   };
 
@@ -287,7 +360,9 @@ export function RecordScreen({
         </TouchableOpacity>
         <View className="flex-row items-center px-3 py-2 bg-red-50 rounded-xl border border-red-100">
           <View className="w-2 h-2 bg-red-500 rounded-full" />
-          <Text className="text-sm text-red-700 ml-2 leading-none">{formatTime(duration)}</Text>
+          <Text className="text-sm text-red-700 ml-2 leading-none">
+            {formatTime(duration)}
+          </Text>
         </View>
         <View className="w-10" />
       </View>
@@ -295,14 +370,22 @@ export function RecordScreen({
       {/* 波形表示（iPhoneボイスメモ風） */}
       <View className="px-4 mb-4 mt-4">
         <View className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 overflow-hidden">
-          <View className="h-24 flex-row items-center" style={{ width: VISIBLE_BARS * BAR_TOTAL_WIDTH }}>
+          <View
+            className="h-24 flex-row items-center"
+            style={{ width: VISIBLE_BARS * BAR_TOTAL_WIDTH }}
+          >
             <Animated.View
               className="flex-row items-center"
               style={{
                 // 右端の枠外から始まるようにオフセット
-                transform: [{
-                  translateX: Animated.add(scrollX, (VISIBLE_BARS + 5) * BAR_TOTAL_WIDTH)
-                }]
+                transform: [
+                  {
+                    translateX: Animated.add(
+                      scrollX,
+                      (VISIBLE_BARS + 5) * BAR_TOTAL_WIDTH
+                    ),
+                  },
+                ],
               }}
             >
               {waveformData.map((height, i) => (
@@ -314,7 +397,7 @@ export function RecordScreen({
                     marginHorizontal: BAR_MARGIN,
                     borderRadius: 2,
                     opacity: isPaused ? 0.5 : 0.9,
-                    backgroundColor: isPaused ? '#6B7280' : '#3B82F6',
+                    backgroundColor: isPaused ? "#6B7280" : "#3B82F6",
                   }}
                 />
               ))}
@@ -328,11 +411,13 @@ export function RecordScreen({
         <View className="bg-white rounded-xl p-4 flex-1 shadow-sm border border-gray-100">
           <View className="mb-2 flex-row items-center gap-2">
             <View className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
-            <Text className="text-sm text-gray-600">リアルタイム文字起こし</Text>
+            <Text className="text-sm text-gray-600">
+              リアルタイム文字起こし
+            </Text>
           </View>
           <ScrollView className="flex-1">
             <Text className="text-gray-700 leading-relaxed">
-              {transcript || '音声を認識中...'}
+              {transcript || "音声を認識中..."}
             </Text>
           </ScrollView>
         </View>
@@ -354,7 +439,9 @@ export function RecordScreen({
           onPress={handleComplete}
           className="flex-1 ml-3 px-6 py-3 bg-blue-600 rounded-xl shadow-lg items-center justify-center"
         >
-          <Text className="text-white font-bold text-base">完了して要約する</Text>
+          <Text className="text-white font-bold text-base">
+            完了して要約する
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
