@@ -1,6 +1,13 @@
-import { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { Save, X } from 'lucide-react-native';
+import { useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { Save, X } from "lucide-react-native";
 
 type TranscriptEditScreenProps = {
   title: string;
@@ -23,13 +30,15 @@ export function TranscriptEditScreen({
   };
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       className="flex-1 bg-white"
     >
       {/* ヘッダー */}
       <View className="px-4 py-4 bg-white border-b border-gray-100 flex-row items-center justify-between shadow-sm">
-        <Text className="text-gray-900 font-bold text-lg">文字起こしを編集</Text>
+        <Text className="text-gray-900 font-bold text-lg">
+          文字起こしを編集
+        </Text>
         <TouchableOpacity
           onPress={onCancel}
           className="w-9 h-9 items-center justify-center rounded-xl bg-gray-50"

@@ -1,7 +1,16 @@
-import { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TextInput, Alert, KeyboardAvoidingView, Platform } from 'react-native';
-import { ArrowLeft, LogOut } from 'lucide-react-native';
-import type { User } from '../App';
+import { useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  TextInput,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { ArrowLeft, LogOut } from "lucide-react-native";
+import type { User } from "../App";
 
 type AccountScreenProps = {
   user: User;
@@ -10,7 +19,12 @@ type AccountScreenProps = {
   onLogout: () => void;
 };
 
-export function AccountScreen({ user, onBack, onUpdateUser, onLogout }: AccountScreenProps) {
+export function AccountScreen({
+  user,
+  onBack,
+  onUpdateUser,
+  onLogout,
+}: AccountScreenProps) {
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState(user.name);
 
@@ -22,19 +36,15 @@ export function AccountScreen({ user, onBack, onUpdateUser, onLogout }: AccountS
   };
 
   const handleLogout = () => {
-    Alert.alert(
-      '確認',
-      'ログアウトしますか？',
-      [
-        { text: 'キャンセル', style: 'cancel' },
-        { text: 'ログアウト', style: 'destructive', onPress: onLogout }
-      ]
-    );
+    Alert.alert("確認", "ログアウトしますか？", [
+      { text: "キャンセル", style: "cancel" },
+      { text: "ログアウト", style: "destructive", onPress: onLogout },
+    ]);
   };
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       className="flex-1 bg-white"
     >
       <ScrollView className="flex-1" stickyHeaderIndices={[0]}>
@@ -46,7 +56,9 @@ export function AccountScreen({ user, onBack, onUpdateUser, onLogout }: AccountS
           >
             <ArrowLeft size={20} color="#374151" />
           </TouchableOpacity>
-          <Text className="text-lg font-bold text-gray-900">アカウント設定</Text>
+          <Text className="text-lg font-bold text-gray-900">
+            アカウント設定
+          </Text>
         </View>
 
         {/* アカウント情報 */}
@@ -87,7 +99,9 @@ export function AccountScreen({ user, onBack, onUpdateUser, onLogout }: AccountS
                     onPress={() => setIsEditingName(true)}
                     className="px-3 py-1.5"
                   >
-                    <Text className="text-sm text-blue-600 font-medium">編集</Text>
+                    <Text className="text-sm text-blue-600 font-medium">
+                      編集
+                    </Text>
                   </TouchableOpacity>
                 </View>
               )}
@@ -105,16 +119,28 @@ export function AccountScreen({ user, onBack, onUpdateUser, onLogout }: AccountS
         <View className="px-4 pb-6">
           <View className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <TouchableOpacity className="w-full p-4 border-b border-gray-100">
-              <Text className="text-gray-900 mb-1 text-base font-medium">通知設定</Text>
-              <Text className="text-sm text-gray-500">プッシュ通知とメール通知</Text>
+              <Text className="text-gray-900 mb-1 text-base font-medium">
+                通知設定
+              </Text>
+              <Text className="text-sm text-gray-500">
+                プッシュ通知とメール通知
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity className="w-full p-4 border-b border-gray-100">
-              <Text className="text-gray-900 mb-1 text-base font-medium">ストレージ</Text>
-              <Text className="text-sm text-gray-500">データの使用状況を確認</Text>
+              <Text className="text-gray-900 mb-1 text-base font-medium">
+                ストレージ
+              </Text>
+              <Text className="text-sm text-gray-500">
+                データの使用状況を確認
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity className="w-full p-4">
-              <Text className="text-gray-900 mb-1 text-base font-medium">プライバシーとセキュリティ</Text>
-              <Text className="text-sm text-gray-500">データ保護とセキュリティ設定</Text>
+              <Text className="text-gray-900 mb-1 text-base font-medium">
+                プライバシーとセキュリティ
+              </Text>
+              <Text className="text-sm text-gray-500">
+                データ保護とセキュリティ設定
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -123,13 +149,19 @@ export function AccountScreen({ user, onBack, onUpdateUser, onLogout }: AccountS
         <View className="px-4 pb-6">
           <View className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <TouchableOpacity className="w-full p-4 border-b border-gray-100">
-              <Text className="text-gray-900 mb-1 text-base font-medium">利用規約</Text>
+              <Text className="text-gray-900 mb-1 text-base font-medium">
+                利用規約
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity className="w-full p-4 border-b border-gray-100">
-              <Text className="text-gray-900 mb-1 text-base font-medium">プライバシーポリシー</Text>
+              <Text className="text-gray-900 mb-1 text-base font-medium">
+                プライバシーポリシー
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity className="w-full p-4">
-              <Text className="text-gray-900 mb-1 text-base font-medium">バージョン</Text>
+              <Text className="text-gray-900 mb-1 text-base font-medium">
+                バージョン
+              </Text>
               <Text className="text-sm text-gray-500">1.0.0</Text>
             </TouchableOpacity>
           </View>
@@ -144,7 +176,9 @@ export function AccountScreen({ user, onBack, onUpdateUser, onLogout }: AccountS
             <View className="mr-2">
               <LogOut size={20} color="#DC2626" />
             </View>
-            <Text className="text-red-600 font-bold text-base leading-none">ログアウト</Text>
+            <Text className="text-red-600 font-bold text-base leading-none">
+              ログアウト
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

@@ -1,6 +1,6 @@
-import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
-import { Mic } from 'lucide-react-native';
-import Svg, { Path } from 'react-native-svg';
+import { View, Text, TouchableOpacity } from "react-native";
+import { Mic } from "lucide-react-native";
+import Svg, { Path } from "react-native-svg";
 
 type User = {
   name: string;
@@ -16,8 +16,8 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
     // 実際のアプリではGoogle OAuth認証を実装
     // ここではモックとしてダミーユーザー情報を生成
     const mockUser: User = {
-      name: 'Tanaka Taro',
-      email: 'tanaka.taro@example.com',
+      name: "Tanaka Taro",
+      email: "tanaka.taro@example.com",
     };
     onLogin(mockUser);
   };
@@ -40,7 +40,9 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
             <Text className="text-blue-600 text-lg">🎤</Text>
           </View>
           <View>
-            <Text className="text-gray-900 font-bold mb-1 text-base">簡単な音声入力</Text>
+            <Text className="text-gray-900 font-bold mb-1 text-base">
+              簡単な音声入力
+            </Text>
             <Text className="text-sm text-gray-600">ボタン一つで録音開始</Text>
           </View>
         </View>
@@ -49,7 +51,9 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
             <Text className="text-purple-600 text-lg">✨</Text>
           </View>
           <View>
-            <Text className="text-gray-900 font-bold mb-1 text-base">自動文字起こし</Text>
+            <Text className="text-gray-900 font-bold mb-1 text-base">
+              自動文字起こし
+            </Text>
             <Text className="text-sm text-gray-600">AIが音声をテキスト化</Text>
           </View>
         </View>
@@ -58,7 +62,9 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
             <Text className="text-green-600 text-lg">📝</Text>
           </View>
           <View>
-            <Text className="text-gray-900 font-bold mb-1 text-base">スマートな整理</Text>
+            <Text className="text-gray-900 font-bold mb-1 text-base">
+              スマートな整理
+            </Text>
             <Text className="text-sm text-gray-600">タグとフォルダで管理</Text>
           </View>
         </View>
@@ -90,14 +96,17 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
               />
             </Svg>
           </View>
-          <Text className="text-gray-900 font-medium text-base leading-none">Googleでログイン</Text>
+          <Text className="text-gray-900 font-medium text-base leading-none">
+            Googleでログイン
+          </Text>
         </TouchableOpacity>
 
         <Text className="text-center text-sm text-gray-500 mt-6 px-4">
           ログインすることで、
-          <Text className="text-blue-600 font-medium">利用規約</Text>
-          と
-          <Text className="text-blue-600 font-medium">プライバシーポリシー</Text>
+          <Text className="text-blue-600 font-medium">利用規約</Text>と
+          <Text className="text-blue-600 font-medium">
+            プライバシーポリシー
+          </Text>
           に同意したものとみなされます
         </Text>
       </View>
