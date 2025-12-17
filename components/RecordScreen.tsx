@@ -1,6 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, Animated } from 'react-native';
-import { X, Pause, Play, ArrowLeft } from 'lucide-react-native';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Alert, Animated, PermissionsAndroid, Platform } from 'react-native';
+import { Pause, Play, ArrowLeft } from 'lucide-react-native';
+import AudioRecorderPlayer, {
+  AVEncoderAudioQualityIOSType,
+  AudioEncoderAndroidType,
+  AudioSet,
+  AudioSourceAndroidType,
+  type RecordBackType,
+} from 'react-native-audio-recorder-player';
 
 type RecordScreenProps = {
   isRecording: boolean;
@@ -27,6 +34,20 @@ export function RecordScreen({
   const [transcript, setTranscript] = useState('');
   const [waveformData, setWaveformData] = useState<number[]>([]);
   const scrollX = useRef(new Animated.Value(0)).current;
+  const scrollPosition = useRef(0);
+  const recorderPlayerRef = useRef(AudioRecorderPlayer);
+  const isRecorderRunning = useRef(false);
+  const audioPathRef = useRef<string | null>(null);
+  const onStopRef = useRef(onStopRecording);
+  const recorderInstance = recorderPlayerRef.current;
+
+  useEffect(() => {
+    onStopRef.current = onStopRecording;
+  }, [onStopRecording]);
+
+  useEffect(() => {
+    recorderInstance.setSubscriptionDuration(0.1);
+  }, [recorderInstance]);
 
   // 画面に入ったら自動的に録音開始
   useEffect(() => {
@@ -35,10 +56,104 @@ export function RecordScreen({
     }
   }, []);
 
+  const ensurePermission = useCallback(async () => {
+    if (Platform.OS !== 'android') {
+      return true;
+    }
+
+    const status = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+      {
+        title: 'マイクへのアクセス',
+        message: '音声を録音するためにマイクへのアクセスを許可してください。',
+        buttonPositive: '許可する',
+      }
+    );
+
+    return status === PermissionsAndroid.RESULTS.GRANTED;
+  }, []);
+
+  const startRecorder = useCallback(async () => {
+    if (!recorderInstance || isRecorderRunning.current) {
+      return;
+    }
+
+    const hasPermission = await ensurePermission();
+    if (!hasPermission) {
+      Alert.alert('マイク権限が必要です', '録音を行うには設定からマイクアクセスを許可してください。');
+      return;
+    }
+
+    try {
+      setDuration(0);
+      setTranscript('');
+      setIsPaused(false);
+      setWaveformData([]);
+      scrollPosition.current = 0;
+      scrollX.setValue(0);
+
+      const audioSet: AudioSet = {
+        AudioEncoderAndroid: AudioEncoderAndroidType.AAC,
+        AudioSourceAndroid: AudioSourceAndroidType.MIC,
+        AVEncoderAudioQualityKeyIOS: AVEncoderAudioQualityIOSType.high,
+        AVNumberOfChannelsKeyIOS: 2,
+        AVFormatIDKeyIOS: 'aac',
+      };
+
+      const uri = await recorderInstance.startRecorder(undefined, audioSet, true);
+      audioPathRef.current = uri;
+      isRecorderRunning.current = true;
+
+      recorderInstance.addRecordBackListener((e: RecordBackType) => {
+        setDuration(Math.floor(e.currentPosition / 1000));
+        return;
+      });
+    } catch (error) {
+      console.error('Failed to start recording', error);
+      Alert.alert('録音エラー', '録音の開始に失敗しました。もう一度お試しください。');
+    }
+  }, [ensurePermission, scrollX]);
+
+  const stopRecorder = useCallback(async () => {
+    if (!recorderInstance || !isRecorderRunning.current) {
+      return audioPathRef.current;
+    }
+
+    let path: string | null = audioPathRef.current;
+    try {
+      path = await recorderInstance.stopRecorder();
+    } catch (error) {
+      console.error('Failed to stop recording', error);
+    }
+
+    recorderInstance.removeRecordBackListener();
+    isRecorderRunning.current = false;
+    audioPathRef.current = path;
+    return path;
+  }, []);
+
+  useEffect(() => {
+    if (isRecording) {
+      startRecorder();
+    } else if (!isRecording && isRecorderRunning.current) {
+      stopRecorder();
+    }
+  }, [isRecording, startRecorder, stopRecorder]);
+
+  useEffect(() => {
+    return () => {
+      stopRecorder().finally(() => {
+        if (isRecorderRunning.current) {
+          isRecorderRunning.current = false;
+        }
+        onStopRef.current?.();
+      });
+    };
+  }, [stopRecorder]);
+
   // 波形データの更新（10ms毎で滑らか）
   const barCount = useRef(0);
   const updateCount = useRef(0);
-  const scrollPosition = useRef(0); // 連続的なスクロール位置
 
   useEffect(() => {
     let waveformInterval: NodeJS.Timeout | undefined;
@@ -70,15 +185,14 @@ export function RecordScreen({
     };
   }, [isRecording, isPaused]);
 
-  // 秒数と文字起こしの更新
+  // 擬似的なリアルタイム文字起こし
   useEffect(() => {
     let interval: NodeJS.Timeout | undefined;
     if (isRecording && !isPaused) {
+      let tick = 0;
       interval = setInterval(() => {
-        setDuration((prev) => prev + 1);
-
-        // リアルタイム文字起こしのシミュレーション
-        if (duration % 3 === 0) {
+        tick += 1;
+        if (tick % 3 === 0) {
           const mockPhrases = [
             'これは音声入力のテストです。',
             '今日の会議では重要な決定事項がありました。',
@@ -102,6 +216,15 @@ export function RecordScreen({
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const resetLocalState = () => {
+    setDuration(0);
+    setTranscript('');
+    setIsPaused(false);
+    setWaveformData([]);
+    scrollPosition.current = 0;
+    scrollX.setValue(0);
+  };
+
   const handleCancel = () => {
     Alert.alert(
       '確認',
@@ -111,11 +234,10 @@ export function RecordScreen({
         {
           text: '破棄',
           style: 'destructive',
-          onPress: () => {
+          onPress: async () => {
+            await stopRecorder();
             onStopRecording();
-            setDuration(0);
-            setTranscript('');
-            setIsPaused(false);
+            resetLocalState();
             onBack();
           }
         }
@@ -123,15 +245,33 @@ export function RecordScreen({
     );
   };
 
-  const handleComplete = () => {
-    onComplete(transcript || 'サンプルの文字起こしテキストです。これは録音から生成された内容を表しています。実際の実装では、音声認識APIを使用して文字起こしを行います。', duration);
-    setDuration(0);
-    setTranscript('');
-    setIsPaused(false);
+  const handleComplete = async () => {
+    const path = await stopRecorder();
+    onStopRecording();
+    const finalTranscript =
+      transcript ||
+      `録音ファイルを保存しました: ${path ?? 'アプリ内ストレージに保存されています。'}\n\n実際の実装では音声認識APIで文字起こしを行います。`;
+    onComplete(finalTranscript, duration);
+    resetLocalState();
   };
 
-  const handleTogglePause = () => {
-    setIsPaused(!isPaused);
+  const handleTogglePause = async () => {
+    if (!recorderInstance || !isRecorderRunning.current) {
+      return;
+    }
+
+    try {
+      if (isPaused) {
+        await recorderInstance.resumeRecorder();
+        setIsPaused(false);
+      } else {
+        await recorderInstance.pauseRecorder();
+        setIsPaused(true);
+      }
+    } catch (error) {
+      console.error('Failed to toggle pause', error);
+      Alert.alert('一時停止エラー', '録音の一時停止/再開に失敗しました。');
+    }
   };
 
   return (
