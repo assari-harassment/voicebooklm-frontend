@@ -11,13 +11,8 @@ React Native（Expo）で開発されています。
 
 | ソフトウェア       | バージョン              | 確認コマンド          |
 | ------------------ | ----------------------- | --------------------- |
-| **Node.js**        | `v22.11.0`（必須）      | `node -v`             |
-| **npm**            | `v10.x` 以上            | `npm -v`              |
-| **macOS**          | 13.0+                   | `sw_vers`             |
 | **Xcode**          | 15.0+                   | `xcodebuild -version` |
 | **Android Studio** | Latest                  | -                     |
-| **CocoaPods**      | 1.14+                   | `pod --version`       |
-| **Java (JDK)**     | 17                      | `java -version`       |
 | **direnv**         | 最新（Node 自動切替用） | `direnv --version`    |
 | **nvm**            | Node Version Manager    | `nvm --version`       |
 
@@ -47,6 +42,14 @@ npm run dev
 npx expo start --dev-client
 ```
 
+### Watchman のインストール（推奨）
+
+ファイル変更を高速に検知するツールです。Fast Refresh の速度と信頼性が向上します。
+
+```bash
+brew install watchman
+```
+
 ## 環境セットアップ（初回のみ）
 
 チーム開発でのバージョン差異トラブル防止のため、**direnv + nvm の導入を推奨**しています。
@@ -73,17 +76,6 @@ brew install direnv
 
 ```zsh
 eval "$(direnv hook zsh)"
-```
-
-**bash の場合**
-
-```bash
-eval "$(direnv hook bash)"
-```
-
-設定後、ターミナルを再起動するか以下を実行：
-
-```bash
 source ~/.zshrc  # または source ~/.bashrc
 ```
 
@@ -131,8 +123,6 @@ cp .env.example .env
 
 `.env` を開き、ローカル環境に必要な値を設定してください。
 
-**注意**: `.env` は Git にコミットしないでください（`.gitignore` に記載済み）
-
 ## 開発ガイド
 
 このプロジェクトは **Expo Prebuild (CNG)** を採用しています。
@@ -151,8 +141,6 @@ cp .env.example .env
 
 #### 開発サーバーの起動（推奨）
 
-Metro Bundler を起動し、QRコードを表示します。実機 (Expo Go) での開発や、複数のプラットフォームを切り替えて開発する場合に便利です。
-
 ```bash
 npm run dev
 # または
@@ -162,33 +150,6 @@ npm start
 - `i` を押すと iOS シミュレータで起動
 - `a` を押すと Android エミュレータで起動
 - `w` を押すと Web ブラウザで起動
-
-#### iOS
-
-```bash
-# シミュレータで実行
-npm run ios
-
-# 特定のデバイスを指定して実行する場合
-npx expo run:ios --device "iPhone 15 Pro"
-```
-
-#### Android
-
-```bash
-# エミュレータで実行（エミュレータを事前に起動しておくか、コマンドが自動起動します）
-npm run android
-```
-
-### 動作確認方法
-
-| 環境                        | 操作方法                                       |
-| --------------------------- | ---------------------------------------------- |
-| 実機（iOS/Android）         | Expo Go アプリで表示された QR コードを読み取る |
-| iOS Simulator（macOS のみ） | ターミナルで `i` キー押下                      |
-| Android Emulator            | ターミナルで `a` キー押下                      |
-
-※ PC とスマホは同一 Wi-Fi に接続してください（VPN はオフ推奨）
 
 ### よく使うコマンド（開発サーバー起動中に）
 
@@ -235,28 +196,6 @@ npm run format:check
 **重要**: コミットまたはプッシュする前に、必ず ESLint を実行してください。  
 エラーや警告がある場合は修正してからコミットしてください。
 
-#### コミット前のチェックリスト
-
-1. **ESLint チェックを実行**
-
-   必ずエラーが **0件** であることを確認してください。警告（Warning）がある場合も、可能な限り修正してください。
-
-   ```bash
-   npm run lint
-   ```
-
-2. **自動修正の実行（推奨）**
-
-   手動での修正が面倒な場合は、以下のコマンドで自動修正を行ってください。
-
-   ```bash
-   # ESLintの自動修正
-   npm run lint -- --fix
-
-   # Prettierによるフォーマット
-   npm run format
-   ```
-
 ### VSCode設定
 
 VSCodeを使用している場合、保存時に自動でフォーマット・Lint修正が行われるように設定済みです。
@@ -267,21 +206,6 @@ VSCodeを使用している場合、保存時に自動でフォーマット・Li
 
 2. **自動フォーマット**
    - `.vscode/settings.json` に設定が含まれており、ファイル保存時に自動で Prettier と ESLint が実行されます。
-
-## 環境構築
-
-### Node.js & Watchman のインストール
-
-**Homebrew を使用する場合（推奨）**
-
-```bash
-# Homebrew のインストール（未インストールの場合）
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-# Node.js と Watchman のインストール
-brew install node
-brew install watchman
-```
 
 ### Android 開発環境のセットアップ
 
@@ -340,66 +264,9 @@ sudo gem install cocoapods
 - `nativewind`: ^2.0.11 - ユーティリティファーストCSS
 - `lucide-react-native`: ^0.561.0 - アイコンライブラリ
 
-## ビルド
-
-### iOS ビルド（ローカル）
-
-```bash
-# Expo CLI を使用してネイティブプロジェクトをビルド
-npx expo run:ios --configuration Release
-```
-
-### Android ビルド（ローカル）
-
-```bash
-# Expo CLI を使用してネイティブプロジェクトをビルド
-npx expo run:android --variant release
-```
-
 ## トラブルシューティング
 
 ### よくある問題
-
-**npm install でエラー**
-
-- Node.js が v22.11.0 か？ `node -v` で確認
-- direnv allow 済みか？ `.envrc` が有効になっているか確認
-
-**実機で接続できない**
-
-- 同一 Wi-Fi か？ VPN オフ？
-- ファイアウォール設定を確認
-
-**.env が反映されない**
-
-- `.env` 作成済みか？
-- `npm run dev` 再起動したか？
-
-**シミュレータが見つからない場合**
-
-```bash
-# 利用可能なシミュレータを確認
-xcrun simctl list devices available
-```
-
-**依存関係のエラー (iOS)**
-
-```bash
-# Pods を再インストール
-cd ios
-pod deintegrate
-pod install
-cd ..
-```
-
-**依存関係のエラー (Android)**
-
-```bash
-# Gradle クリーン
-cd android
-./gradlew clean
-cd ..
-```
 
 **ビルドエラーが発生した場合**
 
@@ -437,25 +304,3 @@ voicebooklm-frontend/
 ├── .nvmrc               # Node.js バージョン指定
 └── README.md            # このファイル
 ```
-
-## 開発ガイドライン
-
-### ブランチ戦略
-
-- `main` - 本番リリース用
-- `develop` - 開発用メインブランチ
-- `feature/*` - 機能開発用
-- `fix/*` - バグ修正用
-
-### コミットメッセージ
-
-- `feat`: 新機能の追加
-- `fix`: バグ修正
-- `docs`: ドキュメント更新
-- `style`: コードスタイル修正
-- `refactor`: リファクタリング
-- `test`: テスト追加・修正
-
-## ライセンス
-
-Private - All rights reserved
