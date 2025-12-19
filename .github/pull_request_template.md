@@ -1,9 +1,4 @@
-<!-- I want to review in Japanese. -->
-<!-- 日本語でレビューしてください -->
-
 ## 関連 Issue
-
-<!-- #の後ろに対応するissue番号を書く -->
 
 Closes #
 
@@ -13,11 +8,17 @@ Closes #
 
 ## 動作確認
 
-<!-- テスト内容など -->
-
 - [ ] ビルドできた
 
 ## 参考にした資料
 
 <!-- I want to review in Japanese. -->
 <!-- 日本語でレビューしてください -->
+
+#### レビューの接頭語
+
+[must] → かならず変更してね
+[imo] → 自分の意見だとこうだけど修正必須ではないよ(in my opinion)
+[nits] → ささいな指摘(nitpick)
+[ask] → 質問
+[fyi] → 参考情報
