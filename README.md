@@ -114,6 +114,15 @@ npx expo run:android
 npx expo prebuild --clean && npx expo run:ios
 ```
 
+### ドキュメントの更新
+
+`docs/` は voicebooklm-docs リポジトリの submodule です。最新のドキュメントを取得するには：
+
+```bash
+git submodule update --remote
+```
+詳しくは`git submodule`で検索
+
 ## 利用可能なスクリプト
 
 | コマンド          | 説明                                 |
