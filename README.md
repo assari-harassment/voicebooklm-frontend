@@ -71,11 +71,14 @@ mise install
 
 ## プロジェクトのセットアップ
 
-1. リポジトリをクローン
+1. リポジトリをクローン（`--recursive` でドキュメントも取得）
 
    ```bash
-   git clone <repository-url>
-   cd expo-poc
+   git clone --recursive https://github.com/assari-harassment/voicebooklm-frontend.git
+   cd voicebooklm-frontend
+
+   # 既存のcloneでドキュメントが空の場合
+   git submodule update --init
    ```
 
 2. 依存関係をインストール
