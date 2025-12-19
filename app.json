@@ -1,44 +1,74 @@
 {
   "expo": {
-    "name": "VoiceBookLM",
-    "slug": "voicebooklm",
+    "name": "expo-poc",
+    "slug": "expo-poc",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "assetBundlePatterns": ["**/*"],
+    "icon": "./assets/images/icon.png",
+    "scheme": "expopoc",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.voicebooklm"
+      "bundleIdentifier": "com.assariuser.expopoc",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "package": "com.anonymous.voicebooklm",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "permissions": ["RECORD_AUDIO"]
+      "package": "com.assariuser.expopoc"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-asset",
+      "expo-router",
       [
-        "expo-build-properties",
+        "react-native-audio-api",
         {
-          "android": {
-            "ndkVersion": "26.1.10909125"
+          "iosMicrophonePermission": "音声メモの録音にマイクを使用します",
+          "androidPermissions": [
+            "android.permission.RECORD_AUDIO"
+          ]
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff",
+          "dark": {
+            "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.16575135262-8un5unbj4u8se8n5qls5jrmpm3mee9q1"
+        }
       ]
-    ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "aea4b3aa-af13-4298-adfa-8fac719f0e7c"
+      }
+    }
   }
 }
