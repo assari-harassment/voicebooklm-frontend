@@ -71,11 +71,14 @@ mise install
 
 ## プロジェクトのセットアップ
 
-1. リポジトリをクローン
+1. リポジトリをクローン（`--recursive` でドキュメントも取得）
 
    ```bash
-   git clone <repository-url>
-   cd expo-poc
+   git clone --recursive https://github.com/assari-harassment/voicebooklm-frontend.git
+   cd voicebooklm-frontend
+
+   # 既存のcloneでドキュメントが空の場合
+   git submodule update --init
    ```
 
 2. 依存関係をインストール
@@ -111,6 +114,15 @@ npx expo run:android
 npx expo prebuild --clean && npx expo run:ios
 ```
 
+### ドキュメントの更新
+
+`docs/` は voicebooklm-docs リポジトリの submodule です。最新のドキュメントを取得するには：
+
+```bash
+git submodule update --remote
+```
+詳しくは`git submodule`で検索
+
 ## 利用可能なスクリプト
 
 | コマンド          | 説明                                 |
@@ -126,3 +138,27 @@ npx expo prebuild --clean && npx expo run:ios
 - [Expo ドキュメント](https://docs.expo.dev/)
 - [環境構築ガイド](https://docs.expo.dev/get-started/set-up-your-environment/)
 - [React Native ドキュメント](https://reactnative.dev/)
+
+## Claude Code / AI アシスタント
+
+このプロジェクトは Claude Code での開発を想定しています。
+
+### セットアップ
+
+```bash
+# Serena（コード解析）を使うには uvx が必要
+pip install uv
+```
+
+### 利用可能な機能
+
+| 機能 | 説明 |
+|-----|------|
+| **Serena** | コードのシンボル解析・リファクタリング支援 |
+| **Context7** | 最新のライブラリドキュメント取得 |
+| **sequential-thinking** | 複雑な問題の思考整理 |
+| **/commit** | 日本語コミットメッセージ自動生成 |
+
+### ドキュメント参照
+
+`docs/` に仕様書・設計書があります。Claude Code は自動的にこれらを参照します。
