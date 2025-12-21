@@ -3,7 +3,6 @@ import { useMemo, useState } from "react";
 import {
   Alert,
   ScrollView,
-  StyleSheet,
   TextInput as RNTextInput,
   View,
 } from "react-native";
@@ -193,18 +192,18 @@ export default function NoteDetailScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-white">
       <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        className="flex-1"
+        contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 16, paddingBottom: 32 }}
       >
         {/* Header */}
-        <View style={styles.header}>
+        <View className="flex-row justify-between items-center mb-4">
           <IconButton
             icon="arrow-left"
             size={20}
             onPress={handleGoHome}
-            style={styles.headerButton}
+            className="bg-white border border-gray-100"
             accessibilityLabel="ホームに戻る"
           />
           <Menu
@@ -215,7 +214,7 @@ export default function NoteDetailScreen() {
                 icon="dots-vertical"
                 size={20}
                 onPress={() => setMenuVisible(true)}
-                style={styles.headerButton}
+                className="bg-white border border-gray-100"
                 accessibilityLabel="メニュー"
               />
             }
@@ -240,41 +239,41 @@ export default function NoteDetailScreen() {
               onPress={handleDeleteNote}
               title="削除"
               leadingIcon="delete"
-              titleStyle={styles.deleteText}
+              titleStyle={{ color: "#EF4444" }}
             />
           </Menu>
         </View>
 
         {/* タイトル */}
-        <Text variant="headlineMedium" style={styles.title}>
+        <Text variant="headlineMedium" className="font-bold text-gray-900 mb-3">
           {note.title}
         </Text>
 
         {/* メタ情報 */}
-        <View style={styles.metaInfo}>
-          <View style={styles.metaItem}>
-            <View style={styles.metaDot} />
-            <Text variant="bodySmall" style={styles.metaText}>
+        <View className="flex-row items-center gap-3 mb-4">
+          <View className="flex-row items-center gap-2">
+            <View className="w-1 h-1 rounded-full bg-gray-400" />
+            <Text variant="bodySmall" className="text-gray-500">
               {formatDate(note.date)}
             </Text>
           </View>
         </View>
 
         {/* タグ一覧 */}
-        <View style={styles.tagsSection}>
-          <View style={styles.tagsContainer}>
+        <View className="mb-4">
+          <View className="flex-row flex-wrap gap-2">
             {note.tags.map((tag) => (
               <Chip
                 key={tag}
                 onClose={() => handleRemoveTag(tag)}
-                style={styles.tag}
-                textStyle={styles.tagText}
+                className="bg-gray-100"
+                textStyle={{ color: "#374151", fontSize: 14 }}
               >
                 #{tag}
               </Chip>
             ))}
             {isAddingTag ? (
-              <View style={styles.tagInputContainer}>
+              <View className="mr-2">
                 <RNTextInput
                   value={newTag}
                   onChangeText={setNewTag}
@@ -287,7 +286,7 @@ export default function NoteDetailScreen() {
                     }
                   }}
                   placeholder="タグ名"
-                  style={styles.tagInput}
+                  className="px-3 py-2 border border-blue-500 rounded-lg bg-white text-sm min-w-[100px]"
                   autoFocus
                 />
               </View>
@@ -295,8 +294,8 @@ export default function NoteDetailScreen() {
               <Chip
                 icon="plus"
                 onPress={() => setIsAddingTag(true)}
-                style={styles.addTagChip}
-                textStyle={styles.addTagText}
+                className="bg-white border border-gray-200 border-dashed"
+                textStyle={{ color: "#6B7280", fontSize: 14 }}
               >
                 タグを追加
               </Chip>
@@ -306,11 +305,11 @@ export default function NoteDetailScreen() {
 
         {/* 表示切り替えインジケーター */}
         {note.transcription && (
-          <View style={styles.viewToggle}>
+          <View className="mb-3">
             <Chip
               icon={showTranscription ? "microphone" : "text-box"}
-              style={styles.viewToggleChip}
-              textStyle={styles.viewToggleText}
+              className="self-start bg-blue-50"
+              textStyle={{ color: "#2563EB", fontSize: 12 }}
             >
               {showTranscription ? "文字起こし" : "AI要約"}
             </Chip>
@@ -318,9 +317,11 @@ export default function NoteDetailScreen() {
         )}
 
         {/* 本文（Markdown）または文字起こし */}
-        <Surface style={styles.contentCard} elevation={0}>
+        <Surface className="bg-white rounded-xl p-1" elevation={0}>
           {showTranscription && note.transcription ? (
-            <Text style={styles.transcriptionText}>{note.transcription}</Text>
+            <Text className="text-gray-700 text-base leading-6 p-2">
+              {note.transcription}
+            </Text>
           ) : (
             <Markdown style={markdownStyles}>{note.content}</Markdown>
           )}
@@ -353,117 +354,3 @@ export default function NoteDetailScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    paddingBottom: 32,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  headerButton: {
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#F3F4F6",
-  },
-  title: {
-    fontWeight: "bold",
-    color: "#111827",
-    marginBottom: 12,
-  },
-  metaInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    marginBottom: 16,
-  },
-  metaItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  metaDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: "#9CA3AF",
-  },
-  metaText: {
-    color: "#6B7280",
-  },
-  tagsSection: {
-    marginBottom: 16,
-  },
-  tagsContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  tag: {
-    backgroundColor: "#F3F4F6",
-  },
-  tagText: {
-    color: "#374151",
-    fontSize: 14,
-  },
-  tagInputContainer: {
-    marginRight: 8,
-  },
-  tagInput: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderWidth: 1,
-    borderColor: "#3B82F6",
-    borderRadius: 8,
-    backgroundColor: "#FFFFFF",
-    fontSize: 14,
-    minWidth: 100,
-  },
-  addTagChip: {
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderStyle: "dashed",
-  },
-  addTagText: {
-    color: "#6B7280",
-    fontSize: 14,
-  },
-  viewToggle: {
-    marginBottom: 12,
-  },
-  viewToggleChip: {
-    alignSelf: "flex-start",
-    backgroundColor: "#EFF6FF",
-  },
-  viewToggleText: {
-    color: "#2563EB",
-    fontSize: 12,
-  },
-  contentCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    padding: 4,
-  },
-  transcriptionText: {
-    color: "#374151",
-    fontSize: 16,
-    lineHeight: 24,
-    padding: 8,
-  },
-  deleteText: {
-    color: "#EF4444",
-  },
-});

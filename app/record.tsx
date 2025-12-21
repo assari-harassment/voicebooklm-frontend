@@ -1,7 +1,7 @@
 import { Paths, File } from "expo-file-system";
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Alert, Animated, StyleSheet, View } from "react-native";
+import { Alert, Animated, View } from "react-native";
 import { Button, IconButton, Surface, Text } from "react-native-paper";
 import { audioRecorderService } from "../src/services/audioRecorder";
 
@@ -167,8 +167,8 @@ export default function RecordScreen() {
 
   if (error) {
     return (
-      <View style={[styles.container, styles.errorContainer]}>
-        <Text variant="bodyLarge" style={styles.errorText}>
+      <View className="flex-1 bg-gray-50 justify-center items-center p-5">
+        <Text variant="bodyLarge" className="text-red-500 mb-5 text-center">
           {error}
         </Text>
         <Button mode="contained" onPress={() => router.back()}>
@@ -179,69 +179,68 @@ export default function RecordScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-gray-50">
       {/* ヘッダー */}
-      <Surface style={styles.header} elevation={0}>
+      <Surface className="flex-row justify-between items-center px-2 py-2 bg-white" elevation={0}>
         <IconButton
           icon="arrow-left"
           size={20}
           onPress={handleCancel}
-          style={styles.backButton}
+          className="bg-white border border-gray-100"
           accessibilityLabel="戻る"
         />
-        <View style={styles.timerContainer}>
-          <View style={styles.recordingDot} />
-          <Text variant="labelLarge" style={styles.timerText}>
+        <View className="flex-row items-center px-3 py-2 bg-red-50 rounded-xl border border-red-100">
+          <View className="w-2 h-2 rounded-full bg-red-500" />
+          <Text variant="labelLarge" className="text-red-700 ml-2">
             {formatTime(duration)}
           </Text>
         </View>
-        <View style={styles.placeholder} />
+        <View className="w-10" />
       </Surface>
 
       {/* 波形表示エリア */}
-      <View style={styles.waveformSection}>
-        <Surface style={styles.waveformCard} elevation={1}>
-          <View style={styles.waveformContainer}>
+      <View className="px-4 pt-4">
+        <Surface className="bg-white rounded-2xl p-4 overflow-hidden" elevation={1}>
+          <View
+            className="h-[120px] flex-row items-center overflow-hidden"
+            style={{ width: VISIBLE_BARS * BAR_TOTAL_WIDTH }}
+          >
             <Animated.View
-              style={[
-                styles.waveformBars,
-                {
-                  transform: [
-                    {
-                      translateX: Animated.add(
-                        scrollX,
-                        (VISIBLE_BARS + 5) * BAR_TOTAL_WIDTH
-                      ),
-                    },
-                  ],
-                },
-              ]}
+              className="flex-row items-center"
+              style={{
+                transform: [
+                  {
+                    translateX: Animated.add(
+                      scrollX,
+                      (VISIBLE_BARS + 5) * BAR_TOTAL_WIDTH
+                    ),
+                  },
+                ],
+              }}
             >
               {waveformData.map((height, i) => (
                 <View
                   key={i}
-                  style={[
-                    styles.bar,
-                    {
-                      height: Math.max(4, height),
-                      opacity: isPaused ? 0.5 : 0.9,
-                      backgroundColor: isPaused ? "#6B7280" : "#3B82F6",
-                    },
-                  ]}
+                  style={{
+                    width: BAR_WIDTH,
+                    marginHorizontal: BAR_MARGIN,
+                    height: Math.max(4, height),
+                    opacity: isPaused ? 0.5 : 0.9,
+                    backgroundColor: isPaused ? "#6B7280" : "#3B82F6",
+                    borderRadius: 2,
+                  }}
                 />
               ))}
             </Animated.View>
           </View>
 
           {/* 録音中/一時停止のステータス */}
-          <View style={styles.statusContainer}>
+          <View className="flex-row items-center justify-center mt-3">
             <View
-              style={[
-                styles.statusDot,
-                { backgroundColor: isPaused ? "#6B7280" : "#EF4444" },
-              ]}
+              className="w-1.5 h-1.5 rounded-full"
+              style={{ backgroundColor: isPaused ? "#6B7280" : "#EF4444" }}
             />
-            <Text variant="bodySmall" style={styles.statusText}>
+            <Text variant="bodySmall" className="text-gray-500 ml-1.5">
               {isPaused ? "一時停止中" : "録音中"}
             </Text>
           </View>
@@ -249,23 +248,23 @@ export default function RecordScreen() {
       </View>
 
       {/* 空白エリア（文字起こしなし） */}
-      <View style={styles.spacer} />
+      <View className="flex-1" />
 
       {/* コントロール */}
-      <Surface style={styles.controls} elevation={0}>
+      <Surface className="flex-row items-center px-4 py-4 bg-white border-t border-gray-100" elevation={0}>
         <IconButton
           icon={isPaused ? "play" : "pause"}
           size={24}
           onPress={handleTogglePause}
-          style={styles.pauseButton}
+          className="bg-gray-100 rounded-xl"
           iconColor="#374151"
         />
         <Button
           mode="contained"
           onPress={handleComplete}
-          style={styles.completeButton}
-          contentStyle={styles.completeButtonContent}
-          labelStyle={styles.completeButtonLabel}
+          className="flex-1 ml-3 rounded-xl bg-blue-600"
+          contentStyle={{ paddingVertical: 6 }}
+          labelStyle={{ fontSize: 16, fontWeight: "bold" }}
         >
           完了して要約する
         </Button>
@@ -273,126 +272,3 @@ export default function RecordScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F9FAFB",
-  },
-  errorContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  errorText: {
-    color: "#EF4444",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-    backgroundColor: "#FFFFFF",
-  },
-  backButton: {
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#F3F4F6",
-  },
-  timerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    backgroundColor: "#FEF2F2",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#FEE2E2",
-  },
-  recordingDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#EF4444",
-  },
-  timerText: {
-    color: "#B91C1C",
-    marginLeft: 8,
-  },
-  placeholder: {
-    width: 40,
-  },
-  waveformSection: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
-  },
-  waveformCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 16,
-    overflow: "hidden",
-  },
-  waveformContainer: {
-    height: 120,
-    flexDirection: "row",
-    alignItems: "center",
-    width: VISIBLE_BARS * BAR_TOTAL_WIDTH,
-    overflow: "hidden",
-  },
-  waveformBars: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  bar: {
-    width: BAR_WIDTH,
-    marginHorizontal: BAR_MARGIN,
-    borderRadius: 2,
-  },
-  statusContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 12,
-  },
-  statusDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
-  statusText: {
-    color: "#6B7280",
-    marginLeft: 6,
-  },
-  spacer: {
-    flex: 1,
-  },
-  controls: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    backgroundColor: "#FFFFFF",
-    borderTopWidth: 1,
-    borderTopColor: "#F3F4F6",
-  },
-  pauseButton: {
-    backgroundColor: "#F3F4F6",
-    borderRadius: 12,
-  },
-  completeButton: {
-    flex: 1,
-    marginLeft: 12,
-    borderRadius: 12,
-    backgroundColor: "#2563EB",
-  },
-  completeButtonContent: {
-    paddingVertical: 6,
-  },
-  completeButtonLabel: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-});

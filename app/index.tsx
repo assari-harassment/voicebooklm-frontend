@@ -7,13 +7,8 @@ import {
 } from "@react-native-google-signin/google-signin";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Alert, ScrollView, StyleSheet, View } from "react-native";
-import {
-  ActivityIndicator,
-  Button,
-  Surface,
-  Text,
-} from "react-native-paper";
+import { Alert, ScrollView, View } from "react-native";
+import { ActivityIndicator, Button, Surface, Text } from "react-native-paper";
 import type { TokenResponse } from "../src/api/generated/apiSchema";
 import { apiClient } from "../src/services/apiClient";
 
@@ -123,168 +118,85 @@ export default function LoginScreen() {
 
   return (
     <ScrollView
-      contentContainerStyle={styles.scrollContent}
-      style={styles.container}
+      contentContainerStyle={{ flexGrow: 1 }}
+      className="flex-1 bg-white"
     >
-      {/* Logo / Brand */}
-      <View style={styles.brandSection}>
-        <Surface style={styles.logoContainer} elevation={4}>
-          <MaterialCommunityIcons name="microphone" size={40} color="#FFFFFF" />
-        </Surface>
-        <Text variant="headlineLarge" style={styles.appName}>
-          VoiceBookLM
-        </Text>
-        <Text variant="bodyLarge" style={styles.tagline}>
-          音声からアイデアを記録
-        </Text>
-      </View>
+      <View className="flex-1 justify-center items-center px-6 py-12">
+        {/* Logo / Brand */}
+        <View className="items-center mb-12">
+          <Surface className="w-20 h-20 rounded-3xl bg-blue-600 justify-center items-center mb-6">
+            <MaterialCommunityIcons
+              name="microphone"
+              size={40}
+              color="#FFFFFF"
+            />
+          </Surface>
+          <Text variant="headlineLarge" className="font-bold text-gray-900 mb-2">
+            VoiceBookLM
+          </Text>
+          <Text variant="bodyLarge" className="text-gray-500">
+            音声からアイデアを記録
+          </Text>
+        </View>
 
-      {/* Features */}
-      <View style={styles.featuresSection}>
-        {features.map((feature, index) => (
-          <View key={index} style={styles.featureRow}>
-            <View
-              style={[
-                styles.featureIcon,
-                { backgroundColor: feature.backgroundColor },
-              ]}
-            >
-              <MaterialCommunityIcons
-                name={feature.icon}
-                size={20}
-                color={feature.color}
-              />
+        {/* Features */}
+        <View className="w-full max-w-xs mb-12 gap-4">
+          {features.map((feature, index) => (
+            <View key={index} className="flex-row items-start gap-3">
+              <View
+                className="w-8 h-8 rounded-lg justify-center items-center mt-0.5"
+                style={{ backgroundColor: feature.backgroundColor }}
+              >
+                <MaterialCommunityIcons
+                  name={feature.icon}
+                  size={20}
+                  color={feature.color}
+                />
+              </View>
+              <View className="flex-1">
+                <Text
+                  variant="titleMedium"
+                  className="font-bold text-gray-900 mb-0.5"
+                >
+                  {feature.title}
+                </Text>
+                <Text variant="bodyMedium" className="text-gray-500">
+                  {feature.description}
+                </Text>
+              </View>
             </View>
-            <View style={styles.featureText}>
-              <Text variant="titleMedium" style={styles.featureTitle}>
-                {feature.title}
-              </Text>
-              <Text variant="bodyMedium" style={styles.featureDescription}>
-                {feature.description}
-              </Text>
-            </View>
-          </View>
-        ))}
-      </View>
+          ))}
+        </View>
 
-      {/* Login Button */}
-      <View style={styles.loginSection}>
-        <Button
-          mode="outlined"
-          onPress={handleGoogleSignIn}
-          disabled={isLoading}
-          icon={isLoading ? undefined : "google"}
-          contentStyle={styles.buttonContent}
-          style={styles.googleButton}
-          labelStyle={styles.buttonLabel}
-        >
-          {isLoading ? (
-            <ActivityIndicator animating={true} size="small" />
-          ) : (
-            "Googleでログイン"
-          )}
-        </Button>
+        {/* Login Button */}
+        <View className="w-full max-w-xs">
+          <Button
+            mode="outlined"
+            onPress={handleGoogleSignIn}
+            disabled={isLoading}
+            icon={isLoading ? undefined : "google"}
+            contentStyle={{ paddingVertical: 8 }}
+            className="rounded-xl border-gray-200"
+            labelStyle={{ color: "#111827", fontWeight: "500", fontSize: 16 }}
+          >
+            {isLoading ? (
+              <ActivityIndicator animating={true} size="small" />
+            ) : (
+              "Googleでログイン"
+            )}
+          </Button>
 
-        <Text variant="bodySmall" style={styles.termsText}>
-          ログインすることで、
-          <Text style={styles.linkText}>利用規約</Text>と
-          <Text style={styles.linkText}>プライバシーポリシー</Text>
-          に同意したものとみなされます
-        </Text>
+          <Text
+            variant="bodySmall"
+            className="text-center text-gray-500 mt-6 px-4 leading-5"
+          >
+            ログインすることで、
+            <Text className="text-blue-600 font-medium">利用規約</Text>と
+            <Text className="text-blue-600 font-medium">プライバシーポリシー</Text>
+            に同意したものとみなされます
+          </Text>
+        </View>
       </View>
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 24,
-    paddingVertical: 48,
-  },
-  brandSection: {
-    alignItems: "center",
-    marginBottom: 48,
-  },
-  logoContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 24,
-    backgroundColor: "#2563EB",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  appName: {
-    fontWeight: "bold",
-    color: "#111827",
-    marginBottom: 8,
-  },
-  tagline: {
-    color: "#6B7280",
-  },
-  featuresSection: {
-    width: "100%",
-    maxWidth: 320,
-    marginBottom: 48,
-    gap: 16,
-  },
-  featureRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 12,
-  },
-  featureIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 2,
-  },
-  featureText: {
-    flex: 1,
-  },
-  featureTitle: {
-    fontWeight: "bold",
-    color: "#111827",
-    marginBottom: 2,
-  },
-  featureDescription: {
-    color: "#6B7280",
-  },
-  loginSection: {
-    width: "100%",
-    maxWidth: 320,
-  },
-  googleButton: {
-    borderRadius: 12,
-    borderColor: "#E5E7EB",
-    borderWidth: 1,
-  },
-  buttonContent: {
-    paddingVertical: 8,
-  },
-  buttonLabel: {
-    color: "#111827",
-    fontWeight: "500",
-    fontSize: 16,
-  },
-  termsText: {
-    textAlign: "center",
-    color: "#6B7280",
-    marginTop: 24,
-    paddingHorizontal: 16,
-    lineHeight: 20,
-  },
-  linkText: {
-    color: "#2563EB",
-    fontWeight: "500",
-  },
-});
