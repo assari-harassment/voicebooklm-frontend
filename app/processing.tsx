@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Animated, Easing, View } from "react-native";
 import { Button, Text } from "react-native-paper";
+import { colors } from "../src/constants/colors";
 import { apiClient } from "../src/services/apiClient";
 
 export default function ProcessingScreen() {
@@ -81,34 +82,34 @@ export default function ProcessingScreen() {
 
   if (error) {
     return (
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-t-bg-primary">
         <View className="flex-1 justify-center items-center px-8">
           <MaterialCommunityIcons
             name="alert-circle-outline"
             size={64}
-            color="#EF4444"
+            color={colors.danger[500]}
           />
           <Text
             variant="headlineSmall"
-            className="text-gray-900 mt-6 font-semibold"
+            className="text-t-text-primary mt-6 font-semibold"
           >
             エラーが発生しました
           </Text>
-          <Text variant="bodyMedium" className="text-red-500 mt-2 text-center">
+          <Text variant="bodyMedium" className="text-t-danger-500 mt-2 text-center">
             {error}
           </Text>
           <View className="mt-8 w-full gap-3">
             <Button
               mode="contained"
               onPress={handleRetry}
-              className="bg-blue-600"
+              className="bg-t-brand-600"
             >
               再度録音する
             </Button>
             <Button
               mode="outlined"
               onPress={handleGoHome}
-              className="border-gray-300"
+              className="border-t-border-primary"
             >
               ホームに戻る
             </Button>
@@ -119,24 +120,24 @@ export default function ProcessingScreen() {
   }
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-t-bg-primary">
       <View className="flex-1 justify-center items-center px-8">
         {/* アイコンとアニメーション */}
         <Animated.View style={{ transform: [{ rotate: spin }] }}>
-          <MaterialCommunityIcons name="loading" size={64} color="#3B82F6" />
+          <MaterialCommunityIcons name="loading" size={64} color={colors.brand[500]} />
         </Animated.View>
 
         {/* ステータステキスト */}
         <Text
           variant="headlineSmall"
-          className="text-gray-900 mt-6 font-semibold"
+          className="text-t-text-primary mt-6 font-semibold"
         >
           {status}
         </Text>
 
         {/* 録音時間 */}
         {duration && (
-          <Text variant="bodyMedium" className="text-gray-500 mt-2">
+          <Text variant="bodyMedium" className="text-t-text-secondary mt-2">
             録音時間: {Math.floor(Number(duration) / 60)}分
             {Number(duration) % 60}秒
           </Text>
@@ -145,7 +146,7 @@ export default function ProcessingScreen() {
         {/* 説明テキスト */}
         <Text
           variant="bodySmall"
-          className="text-gray-400 mt-4 text-center leading-5"
+          className="text-t-text-tertiary mt-4 text-center leading-5"
         >
           AIがメモを生成しています{"\n"}
           しばらくお待ちください
