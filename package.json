@@ -9,7 +9,8 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "generate:api": "swagger-typescript-api generate -p http://localhost:8080/v3/api-docs -o ./src/api/generated -n apiSchema.ts --axios"
+    "generate:api": "swagger-typescript-api generate -p http://localhost:8080/v3/api-docs -o ./src/api/generated -n apiSchema.ts --axios",
+    "generate:colors": "node scripts/generate-colors.js"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
