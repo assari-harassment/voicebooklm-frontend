@@ -10,31 +10,33 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // React Native Paper MD3 カラーパレット
-        primary: {
-          DEFAULT: "#6750A4",
-          container: "#EADDFF",
+        // セマンティックカラー（Figmaデザインベース）
+        // 標準Tailwindカラーへのエイリアス
+        brand: {
+          50: "#eff6ff",
+          100: "#dbeafe",
+          500: "#3b82f6",
+          600: "#2563eb",
+          700: "#1d4ed8",
         },
-        secondary: {
-          DEFAULT: "#625B71",
-          container: "#E8DEF8",
+        accent: {
+          50: "#faf5ff",
+          100: "#f3e8ff",
+          500: "#a855f7",
+          600: "#9333ea",
         },
-        tertiary: {
-          DEFAULT: "#7D5260",
-          container: "#FFD8E4",
+        success: {
+          50: "#f0fdf4",
+          100: "#dcfce7",
+          500: "#22c55e",
+          600: "#16a34a",
         },
-        error: {
-          DEFAULT: "#B3261E",
-          container: "#F9DEDC",
-        },
-        surface: {
-          DEFAULT: "#FFFBFE",
-          variant: "#E7E0EC",
-        },
-        background: "#FFFBFE",
-        outline: {
-          DEFAULT: "#79747E",
-          variant: "#CAC4D0",
+        danger: {
+          50: "#fef2f2",
+          100: "#fee2e2",
+          500: "#ef4444",
+          600: "#dc2626",
+          700: "#b91c1c",
         },
       },
     },
