@@ -1,3 +1,115 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    /* Background */
+    --color-bg-primary: #ffffff;
+    --color-bg-secondary: #f9fafb;    /* gray-50 */
+    --color-bg-tertiary: #f3f4f6;     /* gray-100 */
+
+    /* Text */
+    --color-text-primary: #111827;    /* gray-900 */
+    --color-text-secondary: #6b7280;  /* gray-500 */
+    --color-text-tertiary: #9ca3af;   /* gray-400 */
+    --color-text-inverse: #ffffff;
+
+    /* Border */
+    --color-border-primary: #e5e7eb;  /* gray-200 */
+    --color-border-secondary: #f3f4f6; /* gray-100 */
+
+    /* Brand (Blue) */
+    --color-brand-50: #eff6ff;
+    --color-brand-100: #dbeafe;
+    --color-brand-500: #3b82f6;
+    --color-brand-600: #2563eb;
+    --color-brand-700: #1d4ed8;
+
+    /* Accent (Purple) */
+    --color-accent-50: #faf5ff;
+    --color-accent-100: #f3e8ff;
+    --color-accent-500: #a855f7;
+    --color-accent-600: #9333ea;
+
+    /* Success (Green) */
+    --color-success-50: #f0fdf4;
+    --color-success-100: #dcfce7;
+    --color-success-500: #22c55e;
+    --color-success-600: #16a34a;
+
+    /* Danger (Red) */
+    --color-danger-50: #fef2f2;
+    --color-danger-100: #fee2e2;
+    --color-danger-500: #ef4444;
+    --color-danger-600: #dc2626;
+    --color-danger-700: #b91c1c;
+
+    /* Warning (Orange) */
+    --color-warning-50: #fffbeb;
+    --color-warning-100: #fef3c7;
+    --color-warning-500: #f59e0b;
+    --color-warning-600: #d97706;
+
+    /* Info (Cyan) */
+    --color-info-50: #ecfeff;
+    --color-info-100: #cffafe;
+    --color-info-500: #06b6d4;
+    --color-info-600: #0891b2;
+  }
+
+  .dark {
+    /* Background */
+    --color-bg-primary: #111827;      /* gray-900 */
+    --color-bg-secondary: #1f2937;    /* gray-800 */
+    --color-bg-tertiary: #374151;     /* gray-700 */
+
+    /* Text */
+    --color-text-primary: #f9fafb;    /* gray-50 */
+    --color-text-secondary: #9ca3af;  /* gray-400 */
+    --color-text-tertiary: #6b7280;   /* gray-500 */
+    --color-text-inverse: #111827;    /* gray-900 */
+
+    /* Border */
+    --color-border-primary: #374151;  /* gray-700 */
+    --color-border-secondary: #4b5563; /* gray-600 */
+
+    /* Brand - ダークモードでは少し明るく */
+    --color-brand-50: #1e3a8a;        /* blue-900 */
+    --color-brand-100: #1e40af;       /* blue-800 */
+    --color-brand-500: #60a5fa;       /* blue-400 */
+    --color-brand-600: #3b82f6;       /* blue-500 */
+    --color-brand-700: #2563eb;       /* blue-600 */
+
+    /* Accent */
+    --color-accent-50: #581c87;
+    --color-accent-100: #6b21a8;
+    --color-accent-500: #c084fc;
+    --color-accent-600: #a855f7;
+
+    /* Success */
+    --color-success-50: #14532d;
+    --color-success-100: #166534;
+    --color-success-500: #4ade80;
+    --color-success-600: #22c55e;
+
+    /* Danger */
+    --color-danger-50: #7f1d1d;
+    --color-danger-100: #991b1b;
+    --color-danger-500: #f87171;
+    --color-danger-600: #ef4444;
+    --color-danger-700: #dc2626;
+
+    /* Warning - ダークモードでは少し明るく */
+    --color-warning-50: #78350f;
+    --color-warning-100: #92400e;
+    --color-warning-500: #fbbf24;
+    --color-warning-600: #f59e0b;
+
+    /* Info - ダークモードでは少し明るく */
+    --color-info-50: #164e63;
+    --color-info-100: #155e75;
+    --color-info-500: #22d3ee;
+    --color-info-600: #06b6d4;
+  }
+}
