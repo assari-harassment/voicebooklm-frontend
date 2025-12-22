@@ -20,6 +20,7 @@ import {
   Dialog,
 } from "react-native-paper";
 import type { CreateMemoResponse } from "../../src/api/generated/apiSchema";
+import { colors } from "../../src/constants/colors";
 
 interface NoteData {
   id: string;
@@ -146,42 +147,42 @@ export default function NoteDetailScreen() {
   };
 
   const markdownStyles = {
-    body: { color: "#374151", fontSize: 16, lineHeight: 24 },
+    body: { color: colors.text.primary, fontSize: 16, lineHeight: 24 },
     heading1: {
       fontSize: 24,
       fontWeight: "bold" as const,
       marginVertical: 10,
-      color: "#111827",
+      color: colors.text.primary,
     },
     heading2: {
       fontSize: 20,
       fontWeight: "bold" as const,
       marginVertical: 8,
-      color: "#1F2937",
+      color: colors.text.primary,
     },
     heading3: {
       fontSize: 18,
       fontWeight: "bold" as const,
       marginVertical: 6,
-      color: "#374151",
+      color: colors.text.primary,
     },
     blockquote: {
       borderLeftWidth: 4,
-      borderLeftColor: "#3B82F6",
+      borderLeftColor: colors.brand[500],
       paddingLeft: 10,
       fontStyle: "italic" as const,
-      color: "#4B5563",
+      color: colors.text.secondary,
       marginVertical: 8,
     },
     code_inline: {
-      backgroundColor: "#F3F4F6",
+      backgroundColor: colors.bg.tertiary,
       borderRadius: 4,
       paddingHorizontal: 4,
       paddingVertical: 2,
       fontFamily: "System" as const,
     },
     code_block: {
-      backgroundColor: "#F3F4F6",
+      backgroundColor: colors.bg.tertiary,
       borderRadius: 8,
       padding: 12,
       marginVertical: 8,
@@ -192,7 +193,7 @@ export default function NoteDetailScreen() {
   };
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-t-bg-primary">
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 16, paddingBottom: 32 }}
@@ -203,7 +204,7 @@ export default function NoteDetailScreen() {
             icon="arrow-left"
             size={20}
             onPress={handleGoHome}
-            className="bg-white border border-gray-100"
+            className="bg-t-bg-primary border border-t-border-secondary"
             accessibilityLabel="ホームに戻る"
           />
           <Menu
@@ -214,7 +215,7 @@ export default function NoteDetailScreen() {
                 icon="dots-vertical"
                 size={20}
                 onPress={() => setMenuVisible(true)}
-                className="bg-white border border-gray-100"
+                className="bg-t-bg-primary border border-t-border-secondary"
                 accessibilityLabel="メニュー"
               />
             }
@@ -239,21 +240,21 @@ export default function NoteDetailScreen() {
               onPress={handleDeleteNote}
               title="削除"
               leadingIcon="delete"
-              titleStyle={{ color: "#EF4444" }}
+              titleStyle={{ color: colors.danger[500] }}
             />
           </Menu>
         </View>
 
         {/* タイトル */}
-        <Text variant="headlineMedium" className="font-bold text-gray-900 mb-3">
+        <Text variant="headlineMedium" className="font-bold text-t-text-primary mb-3">
           {note.title}
         </Text>
 
         {/* メタ情報 */}
         <View className="flex-row items-center gap-3 mb-4">
           <View className="flex-row items-center gap-2">
-            <View className="w-1 h-1 rounded-full bg-gray-400" />
-            <Text variant="bodySmall" className="text-gray-500">
+            <View className="w-1 h-1 rounded-full bg-t-text-tertiary" />
+            <Text variant="bodySmall" className="text-t-text-secondary">
               {formatDate(note.date)}
             </Text>
           </View>
@@ -266,8 +267,8 @@ export default function NoteDetailScreen() {
               <Chip
                 key={tag}
                 onClose={() => handleRemoveTag(tag)}
-                className="bg-gray-100"
-                textStyle={{ color: "#374151", fontSize: 14 }}
+                className="bg-t-bg-tertiary"
+                textStyle={{ color: colors.text.primary, fontSize: 14 }}
               >
                 #{tag}
               </Chip>
@@ -286,7 +287,7 @@ export default function NoteDetailScreen() {
                     }
                   }}
                   placeholder="タグ名"
-                  className="px-3 py-2 border border-blue-500 rounded-lg bg-white text-sm min-w-[100px]"
+                  className="px-3 py-2 border border-t-brand-500 rounded-lg bg-t-bg-primary text-sm min-w-[100px]"
                   autoFocus
                 />
               </View>
@@ -294,8 +295,8 @@ export default function NoteDetailScreen() {
               <Chip
                 icon="plus"
                 onPress={() => setIsAddingTag(true)}
-                className="bg-white border border-gray-200 border-dashed"
-                textStyle={{ color: "#6B7280", fontSize: 14 }}
+                className="bg-t-bg-primary border border-t-border-primary border-dashed"
+                textStyle={{ color: colors.text.secondary, fontSize: 14 }}
               >
                 タグを追加
               </Chip>
@@ -308,8 +309,8 @@ export default function NoteDetailScreen() {
           <View className="mb-3">
             <Chip
               icon={showTranscription ? "microphone" : "text-box"}
-              className="self-start bg-blue-50"
-              textStyle={{ color: "#2563EB", fontSize: 12 }}
+              className="self-start bg-t-brand-50"
+              textStyle={{ color: colors.brand[600], fontSize: 12 }}
             >
               {showTranscription ? "文字起こし" : "AI要約"}
             </Chip>
@@ -317,9 +318,9 @@ export default function NoteDetailScreen() {
         )}
 
         {/* 本文（Markdown）または文字起こし */}
-        <Surface className="bg-white rounded-xl p-1" elevation={0}>
+        <Surface className="bg-t-bg-primary rounded-xl p-1" elevation={0}>
           {showTranscription && note.transcription ? (
-            <Text className="text-gray-700 text-base leading-6 p-2">
+            <Text className="text-t-text-primary text-base leading-6 p-2">
               {note.transcription}
             </Text>
           ) : (

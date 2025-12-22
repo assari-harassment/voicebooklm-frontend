@@ -15,6 +15,7 @@ import {
   TextInput,
   TouchableRipple,
 } from "react-native-paper";
+import { colors } from "../src/constants/colors";
 import type { Note, User } from "../src/types";
 
 // サンプルデータ
@@ -64,7 +65,7 @@ type CategoryItem = {
 const folderStructure: CategoryItem[] = [
   {
     category: "Work",
-    color: "#3B82F6",
+    color: colors.brand[500],
     folders: [
       { name: "Projects", indent: 1 },
       { name: "Meetings", indent: 1 },
@@ -73,7 +74,7 @@ const folderStructure: CategoryItem[] = [
   },
   {
     category: "Personal",
-    color: "#A855F7",
+    color: colors.accent[500],
     folders: [
       { name: "Learning", indent: 1 },
       { name: "Ideas", indent: 1 },
@@ -82,7 +83,7 @@ const folderStructure: CategoryItem[] = [
   },
   {
     category: "Archive",
-    color: "#6B7280",
+    color: colors.text.secondary,
     folders: [{ name: "Old Projects", indent: 1 }],
   },
 ];
@@ -179,26 +180,26 @@ export default function HomeScreen() {
   };
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-t-bg-primary">
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 96 }}
         stickyHeaderIndices={[0]}
       >
         {/* Header - Sticky */}
-        <View className="flex-row items-center justify-between px-4 py-3 bg-white">
+        <View className="flex-row items-center justify-between px-4 py-3 bg-t-bg-primary">
           <TouchableRipple
             onPress={handleAccountClick}
             className="rounded-lg"
             borderless
           >
-            <View className="flex-row items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg">
+            <View className="flex-row items-center gap-2 px-3 py-2 bg-t-bg-secondary rounded-lg">
               <MaterialCommunityIcons
                 name="account-circle"
                 size={24}
-                color="#6B7280"
+                color={colors.text.secondary}
               />
-              <Text variant="titleSmall" className="text-gray-900 font-medium">
+              <Text variant="titleSmall" className="text-t-text-primary font-medium">
                 {user?.name || "Workspace"}
               </Text>
             </View>
@@ -207,7 +208,7 @@ export default function HomeScreen() {
             icon="magnify"
             size={24}
             onPress={handleSearchClick}
-            className="bg-white border border-gray-100"
+            className="bg-t-bg-primary border border-t-border-secondary"
             accessibilityLabel="検索"
           />
         </View>
@@ -215,8 +216,8 @@ export default function HomeScreen() {
         {/* 最近のメモ */}
         <View className="px-4 mb-6">
           <View className="flex-row items-center gap-2 mb-3">
-            <View className="w-1 h-5 rounded-sm bg-blue-500" />
-            <Text variant="titleMedium" className="font-bold text-gray-900">
+            <View className="w-1 h-5 rounded-sm bg-t-brand-500" />
+            <Text variant="titleMedium" className="font-bold text-t-text-primary">
               最近のメモ
             </Text>
           </View>
@@ -224,7 +225,7 @@ export default function HomeScreen() {
             {recentNotes.map((note) => (
               <Surface
                 key={note.id}
-                className="rounded-xl bg-white flex-row items-center"
+                className="rounded-xl bg-t-bg-primary flex-row items-center"
                 elevation={1}
               >
                 <TouchableRipple
@@ -236,14 +237,14 @@ export default function HomeScreen() {
                     <View className="flex-1">
                       <Text
                         variant="titleSmall"
-                        className="text-gray-900 font-medium mb-1"
+                        className="text-t-text-primary font-medium mb-1"
                         numberOfLines={1}
                       >
                         {note.title}
                       </Text>
                       <View className="flex-row items-center gap-2">
-                        <View className="w-1 h-1 rounded-full bg-gray-400" />
-                        <Text variant="bodySmall" className="text-gray-500">
+                        <View className="w-1 h-1 rounded-full bg-t-text-tertiary" />
+                        <Text variant="bodySmall" className="text-t-text-secondary">
                           {formatDate(note.date)}
                         </Text>
                       </View>
@@ -251,7 +252,7 @@ export default function HomeScreen() {
                     <MaterialCommunityIcons
                       name="chevron-right"
                       size={20}
-                      color="#9CA3AF"
+                      color={colors.text.tertiary}
                     />
                   </View>
                 </TouchableRipple>
@@ -277,7 +278,7 @@ export default function HomeScreen() {
                     onPress={() => handleDeleteNote(note.id)}
                     title="削除"
                     leadingIcon="delete"
-                    titleStyle={{ color: "#EF4444" }}
+                    titleStyle={{ color: colors.danger[500] }}
                   />
                 </Menu>
               </Surface>
@@ -288,8 +289,8 @@ export default function HomeScreen() {
         {/* フォルダ一覧 */}
         <View className="px-4 mb-6">
           <View className="flex-row items-center gap-2 mb-3">
-            <View className="w-1 h-5 rounded-sm bg-green-500" />
-            <Text variant="titleMedium" className="font-bold text-gray-900">
+            <View className="w-1 h-5 rounded-sm bg-t-success-500" />
+            <Text variant="titleMedium" className="font-bold text-t-text-primary">
               フォルダ
             </Text>
           </View>
@@ -308,14 +309,14 @@ export default function HomeScreen() {
                           : "chevron-right"
                       }
                       size={18}
-                      color="#6B7280"
+                      color={colors.text.secondary}
                     />
                     <MaterialCommunityIcons
                       name="folder"
                       size={20}
-                      color="#6B7280"
+                      color={colors.text.secondary}
                     />
-                    <Text variant="bodyMedium" className="text-gray-700 font-medium">
+                    <Text variant="bodyMedium" className="text-t-text-primary font-medium">
                       {category.category}
                     </Text>
                   </View>
@@ -333,17 +334,17 @@ export default function HomeScreen() {
                           <MaterialCommunityIcons
                             name="file-document-outline"
                             size={18}
-                            color="#9CA3AF"
+                            color={colors.text.tertiary}
                           />
                           <Text
                             variant="bodyMedium"
-                            className="text-gray-600"
+                            className="text-t-text-secondary"
                             numberOfLines={1}
                           >
                             {folder.name}
                           </Text>
                         </View>
-                        <Text variant="bodySmall" className="text-gray-400">
+                        <Text variant="bodySmall" className="text-t-text-tertiary">
                           {getFolderCount(folder.name)}
                         </Text>
                       </View>
@@ -382,7 +383,8 @@ export default function HomeScreen() {
       {/* 録音ボタン (FAB) */}
       <FAB
         icon="microphone"
-        className="absolute bottom-6 self-center bg-blue-600 rounded-3xl"
+        color={colors.text.inverse}
+        className="absolute bottom-6 self-center bg-t-brand-600 rounded-3xl"
         onPress={() => router.push("/record")}
         accessibilityLabel="録音を開始"
       />

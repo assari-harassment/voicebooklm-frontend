@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Alert, Animated, View } from "react-native";
 import { Button, IconButton, Surface, Text } from "react-native-paper";
+import { colors } from "../src/constants/colors";
 import { audioRecorderService } from "../src/services/audioRecorder";
 
 const BAR_WIDTH = 3;
@@ -167,8 +168,8 @@ export default function RecordScreen() {
 
   if (error) {
     return (
-      <View className="flex-1 bg-gray-50 justify-center items-center p-5">
-        <Text variant="bodyLarge" className="text-red-500 mb-5 text-center">
+      <View className="flex-1 bg-t-bg-secondary justify-center items-center p-5">
+        <Text variant="bodyLarge" className="text-t-danger-500 mb-5 text-center">
           {error}
         </Text>
         <Button mode="contained" onPress={() => router.back()}>
@@ -179,19 +180,19 @@ export default function RecordScreen() {
   }
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View className="flex-1 bg-t-bg-secondary">
       {/* ヘッダー */}
-      <Surface className="flex-row justify-between items-center px-2 py-2 bg-white" elevation={0}>
+      <Surface className="flex-row justify-between items-center px-2 py-2 bg-t-bg-primary" elevation={0}>
         <IconButton
           icon="arrow-left"
           size={20}
           onPress={handleCancel}
-          className="bg-white border border-gray-100"
+          className="bg-t-bg-primary border border-t-border-secondary"
           accessibilityLabel="戻る"
         />
-        <View className="flex-row items-center px-3 py-2 bg-red-50 rounded-xl border border-red-100">
-          <View className="w-2 h-2 rounded-full bg-red-500" />
-          <Text variant="labelLarge" className="text-red-700 ml-2">
+        <View className="flex-row items-center px-3 py-2 bg-t-danger-50 rounded-xl border border-t-danger-100">
+          <View className="w-2 h-2 rounded-full bg-t-danger-500" />
+          <Text variant="labelLarge" className="text-t-danger-700 ml-2">
             {formatTime(duration)}
           </Text>
         </View>
@@ -200,7 +201,7 @@ export default function RecordScreen() {
 
       {/* 波形表示エリア */}
       <View className="px-4 pt-4">
-        <Surface className="bg-white rounded-2xl p-4 overflow-hidden" elevation={1}>
+        <Surface className="bg-t-bg-primary rounded-2xl p-4 overflow-hidden" elevation={1}>
           <View
             className="h-[120px] flex-row items-center overflow-hidden"
             style={{ width: VISIBLE_BARS * BAR_TOTAL_WIDTH }}
@@ -226,7 +227,7 @@ export default function RecordScreen() {
                     marginHorizontal: BAR_MARGIN,
                     height: Math.max(4, height),
                     opacity: isPaused ? 0.5 : 0.9,
-                    backgroundColor: isPaused ? "#6B7280" : "#3B82F6",
+                    backgroundColor: isPaused ? colors.text.secondary : colors.brand[500],
                     borderRadius: 2,
                   }}
                 />
@@ -238,9 +239,9 @@ export default function RecordScreen() {
           <View className="flex-row items-center justify-center mt-3">
             <View
               className="w-1.5 h-1.5 rounded-full"
-              style={{ backgroundColor: isPaused ? "#6B7280" : "#EF4444" }}
+              style={{ backgroundColor: isPaused ? colors.text.secondary : colors.danger[500] }}
             />
-            <Text variant="bodySmall" className="text-gray-500 ml-1.5">
+            <Text variant="bodySmall" className="text-t-text-secondary ml-1.5">
               {isPaused ? "一時停止中" : "録音中"}
             </Text>
           </View>
@@ -251,18 +252,18 @@ export default function RecordScreen() {
       <View className="flex-1" />
 
       {/* コントロール */}
-      <Surface className="flex-row items-center px-4 py-4 bg-white border-t border-gray-100" elevation={0}>
+      <Surface className="flex-row items-center px-4 py-4 bg-t-bg-primary border-t border-t-border-secondary" elevation={0}>
         <IconButton
           icon={isPaused ? "play" : "pause"}
           size={24}
           onPress={handleTogglePause}
-          className="bg-gray-100 rounded-xl"
-          iconColor="#374151"
+          className="bg-t-bg-tertiary rounded-xl"
+          iconColor={colors.text.primary}
         />
         <Button
           mode="contained"
           onPress={handleComplete}
-          className="flex-1 ml-3 rounded-xl bg-blue-600"
+          className="flex-1 ml-3 rounded-xl bg-t-brand-600"
           contentStyle={{ paddingVertical: 6 }}
           labelStyle={{ fontSize: 16, fontWeight: "bold" }}
         >

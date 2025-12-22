@@ -10,6 +10,8 @@ import { useState } from "react";
 import { Alert, ScrollView, View } from "react-native";
 import { ActivityIndicator, Button, Surface, Text } from "react-native-paper";
 import type { TokenResponse } from "../src/api/generated/apiSchema";
+import { GoogleLogo } from "../src/components/GoogleLogo";
+import { colors } from "../src/constants/colors";
 import { apiClient } from "../src/services/apiClient";
 
 // Google Sign-In を初期化
@@ -30,22 +32,22 @@ const features: FeatureItem[] = [
     icon: "microphone",
     title: "簡単な音声入力",
     description: "ボタン一つで録音開始",
-    color: "#2563EB",
-    backgroundColor: "#DBEAFE",
+    color: colors.brand[600],
+    backgroundColor: colors.brand[100],
   },
   {
     icon: "auto-fix",
     title: "自動文字起こし",
     description: "AIが音声をテキスト化",
-    color: "#9333EA",
-    backgroundColor: "#F3E8FF",
+    color: colors.accent[600],
+    backgroundColor: colors.accent[100],
   },
   {
     icon: "note-text",
     title: "スマートな整理",
     description: "AIがタグとフォルダを作成",
-    color: "#16A34A",
-    backgroundColor: "#DCFCE7",
+    color: colors.success[600],
+    backgroundColor: colors.success[100],
   },
 ];
 
@@ -119,22 +121,33 @@ export default function LoginScreen() {
   return (
     <ScrollView
       contentContainerStyle={{ flexGrow: 1 }}
-      className="flex-1 bg-white"
+      className="flex-1 bg-t-bg-primary"
     >
       <View className="flex-1 justify-center items-center px-6 py-12">
         {/* Logo / Brand */}
         <View className="items-center mb-12">
-          <Surface className="w-20 h-20 rounded-3xl bg-blue-600 justify-center items-center mb-6">
+          <Surface
+            elevation={0}
+            style={{
+              width: 80,
+              height: 80,
+              borderRadius: 24,
+              backgroundColor: colors.brand[600],
+              justifyContent: "center",
+              alignItems: "center",
+              marginBottom: 24,
+            }}
+          >
             <MaterialCommunityIcons
               name="microphone"
               size={40}
-              color="#FFFFFF"
+              color={colors.text.inverse}
             />
           </Surface>
-          <Text variant="headlineLarge" className="font-bold text-gray-900 mb-2">
+          <Text variant="headlineLarge" className="font-bold text-t-text-primary mb-2">
             VoiceBookLM
           </Text>
-          <Text variant="bodyLarge" className="text-gray-500">
+          <Text variant="bodyLarge" className="text-t-text-secondary">
             音声からアイデアを記録
           </Text>
         </View>
@@ -156,11 +169,11 @@ export default function LoginScreen() {
               <View className="flex-1">
                 <Text
                   variant="titleMedium"
-                  className="font-bold text-gray-900 mb-0.5"
+                  className="font-bold text-t-text-primary mb-0.5"
                 >
                   {feature.title}
                 </Text>
-                <Text variant="bodyMedium" className="text-gray-500">
+                <Text variant="bodyMedium" className="text-t-text-secondary">
                   {feature.description}
                 </Text>
               </View>
@@ -174,10 +187,10 @@ export default function LoginScreen() {
             mode="outlined"
             onPress={handleGoogleSignIn}
             disabled={isLoading}
-            icon={isLoading ? undefined : "google"}
+            icon={isLoading ? undefined : () => <GoogleLogo size={20} />}
             contentStyle={{ paddingVertical: 8 }}
-            className="rounded-xl border-gray-200"
-            labelStyle={{ color: "#111827", fontWeight: "500", fontSize: 16 }}
+            className="rounded-xl border-t-border-primary"
+            labelStyle={{ color: colors.text.primary, fontWeight: "500", fontSize: 16 }}
           >
             {isLoading ? (
               <ActivityIndicator animating={true} size="small" />
@@ -188,11 +201,11 @@ export default function LoginScreen() {
 
           <Text
             variant="bodySmall"
-            className="text-center text-gray-500 mt-6 px-4 leading-5"
+            className="text-center text-t-text-secondary mt-6 px-4 leading-5"
           >
             ログインすることで、
-            <Text className="text-blue-600 font-medium">利用規約</Text>と
-            <Text className="text-blue-600 font-medium">プライバシーポリシー</Text>
+            <Text className="text-t-brand-600 font-medium">利用規約</Text>と
+            <Text className="text-t-brand-600 font-medium">プライバシーポリシー</Text>
             に同意したものとみなされます
           </Text>
         </View>
