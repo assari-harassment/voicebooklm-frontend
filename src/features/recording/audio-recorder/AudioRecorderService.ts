@@ -1,10 +1,11 @@
-import { AudioContext, AudioRecorder, AudioManager } from 'react-native-audio-api';
 import { File } from 'expo-file-system';
+import { AudioContext, AudioManager, AudioRecorder } from 'react-native-audio-api';
 
 // Google Speech to Text推奨設定: LINEAR16, 16kHz, mono
 const SAMPLE_RATE = 16000;
 const BUFFER_LENGTH_IN_SAMPLES = SAMPLE_RATE; // 1秒分のバッファ
 
+// 型定義
 export interface RecordingResult {
   filePath: string;
   duration: number;
@@ -16,6 +17,7 @@ export interface AudioLevel {
 
 type AudioLevelCallback = (data: AudioLevel) => void;
 
+// サービスクラス
 class AudioRecorderService {
   private audioContext: AudioContext | null = null;
   private recorder: AudioRecorder | null = null;
@@ -229,12 +231,12 @@ class AudioRecorderService {
     view.setUint32(40, dataSize, true);
 
     // PCMデータを書き込み（Float32 → Int16変換）
-    let offset = 44;
+    let writeOffset = 44;
     for (let i = 0; i < samples.length; i++) {
       const sample = Math.max(-1, Math.min(1, samples[i]));
       const int16Sample = sample < 0 ? sample * 0x8000 : sample * 0x7fff;
-      view.setInt16(offset, int16Sample, true);
-      offset += 2;
+      view.setInt16(writeOffset, int16Sample, true);
+      writeOffset += 2;
     }
 
     return buffer;

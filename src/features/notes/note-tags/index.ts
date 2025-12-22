@@ -1,0 +1,1 @@
+export { NoteTags } from './NoteTags';

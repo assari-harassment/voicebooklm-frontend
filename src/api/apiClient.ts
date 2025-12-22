@@ -1,5 +1,5 @@
 import axios, { isAxiosError } from 'axios';
-import { Api, CreateMemoResponse, TokenResponse } from '../api/generated/apiSchema';
+import { Api, CreateMemoResponse, TokenResponse } from './generated/apiSchema';
 import { File } from 'expo-file-system';
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8080';
