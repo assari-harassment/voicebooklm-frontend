@@ -11,8 +11,9 @@
 const fs = require('fs');
 const path = require('path');
 
-const globalCssPath = path.join(__dirname, '..', 'global.css');
-const colorsOutputPath = path.join(__dirname, '..', 'src', 'constants', 'colors.ts');
+const rootDir = process.cwd();
+const globalCssPath = path.join(rootDir, 'global.css');
+const colorsOutputPath = path.join(rootDir, 'src', 'shared', 'constants', 'colors.ts');
 
 // global.css を読み込み
 const cssContent = fs.readFileSync(globalCssPath, 'utf-8');
@@ -111,7 +112,7 @@ export type Colors = typeof colors;
 
 // ファイルを書き出し
 fs.writeFileSync(colorsOutputPath, tsContent);
-console.log('✅ Generated: src/constants/colors.ts');
+console.log('✅ Generated: src/shared/constants/colors.ts');
 console.log('   Source: global.css :root section');
 console.log('');
 console.log('Parsed colors:');
