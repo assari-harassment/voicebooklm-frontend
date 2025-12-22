@@ -8,6 +8,7 @@
 | 言語 | TypeScript 5.9 |
 | ルーティング | Expo Router |
 | UI | React Native Paper |
+| スタイリング | NativeWind (Tailwind CSS for RN) |
 | ナビゲーション | React Navigation |
 | 音声 | react-native-audio-api |
 | HTTP | Axios |

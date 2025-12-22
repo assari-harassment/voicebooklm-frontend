@@ -1,7 +1,7 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Animated, Easing, StyleSheet, View } from "react-native";
+import { Animated, Easing, View } from "react-native";
 import { Button, Text } from "react-native-paper";
 import { apiClient } from "../src/services/apiClient";
 
@@ -81,28 +81,35 @@ export default function ProcessingScreen() {
 
   if (error) {
     return (
-      <View style={styles.container}>
-        <View style={styles.content}>
+      <View className="flex-1 bg-white">
+        <View className="flex-1 justify-center items-center px-8">
           <MaterialCommunityIcons
             name="alert-circle-outline"
             size={64}
             color="#EF4444"
           />
-          <Text variant="headlineSmall" style={styles.errorTitle}>
+          <Text
+            variant="headlineSmall"
+            className="text-gray-900 mt-6 font-semibold"
+          >
             エラーが発生しました
           </Text>
-          <Text variant="bodyMedium" style={styles.errorText}>
+          <Text variant="bodyMedium" className="text-red-500 mt-2 text-center">
             {error}
           </Text>
-          <View style={styles.buttonContainer}>
+          <View className="mt-8 w-full gap-3">
             <Button
               mode="contained"
               onPress={handleRetry}
-              style={styles.retryButton}
+              className="bg-blue-600"
             >
               再度録音する
             </Button>
-            <Button mode="outlined" onPress={handleGoHome} style={styles.homeButton}>
+            <Button
+              mode="outlined"
+              onPress={handleGoHome}
+              className="border-gray-300"
+            >
               ホームに戻る
             </Button>
           </View>
@@ -112,28 +119,34 @@ export default function ProcessingScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
+    <View className="flex-1 bg-white">
+      <View className="flex-1 justify-center items-center px-8">
         {/* アイコンとアニメーション */}
         <Animated.View style={{ transform: [{ rotate: spin }] }}>
           <MaterialCommunityIcons name="loading" size={64} color="#3B82F6" />
         </Animated.View>
 
         {/* ステータステキスト */}
-        <Text variant="headlineSmall" style={styles.statusText}>
+        <Text
+          variant="headlineSmall"
+          className="text-gray-900 mt-6 font-semibold"
+        >
           {status}
         </Text>
 
         {/* 録音時間 */}
         {duration && (
-          <Text variant="bodyMedium" style={styles.durationText}>
+          <Text variant="bodyMedium" className="text-gray-500 mt-2">
             録音時間: {Math.floor(Number(duration) / 60)}分
             {Number(duration) % 60}秒
           </Text>
         )}
 
         {/* 説明テキスト */}
-        <Text variant="bodySmall" style={styles.descriptionText}>
+        <Text
+          variant="bodySmall"
+          className="text-gray-400 mt-4 text-center leading-5"
+        >
           AIがメモを生成しています{"\n"}
           しばらくお待ちください
         </Text>
@@ -141,52 +154,3 @@ export default function ProcessingScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-  },
-  content: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 32,
-  },
-  statusText: {
-    color: "#111827",
-    marginTop: 24,
-    fontWeight: "600",
-  },
-  durationText: {
-    color: "#6B7280",
-    marginTop: 8,
-  },
-  descriptionText: {
-    color: "#9CA3AF",
-    marginTop: 16,
-    textAlign: "center",
-    lineHeight: 20,
-  },
-  errorTitle: {
-    color: "#111827",
-    marginTop: 24,
-    fontWeight: "600",
-  },
-  errorText: {
-    color: "#EF4444",
-    marginTop: 8,
-    textAlign: "center",
-  },
-  buttonContainer: {
-    marginTop: 32,
-    width: "100%",
-    gap: 12,
-  },
-  retryButton: {
-    backgroundColor: "#2563EB",
-  },
-  homeButton: {
-    borderColor: "#D1D5DB",
-  },
-});

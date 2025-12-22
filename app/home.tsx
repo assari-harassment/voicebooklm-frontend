@@ -1,7 +1,7 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Alert, ScrollView, StyleSheet, View } from "react-native";
+import { Alert, ScrollView, View } from "react-native";
 import {
   Button,
   Dialog,
@@ -179,26 +179,26 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-white">
       <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 96 }}
         stickyHeaderIndices={[0]}
       >
         {/* Header - Sticky */}
-        <View style={styles.header}>
+        <View className="flex-row items-center justify-between px-4 py-3 bg-white">
           <TouchableRipple
             onPress={handleAccountClick}
-            style={styles.accountButton}
+            className="rounded-lg"
             borderless
           >
-            <View style={styles.accountContent}>
+            <View className="flex-row items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg">
               <MaterialCommunityIcons
                 name="account-circle"
                 size={24}
                 color="#6B7280"
               />
-              <Text variant="titleSmall" style={styles.accountName}>
+              <Text variant="titleSmall" className="text-gray-900 font-medium">
                 {user?.name || "Workspace"}
               </Text>
             </View>
@@ -207,39 +207,43 @@ export default function HomeScreen() {
             icon="magnify"
             size={24}
             onPress={handleSearchClick}
-            style={styles.searchButton}
+            className="bg-white border border-gray-100"
             accessibilityLabel="検索"
           />
         </View>
 
         {/* 最近のメモ */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <View style={[styles.sectionIndicator, { backgroundColor: "#3B82F6" }]} />
-            <Text variant="titleMedium" style={styles.sectionTitle}>
+        <View className="px-4 mb-6">
+          <View className="flex-row items-center gap-2 mb-3">
+            <View className="w-1 h-5 rounded-sm bg-blue-500" />
+            <Text variant="titleMedium" className="font-bold text-gray-900">
               最近のメモ
             </Text>
           </View>
-          <View style={styles.notesList}>
+          <View className="gap-2">
             {recentNotes.map((note) => (
-              <Surface key={note.id} style={styles.noteCard} elevation={1}>
+              <Surface
+                key={note.id}
+                className="rounded-xl bg-white flex-row items-center"
+                elevation={1}
+              >
                 <TouchableRipple
                   onPress={() => handleNoteClick(note.id)}
-                  style={styles.noteContent}
+                  className="flex-1 p-3 rounded-xl"
                   borderless
                 >
-                  <View style={styles.noteInner}>
-                    <View style={styles.noteInfo}>
+                  <View className="flex-row items-center justify-between">
+                    <View className="flex-1">
                       <Text
                         variant="titleSmall"
-                        style={styles.noteTitle}
+                        className="text-gray-900 font-medium mb-1"
                         numberOfLines={1}
                       >
                         {note.title}
                       </Text>
-                      <View style={styles.noteMeta}>
-                        <View style={styles.dateDot} />
-                        <Text variant="bodySmall" style={styles.noteDate}>
+                      <View className="flex-row items-center gap-2">
+                        <View className="w-1 h-1 rounded-full bg-gray-400" />
+                        <Text variant="bodySmall" className="text-gray-500">
                           {formatDate(note.date)}
                         </Text>
                       </View>
@@ -259,7 +263,7 @@ export default function HomeScreen() {
                       icon="dots-vertical"
                       size={18}
                       onPress={() => setMenuVisible(note.id)}
-                      style={styles.menuButton}
+                      className="m-0"
                     />
                   }
                 >
@@ -273,7 +277,7 @@ export default function HomeScreen() {
                     onPress={() => handleDeleteNote(note.id)}
                     title="削除"
                     leadingIcon="delete"
-                    titleStyle={styles.deleteText}
+                    titleStyle={{ color: "#EF4444" }}
                   />
                 </Menu>
               </Surface>
@@ -282,21 +286,21 @@ export default function HomeScreen() {
         </View>
 
         {/* フォルダ一覧 */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <View style={[styles.sectionIndicator, { backgroundColor: "#22C55E" }]} />
-            <Text variant="titleMedium" style={styles.sectionTitle}>
+        <View className="px-4 mb-6">
+          <View className="flex-row items-center gap-2 mb-3">
+            <View className="w-1 h-5 rounded-sm bg-green-500" />
+            <Text variant="titleMedium" className="font-bold text-gray-900">
               フォルダ
             </Text>
           </View>
-          <View style={styles.folderList}>
+          <View>
             {folderStructure.map((category) => (
               <View key={category.category}>
                 <TouchableRipple
                   onPress={() => toggleCategory(category.category)}
-                  style={styles.categoryItem}
+                  className="px-3 py-3 rounded-lg"
                 >
-                  <View style={styles.categoryContent}>
+                  <View className="flex-row items-center gap-2">
                     <MaterialCommunityIcons
                       name={
                         expandedCategories[category.category]
@@ -311,7 +315,7 @@ export default function HomeScreen() {
                       size={20}
                       color="#6B7280"
                     />
-                    <Text variant="bodyMedium" style={styles.categoryName}>
+                    <Text variant="bodyMedium" className="text-gray-700 font-medium">
                       {category.category}
                     </Text>
                   </View>
@@ -322,10 +326,10 @@ export default function HomeScreen() {
                     <TouchableRipple
                       key={folder.name}
                       onPress={() => handleFolderClick(folder.name)}
-                      style={styles.folderItem}
+                      className="ml-6 px-3 py-3 rounded-lg"
                     >
-                      <View style={styles.folderContent}>
-                        <View style={styles.folderInfo}>
+                      <View className="flex-row items-center justify-between">
+                        <View className="flex-row items-center gap-2 flex-1">
                           <MaterialCommunityIcons
                             name="file-document-outline"
                             size={18}
@@ -333,13 +337,13 @@ export default function HomeScreen() {
                           />
                           <Text
                             variant="bodyMedium"
-                            style={styles.folderName}
+                            className="text-gray-600"
                             numberOfLines={1}
                           >
                             {folder.name}
                           </Text>
                         </View>
-                        <Text variant="bodySmall" style={styles.folderCount}>
+                        <Text variant="bodySmall" className="text-gray-400">
                           {getFolderCount(folder.name)}
                         </Text>
                       </View>
@@ -378,165 +382,10 @@ export default function HomeScreen() {
       {/* 録音ボタン (FAB) */}
       <FAB
         icon="microphone"
-        style={styles.fab}
+        className="absolute bottom-6 self-center bg-blue-600 rounded-3xl"
         onPress={() => router.push("/record")}
         accessibilityLabel="録音を開始"
       />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 96,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: "#FFFFFF",
-  },
-  accountButton: {
-    borderRadius: 8,
-  },
-  accountContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    backgroundColor: "#F9FAFB",
-    borderRadius: 8,
-  },
-  accountName: {
-    color: "#111827",
-    fontWeight: "500",
-  },
-  searchButton: {
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#F3F4F6",
-  },
-  section: {
-    paddingHorizontal: 16,
-    marginBottom: 24,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 12,
-  },
-  sectionIndicator: {
-    width: 4,
-    height: 20,
-    borderRadius: 2,
-  },
-  sectionTitle: {
-    fontWeight: "bold",
-    color: "#111827",
-  },
-  notesList: {
-    gap: 8,
-  },
-  noteCard: {
-    borderRadius: 12,
-    backgroundColor: "#FFFFFF",
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  noteContent: {
-    flex: 1,
-    padding: 12,
-    borderRadius: 12,
-  },
-  noteInner: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  noteInfo: {
-    flex: 1,
-  },
-  noteTitle: {
-    color: "#111827",
-    fontWeight: "500",
-    marginBottom: 4,
-  },
-  noteMeta: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  dateDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: "#9CA3AF",
-  },
-  noteDate: {
-    color: "#6B7280",
-  },
-  menuButton: {
-    margin: 0,
-  },
-  deleteText: {
-    color: "#EF4444",
-  },
-  folderList: {
-    gap: 0,
-  },
-  categoryItem: {
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  categoryContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  categoryName: {
-    color: "#374151",
-    fontWeight: "500",
-  },
-  folderItem: {
-    marginLeft: 24,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  folderContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  folderInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    flex: 1,
-  },
-  folderName: {
-    color: "#4B5563",
-  },
-  folderCount: {
-    color: "#9CA3AF",
-  },
-  fab: {
-    position: "absolute",
-    bottom: 24,
-    alignSelf: "center",
-    backgroundColor: "#2563EB",
-    borderRadius: 28,
-  },
-});
