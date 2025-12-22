@@ -120,13 +120,15 @@ import type {
   AxiosResponse,
   HeadersDefaults,
   ResponseType,
-} from "axios";
-import axios from "axios";
+} from 'axios';
+import axios from 'axios';
 
 export type QueryParamsType = Record<string | number, any>;
 
-export interface FullRequestParams
-  extends Omit<AxiosRequestConfig, "data" | "params" | "url" | "responseType"> {
+export interface FullRequestParams extends Omit<
+  AxiosRequestConfig,
+  'data' | 'params' | 'url' | 'responseType'
+> {
   /** set parameter to `true` for call `securityWorker` for this request */
   secure?: boolean;
   /** request path */
@@ -141,32 +143,31 @@ export interface FullRequestParams
   body?: unknown;
 }
 
-export type RequestParams = Omit<
-  FullRequestParams,
-  "body" | "method" | "query" | "path"
->;
+export type RequestParams = Omit<FullRequestParams, 'body' | 'method' | 'query' | 'path'>;
 
-export interface ApiConfig<SecurityDataType = unknown>
-  extends Omit<AxiosRequestConfig, "data" | "cancelToken"> {
+export interface ApiConfig<SecurityDataType = unknown> extends Omit<
+  AxiosRequestConfig,
+  'data' | 'cancelToken'
+> {
   securityWorker?: (
-    securityData: SecurityDataType | null,
+    securityData: SecurityDataType | null
   ) => Promise<AxiosRequestConfig | void> | AxiosRequestConfig | void;
   secure?: boolean;
   format?: ResponseType;
 }
 
 export enum ContentType {
-  Json = "application/json",
-  JsonApi = "application/vnd.api+json",
-  FormData = "multipart/form-data",
-  UrlEncoded = "application/x-www-form-urlencoded",
-  Text = "text/plain",
+  Json = 'application/json',
+  JsonApi = 'application/vnd.api+json',
+  FormData = 'multipart/form-data',
+  UrlEncoded = 'application/x-www-form-urlencoded',
+  Text = 'text/plain',
 }
 
 export class HttpClient<SecurityDataType = unknown> {
   public instance: AxiosInstance;
   private securityData: SecurityDataType | null = null;
-  private securityWorker?: ApiConfig<SecurityDataType>["securityWorker"];
+  private securityWorker?: ApiConfig<SecurityDataType>['securityWorker'];
   private secure?: boolean;
   private format?: ResponseType;
 
@@ -178,7 +179,7 @@ export class HttpClient<SecurityDataType = unknown> {
   }: ApiConfig<SecurityDataType> = {}) {
     this.instance = axios.create({
       ...axiosConfig,
-      baseURL: axiosConfig.baseURL || "http://localhost:8080",
+      baseURL: axiosConfig.baseURL || 'http://localhost:8080',
     });
     this.secure = secure;
     this.format = format;
@@ -191,7 +192,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
   protected mergeRequestParams(
     params1: AxiosRequestConfig,
-    params2?: AxiosRequestConfig,
+    params2?: AxiosRequestConfig
   ): AxiosRequestConfig {
     const method = params1.method || (params2 && params2.method);
 
@@ -201,9 +202,7 @@ export class HttpClient<SecurityDataType = unknown> {
       ...(params2 || {}),
       headers: {
         ...((method &&
-          this.instance.defaults.headers[
-            method.toLowerCase() as keyof HeadersDefaults
-          ]) ||
+          this.instance.defaults.headers[method.toLowerCase() as keyof HeadersDefaults]) ||
           {}),
         ...(params1.headers || {}),
         ...((params2 && params2.headers) || {}),
@@ -212,7 +211,7 @@ export class HttpClient<SecurityDataType = unknown> {
   }
 
   protected stringifyFormItem(formItem: unknown) {
-    if (typeof formItem === "object" && formItem !== null) {
+    if (typeof formItem === 'object' && formItem !== null) {
       return JSON.stringify(formItem);
     } else {
       return `${formItem}`;
@@ -225,15 +224,11 @@ export class HttpClient<SecurityDataType = unknown> {
     }
     return Object.keys(input || {}).reduce((formData, key) => {
       const property = input[key];
-      const propertyContent: any[] =
-        property instanceof Array ? property : [property];
+      const propertyContent: any[] = property instanceof Array ? property : [property];
 
       for (const formItem of propertyContent) {
         const isFileType = formItem instanceof Blob || formItem instanceof File;
-        formData.append(
-          key,
-          isFileType ? formItem : this.stringifyFormItem(formItem),
-        );
+        formData.append(key, isFileType ? formItem : this.stringifyFormItem(formItem));
       }
 
       return formData;
@@ -250,28 +245,18 @@ export class HttpClient<SecurityDataType = unknown> {
     ...params
   }: FullRequestParams): Promise<AxiosResponse<T>> => {
     const secureParams =
-      ((typeof secure === "boolean" ? secure : this.secure) &&
+      ((typeof secure === 'boolean' ? secure : this.secure) &&
         this.securityWorker &&
         (await this.securityWorker(this.securityData))) ||
       {};
     const requestParams = this.mergeRequestParams(params, secureParams);
     const responseFormat = format || this.format || undefined;
 
-    if (
-      type === ContentType.FormData &&
-      body &&
-      body !== null &&
-      typeof body === "object"
-    ) {
+    if (type === ContentType.FormData && body && body !== null && typeof body === 'object') {
       body = this.createFormData(body as Record<string, unknown>);
     }
 
-    if (
-      type === ContentType.Text &&
-      body &&
-      body !== null &&
-      typeof body !== "string"
-    ) {
+    if (type === ContentType.Text && body && body !== null && typeof body !== 'string') {
       body = JSON.stringify(body);
     }
 
@@ -279,7 +264,7 @@ export class HttpClient<SecurityDataType = unknown> {
       ...requestParams,
       headers: {
         ...(requestParams.headers || {}),
-        ...(type ? { "Content-Type": type } : {}),
+        ...(type ? { 'Content-Type': type } : {}),
       },
       params: query,
       responseType: responseFormat,
@@ -309,9 +294,7 @@ export class HttpClient<SecurityDataType = unknown> {
  * - JWT トークン認証
  * - TypeScript 型定義の生成が可能
  */
-export class Api<
-  SecurityDataType extends unknown,
-> extends HttpClient<SecurityDataType> {
+export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
   api = {
     /**
      * @description multipart/form-data で音声ファイルをアップロードし、文字起こし→AI整形→保存を行う。60秒以内のレスポンスを想定。
@@ -330,16 +313,16 @@ export class Api<
       query?: {
         language?: string;
       },
-      params: RequestParams = {},
+      params: RequestParams = {}
     ) =>
       this.request<CreateMemoResponse, ErrorResponse>({
         path: `/api/voice/memos`,
-        method: "POST",
+        method: 'POST',
         query: query,
         body: data,
         secure: true,
         type: ContentType.FormData,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -355,7 +338,7 @@ export class Api<
     refreshToken: (data: RefreshTokenRequest, params: RequestParams = {}) =>
       this.request<TokenResponse, ErrorResponse>({
         path: `/api/auth/refresh`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -374,7 +357,7 @@ export class Api<
     logout: (data: LogoutRequest, params: RequestParams = {}) =>
       this.request<void, ErrorResponse>({
         path: `/api/auth/logout`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -393,7 +376,7 @@ export class Api<
     loginWithGoogle: (data: GoogleAuthRequest, params: RequestParams = {}) =>
       this.request<TokenResponse, ErrorResponse>({
         path: `/api/auth/google`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -412,7 +395,7 @@ export class Api<
     getCurrentUser: (params: RequestParams = {}) =>
       this.request<UserResponse, ErrorResponse>({
         path: `/api/auth/me`,
-        method: "GET",
+        method: 'GET',
         secure: true,
         ...params,
       }),
@@ -429,7 +412,7 @@ export class Api<
     deleteAccount: (params: RequestParams = {}) =>
       this.request<void, ErrorResponse>({
         path: `/api/auth/account`,
-        method: "DELETE",
+        method: 'DELETE',
         secure: true,
         ...params,
       }),

@@ -25,11 +25,11 @@ className="text-success-500"
 
 ```tsx
 // ✅ t- プレフィックス付きトークンを使用
-className="bg-t-bg-primary"
-className="text-t-text-secondary"
-className="bg-t-brand-600"
-className="border-t-border-primary"
-className="text-t-success-500"
+className = 'bg-t-bg-primary';
+className = 'text-t-text-secondary';
+className = 'bg-t-brand-600';
+className = 'border-t-border-primary';
+className = 'text-t-success-500';
 ```
 
 ## ファイル構成

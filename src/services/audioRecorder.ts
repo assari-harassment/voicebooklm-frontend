@@ -1,9 +1,5 @@
-import {
-  AudioContext,
-  AudioRecorder,
-  AudioManager,
-} from "react-native-audio-api";
-import { File } from "expo-file-system";
+import { AudioContext, AudioRecorder, AudioManager } from 'react-native-audio-api';
+import { File } from 'expo-file-system';
 
 // Google Speech to Text推奨設定: LINEAR16, 16kHz, mono
 const SAMPLE_RATE = 16000;
@@ -35,9 +31,9 @@ class AudioRecorderService {
   async requestPermissions(): Promise<boolean> {
     try {
       const permission = await AudioManager.requestRecordingPermissions();
-      return permission === "Granted";
+      return permission === 'Granted';
     } catch (error) {
-      console.error("Permission request failed:", error);
+      console.error('Permission request failed:', error);
       return false;
     }
   }
@@ -45,16 +41,16 @@ class AudioRecorderService {
   async checkPermissions(): Promise<boolean> {
     try {
       const permission = await AudioManager.checkRecordingPermissions();
-      return permission === "Granted";
+      return permission === 'Granted';
     } catch (error) {
-      console.error("Permission check failed:", error);
+      console.error('Permission check failed:', error);
       return false;
     }
   }
 
   async startRecording(outputFilePath: string): Promise<void> {
     if (this.isRecording) {
-      console.warn("Already recording");
+      console.warn('Already recording');
       return;
     }
 
@@ -63,15 +59,15 @@ class AudioRecorderService {
     if (!hasPermission) {
       const granted = await this.requestPermissions();
       if (!granted) {
-        throw new Error("Recording permission not granted");
+        throw new Error('Recording permission not granted');
       }
     }
 
     // オーディオセッション設定
     AudioManager.setAudioSessionOptions({
-      iosCategory: "playAndRecord",
-      iosMode: "default",
-      iosOptions: ["defaultToSpeaker", "allowBluetooth"],
+      iosCategory: 'playAndRecord',
+      iosMode: 'default',
+      iosOptions: ['defaultToSpeaker', 'allowBluetooth'],
     });
 
     // AudioContext作成
@@ -152,9 +148,7 @@ class AudioRecorderService {
     this.recorder.stop();
     this.recorder.disconnect();
 
-    const duration = Math.floor(
-      (Date.now() - this.startTime - this.pausedDuration) / 1000
-    );
+    const duration = Math.floor((Date.now() - this.startTime - this.pausedDuration) / 1000);
 
     // WAVファイルを生成して保存
     if (this.outputPath && this.audioBuffers.length > 0) {
@@ -216,12 +210,12 @@ class AudioRecorderService {
 
     // WAVヘッダー
     // RIFF chunk
-    this.writeString(view, 0, "RIFF");
+    this.writeString(view, 0, 'RIFF');
     view.setUint32(4, bufferSize - 8, true);
-    this.writeString(view, 8, "WAVE");
+    this.writeString(view, 8, 'WAVE');
 
     // fmt chunk
-    this.writeString(view, 12, "fmt ");
+    this.writeString(view, 12, 'fmt ');
     view.setUint32(16, 16, true); // chunk size
     view.setUint16(20, 1, true); // PCM format
     view.setUint16(22, numChannels, true);
@@ -231,7 +225,7 @@ class AudioRecorderService {
     view.setUint16(34, bitsPerSample, true);
 
     // data chunk
-    this.writeString(view, 36, "data");
+    this.writeString(view, 36, 'data');
     view.setUint32(40, dataSize, true);
 
     // PCMデータを書き込み（Float32 → Int16変換）

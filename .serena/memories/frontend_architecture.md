@@ -28,7 +28,7 @@ FSDのような複雑な多層構造ではなく、シンプルで直感的な�
 
 ```tsx
 // app/record.tsx - ルーティングのみ
-import { RecordingScreen } from "@/features/recording";
+import { RecordingScreen } from '@/features/recording';
 
 export default function RecordPage() {
   return <RecordingScreen />;
@@ -119,9 +119,9 @@ const styles = StyleSheet.create({
 
 ## 他アーキテクチャとの比較
 
-| 観点 | FSD | Atomic Design | Feature-Colocation |
-|------|-----|---------------|-------------------|
-| 学習コスト | 高（7層） | 中（5層） | **低（2層）** |
-| 小規模アプリ | オーバーキル | やや過剰 | **ちょうど良い** |
-| 関連ファイル発見 | 分散 | 分散 | **同じフォルダ** |
-| 初心者向け | ✗ | △ | **◎** |
+| 観点             | FSD          | Atomic Design | Feature-Colocation |
+| ---------------- | ------------ | ------------- | ------------------ |
+| 学習コスト       | 高（7層）    | 中（5層）     | **低（2層）**      |
+| 小規模アプリ     | オーバーキル | やや過剰      | **ちょうど良い**   |
+| 関連ファイル発見 | 分散         | 分散          | **同じフォルダ**   |
+| 初心者向け       | ✗            | △             | **◎**              |

@@ -103,28 +103,28 @@ export function RecordScreen({
   };
 
   const handleCancel = () => {
-    Alert.alert(
-      '確認',
-      '録音を破棄しますか?',
-      [
-        { text: 'キャンセル', style: 'cancel' },
-        {
-          text: '破棄',
-          style: 'destructive',
-          onPress: () => {
-            onStopRecording();
-            setDuration(0);
-            setTranscript('');
-            setIsPaused(false);
-            onBack();
-          }
-        }
-      ]
-    );
+    Alert.alert('確認', '録音を破棄しますか?', [
+      { text: 'キャンセル', style: 'cancel' },
+      {
+        text: '破棄',
+        style: 'destructive',
+        onPress: () => {
+          onStopRecording();
+          setDuration(0);
+          setTranscript('');
+          setIsPaused(false);
+          onBack();
+        },
+      },
+    ]);
   };
 
   const handleComplete = () => {
-    onComplete(transcript || 'サンプルの文字起こしテキストです。これは録音から生成された内容を表しています。実際の実装では、音声認識APIを使用して文字起こしを行います。', duration);
+    onComplete(
+      transcript ||
+        'サンプルの文字起こしテキストです。これは録音から生成された内容を表しています。実際の実装では、音声認識APIを使用して文字起こしを行います。',
+      duration
+    );
     setDuration(0);
     setTranscript('');
     setIsPaused(false);
@@ -155,14 +155,19 @@ export function RecordScreen({
       {/* 波形表示（iPhoneボイスメモ風） */}
       <View className="px-4 mb-4 mt-4">
         <View className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 overflow-hidden">
-          <View className="h-24 flex-row items-center" style={{ width: VISIBLE_BARS * BAR_TOTAL_WIDTH }}>
+          <View
+            className="h-24 flex-row items-center"
+            style={{ width: VISIBLE_BARS * BAR_TOTAL_WIDTH }}
+          >
             <Animated.View
               className="flex-row items-center"
               style={{
                 // 右端の枠外から始まるようにオフセット
-                transform: [{
-                  translateX: Animated.add(scrollX, (VISIBLE_BARS + 5) * BAR_TOTAL_WIDTH)
-                }]
+                transform: [
+                  {
+                    translateX: Animated.add(scrollX, (VISIBLE_BARS + 5) * BAR_TOTAL_WIDTH),
+                  },
+                ],
               }}
             >
               {waveformData.map((height, i) => (
@@ -191,9 +196,7 @@ export function RecordScreen({
             <Text className="text-sm text-gray-600">リアルタイム文字起こし</Text>
           </View>
           <ScrollView className="flex-1">
-            <Text className="text-gray-700 leading-relaxed">
-              {transcript || '音声を認識中...'}
-            </Text>
+            <Text className="text-gray-700 leading-relaxed">{transcript || '音声を認識中...'}</Text>
           </ScrollView>
         </View>
       </View>
@@ -204,11 +207,7 @@ export function RecordScreen({
           onPress={handleTogglePause}
           className="w-12 h-12 bg-gray-100 rounded-xl items-center justify-center shadow-sm"
         >
-          {isPaused ? (
-            <Play size={20} color="#374151" />
-          ) : (
-            <Pause size={20} color="#374151" />
-          )}
+          {isPaused ? <Play size={20} color="#374151" /> : <Pause size={20} color="#374151" />}
         </TouchableOpacity>
         <TouchableOpacity
           onPress={handleComplete}

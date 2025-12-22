@@ -1,5 +1,14 @@
 import { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TextInput, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  TextInput,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { ArrowLeft, LogOut } from 'lucide-react-native';
 import type { User } from '../App';
 
@@ -22,14 +31,10 @@ export function AccountScreen({ user, onBack, onUpdateUser, onLogout }: AccountS
   };
 
   const handleLogout = () => {
-    Alert.alert(
-      '確認',
-      'ログアウトしますか？',
-      [
-        { text: 'キャンセル', style: 'cancel' },
-        { text: 'ログアウト', style: 'destructive', onPress: onLogout }
-      ]
-    );
+    Alert.alert('確認', 'ログアウトしますか？', [
+      { text: 'キャンセル', style: 'cancel' },
+      { text: 'ログアウト', style: 'destructive', onPress: onLogout },
+    ]);
   };
 
   return (
@@ -83,10 +88,7 @@ export function AccountScreen({ user, onBack, onUpdateUser, onLogout }: AccountS
               ) : (
                 <View className="flex-row items-center justify-between">
                   <Text className="text-gray-900 text-base">{user.name}</Text>
-                  <TouchableOpacity
-                    onPress={() => setIsEditingName(true)}
-                    className="px-3 py-1.5"
-                  >
+                  <TouchableOpacity onPress={() => setIsEditingName(true)} className="px-3 py-1.5">
                     <Text className="text-sm text-blue-600 font-medium">編集</Text>
                   </TouchableOpacity>
                 </View>
@@ -113,7 +115,9 @@ export function AccountScreen({ user, onBack, onUpdateUser, onLogout }: AccountS
               <Text className="text-sm text-gray-500">データの使用状況を確認</Text>
             </TouchableOpacity>
             <TouchableOpacity className="w-full p-4">
-              <Text className="text-gray-900 mb-1 text-base font-medium">プライバシーとセキュリティ</Text>
+              <Text className="text-gray-900 mb-1 text-base font-medium">
+                プライバシーとセキュリティ
+              </Text>
               <Text className="text-sm text-gray-500">データ保護とセキュリティ設定</Text>
             </TouchableOpacity>
           </View>

@@ -95,8 +95,7 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
 
         <Text className="text-center text-sm text-gray-500 mt-6 px-4">
           ログインすることで、
-          <Text className="text-blue-600 font-medium">利用規約</Text>
-          と
+          <Text className="text-blue-600 font-medium">利用規約</Text>と
           <Text className="text-blue-600 font-medium">プライバシーポリシー</Text>
           に同意したものとみなされます
         </Text>

@@ -36,9 +36,7 @@
         "react-native-audio-api",
         {
           "iosMicrophonePermission": "音声メモの録音にマイクを使用します",
-          "androidPermissions": [
-            "android.permission.RECORD_AUDIO"
-          ]
+          "androidPermissions": ["android.permission.RECORD_AUDIO"]
         }
       ],
       [

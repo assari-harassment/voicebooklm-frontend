@@ -13,7 +13,14 @@ type SearchScreenProps = {
   onUpdateNote?: (noteId: string, updates: Partial<Note>) => void;
 };
 
-export function SearchScreen({ notes, onNoteClick, onBack, initialFolder, onDeleteNote, onUpdateNote }: SearchScreenProps) {
+export function SearchScreen({
+  notes,
+  onNoteClick,
+  onBack,
+  initialFolder,
+  onDeleteNote,
+  onUpdateNote,
+}: SearchScreenProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
@@ -24,17 +31,16 @@ export function SearchScreen({ notes, onNoteClick, onBack, initialFolder, onDele
 
   // フォルダーフィルタリングを適用
   const displayNotes = initialFolder
-    ? notes.filter(note => note.folder === initialFolder)
+    ? notes.filter((note) => note.folder === initialFolder)
     : notes;
 
   const filteredNotes = searchQuery
-    ? displayNotes.filter((note) =>
-      note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      note.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      note.tags.some((tag) =>
-        tag.toLowerCase().includes(searchQuery.toLowerCase())
+    ? displayNotes.filter(
+        (note) =>
+          note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          note.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          note.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
       )
-    )
     : displayNotes;
 
   const formatDate = (date: Date) => {
@@ -48,37 +54,29 @@ export function SearchScreen({ notes, onNoteClick, onBack, initialFolder, onDele
   };
 
   const handleMenuPress = (note: Note) => {
-    Alert.alert(
-      'メニュー',
-      note.title,
-      [
-        {
-          text: '編集',
-          onPress: () => {
-            setEditingNote(note);
-            setEditingNoteId(note.id);
-            setIsEditModalOpen(true);
+    Alert.alert('メニュー', note.title, [
+      {
+        text: '編集',
+        onPress: () => {
+          setEditingNote(note);
+          setEditingNoteId(note.id);
+          setIsEditModalOpen(true);
+        },
+      },
+      {
+        text: '削除',
+        style: 'destructive',
+        onPress: () => {
+          if (onDeleteNote) {
+            Alert.alert('削除の確認', 'このメモを削除しますか？', [
+              { text: 'キャンセル', style: 'cancel' },
+              { text: '削除', style: 'destructive', onPress: () => onDeleteNote(note.id) },
+            ]);
           }
         },
-        {
-          text: '削除',
-          style: 'destructive',
-          onPress: () => {
-            if (onDeleteNote) {
-              Alert.alert(
-                '削除の確認',
-                'このメモを削除しますか？',
-                [
-                  { text: 'キャンセル', style: 'cancel' },
-                  { text: '削除', style: 'destructive', onPress: () => onDeleteNote(note.id) }
-                ]
-              );
-            }
-          }
-        },
-        { text: 'キャンセル', style: 'cancel' }
-      ]
-    );
+      },
+      { text: 'キャンセル', style: 'cancel' },
+    ]);
   };
 
   return (
@@ -94,7 +92,9 @@ export function SearchScreen({ notes, onNoteClick, onBack, initialFolder, onDele
             <ArrowLeft size={20} color="#374151" />
           </TouchableOpacity>
           <View>
-            <Text className="text-gray-900 text-lg font-bold">{initialFolder ? initialFolder : '検索'}</Text>
+            <Text className="text-gray-900 text-lg font-bold">
+              {initialFolder ? initialFolder : '検索'}
+            </Text>
             {initialFolder && (
               <Text className="text-sm text-gray-500">{displayNotes.length}件のメモ</Text>
             )}
@@ -130,7 +130,9 @@ export function SearchScreen({ notes, onNoteClick, onBack, initialFolder, onDele
             <View className="mb-3 flex-row items-center gap-2">
               <View className="w-1 h-5 bg-blue-500 rounded-full" />
               <Text className="text-gray-900 font-bold">
-                {searchQuery ? `検索結果 (${filteredNotes.length}件)` : `すべてのメモ (${filteredNotes.length}件)`}
+                {searchQuery
+                  ? `検索結果 (${filteredNotes.length}件)`
+                  : `すべてのメモ (${filteredNotes.length}件)`}
               </Text>
             </View>
             <View className="gap-2">
@@ -141,11 +143,10 @@ export function SearchScreen({ notes, onNoteClick, onBack, initialFolder, onDele
                     className="w-full p-3 bg-white rounded-xl shadow-sm border border-gray-100"
                   >
                     <View className="flex-row items-start justify-between gap-2">
-                      <TouchableOpacity
-                        onPress={() => onNoteClick(note.id)}
-                        className="flex-1"
-                      >
-                        <Text className="mb-2 text-gray-900 font-medium text-base">{note.title}</Text>
+                      <TouchableOpacity onPress={() => onNoteClick(note.id)} className="flex-1">
+                        <Text className="mb-2 text-gray-900 font-medium text-base">
+                          {note.title}
+                        </Text>
                         <View className="flex-row flex-wrap mb-2">
                           {note.tags.slice(0, 3).map((tag) => (
                             <View

@@ -60,28 +60,20 @@ export function NoteDetailScreen({
   };
 
   const handleMenuPress = () => {
-    Alert.alert(
-      'メニュー',
-      undefined,
-      [
-        { text: '編集', onPress: handleEditTranscriptClick },
-        {
-          text: '削除',
-          style: 'destructive',
-          onPress: () => {
-            Alert.alert(
-              '削除の確認',
-              'このメモを削除しますか？',
-              [
-                { text: 'キャンセル', style: 'cancel' },
-                { text: '削除', style: 'destructive', onPress: () => onDeleteNote(note.id) }
-              ]
-            );
-          }
+    Alert.alert('メニュー', undefined, [
+      { text: '編集', onPress: handleEditTranscriptClick },
+      {
+        text: '削除',
+        style: 'destructive',
+        onPress: () => {
+          Alert.alert('削除の確認', 'このメモを削除しますか？', [
+            { text: 'キャンセル', style: 'cancel' },
+            { text: '削除', style: 'destructive', onPress: () => onDeleteNote(note.id) },
+          ]);
         },
-        { text: 'キャンセル', style: 'cancel' }
-      ]
-    );
+      },
+      { text: 'キャンセル', style: 'cancel' },
+    ]);
   };
 
   return (
@@ -175,9 +167,28 @@ export function NoteDetailScreen({
               heading1: { fontSize: 24, fontWeight: 'bold', marginVertical: 10, color: '#111827' },
               heading2: { fontSize: 20, fontWeight: 'bold', marginVertical: 8, color: '#1F2937' },
               heading3: { fontSize: 18, fontWeight: 'bold', marginVertical: 6, color: '#374151' },
-              blockquote: { borderLeftWidth: 4, borderLeftColor: '#3B82F6', paddingLeft: 10, fontStyle: 'italic', color: '#4B5563', marginVertical: 8 },
-              code_inline: { backgroundColor: '#F3F4F6', borderRadius: 4, paddingHorizontal: 4, paddingVertical: 2, fontFamily: 'System' },
-              code_block: { backgroundColor: '#F3F4F6', borderRadius: 8, padding: 12, marginVertical: 8, fontFamily: 'System' },
+              blockquote: {
+                borderLeftWidth: 4,
+                borderLeftColor: '#3B82F6',
+                paddingLeft: 10,
+                fontStyle: 'italic',
+                color: '#4B5563',
+                marginVertical: 8,
+              },
+              code_inline: {
+                backgroundColor: '#F3F4F6',
+                borderRadius: 4,
+                paddingHorizontal: 4,
+                paddingVertical: 2,
+                fontFamily: 'System',
+              },
+              code_block: {
+                backgroundColor: '#F3F4F6',
+                borderRadius: 8,
+                padding: 12,
+                marginVertical: 8,
+                fontFamily: 'System',
+              },
               list_item: { marginVertical: 4 },
               bullet_list: { marginVertical: 8 },
             }}
