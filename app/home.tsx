@@ -1,7 +1,7 @@
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { useState } from "react";
-import { Alert, ScrollView, View } from "react-native";
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { useState } from 'react';
+import { Alert, ScrollView, View } from 'react-native';
 import {
   Button,
   Dialog,
@@ -14,41 +14,41 @@ import {
   Text,
   TextInput,
   TouchableRipple,
-} from "react-native-paper";
-import { colors } from "../src/constants/colors";
-import type { Note, User } from "../src/types";
+} from 'react-native-paper';
+import { colors } from '../src/constants/colors';
+import type { Note, User } from '../src/types';
 
 // サンプルデータ
 const sampleNotes: Note[] = [
   {
-    id: "1",
-    title: "プロジェクト企画会議",
+    id: '1',
+    title: 'プロジェクト企画会議',
     date: new Date(2025, 0, 15, 14, 30),
-    folder: "Meetings",
-    summary: "# プロジェクト企画会議\n新規プロジェクトの方向性について議論",
-    tags: ["仕事", "会議"],
+    folder: 'Meetings',
+    summary: '# プロジェクト企画会議\n新規プロジェクトの方向性について議論',
+    tags: ['仕事', '会議'],
   },
   {
-    id: "2",
-    title: "読書メモ - AIの未来",
+    id: '2',
+    title: '読書メモ - AIの未来',
     date: new Date(2025, 0, 14, 20, 0),
-    folder: "Reading Notes",
-    summary: "# 読書メモ - AIの未来\n人工知能の発展と社会への影響",
-    tags: ["読書", "AI"],
+    folder: 'Reading Notes',
+    summary: '# 読書メモ - AIの未来\n人工知能の発展と社会への影響',
+    tags: ['読書', 'AI'],
   },
   {
-    id: "3",
-    title: "新しいアイデア",
+    id: '3',
+    title: '新しいアイデア',
     date: new Date(2025, 0, 13, 9, 15),
-    folder: "Ideas",
-    summary: "# 新しいアイデア\nアプリの新機能について",
-    tags: ["アイデア"],
+    folder: 'Ideas',
+    summary: '# 新しいアイデア\nアプリの新機能について',
+    tags: ['アイデア'],
   },
 ];
 
 const sampleUser: User = {
-  name: "田中太郎",
-  email: "tanaka@example.com",
+  name: '田中太郎',
+  email: 'tanaka@example.com',
 };
 
 type FolderItem = {
@@ -64,36 +64,34 @@ type CategoryItem = {
 
 const folderStructure: CategoryItem[] = [
   {
-    category: "Work",
+    category: 'Work',
     color: colors.brand[500],
     folders: [
-      { name: "Projects", indent: 1 },
-      { name: "Meetings", indent: 1 },
-      { name: "Client Notes", indent: 1 },
+      { name: 'Projects', indent: 1 },
+      { name: 'Meetings', indent: 1 },
+      { name: 'Client Notes', indent: 1 },
     ],
   },
   {
-    category: "Personal",
+    category: 'Personal',
     color: colors.accent[500],
     folders: [
-      { name: "Learning", indent: 1 },
-      { name: "Ideas", indent: 1 },
-      { name: "Reading Notes", indent: 1 },
+      { name: 'Learning', indent: 1 },
+      { name: 'Ideas', indent: 1 },
+      { name: 'Reading Notes', indent: 1 },
     ],
   },
   {
-    category: "Archive",
+    category: 'Archive',
     color: colors.text.secondary,
-    folders: [{ name: "Old Projects", indent: 1 }],
+    folders: [{ name: 'Old Projects', indent: 1 }],
   },
 ];
 
 export default function HomeScreen() {
   const [notes, setNotes] = useState<Note[]>(sampleNotes);
   const [user] = useState<User | null>(sampleUser);
-  const [expandedCategories, setExpandedCategories] = useState<
-    Record<string, boolean>
-  >({
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
     Work: true,
     Personal: true,
     Archive: false,
@@ -101,7 +99,7 @@ export default function HomeScreen() {
   const [menuVisible, setMenuVisible] = useState<string | null>(null);
   const [editDialogVisible, setEditDialogVisible] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
-  const [editingTitle, setEditingTitle] = useState("");
+  const [editingTitle, setEditingTitle] = useState('');
 
   const recentNotes = notes.slice(0, 3);
 
@@ -118,31 +116,31 @@ export default function HomeScreen() {
 
   const formatDate = (date: Date) => {
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
 
     return `${year}-${month}/${day} ${hours}:${minutes}`;
   };
 
   const handleNoteClick = (noteId: string) => {
-    console.log("Note clicked:", noteId);
+    console.log('Note clicked:', noteId);
     // TODO: Navigate to note detail
   };
 
   const handleSearchClick = () => {
-    console.log("Search clicked");
+    console.log('Search clicked');
     // TODO: Navigate to search
   };
 
   const handleFolderClick = (folderName: string) => {
-    console.log("Folder clicked:", folderName);
+    console.log('Folder clicked:', folderName);
     // TODO: Navigate to folder view
   };
 
   const handleAccountClick = () => {
-    console.log("Account clicked");
+    console.log('Account clicked');
     // TODO: Show account menu
   };
 
@@ -156,9 +154,7 @@ export default function HomeScreen() {
   const handleSaveTitle = () => {
     if (editingNote && editingTitle.trim()) {
       setNotes((prev) =>
-        prev.map((n) =>
-          n.id === editingNote.id ? { ...n, title: editingTitle.trim() } : n
-        )
+        prev.map((n) => (n.id === editingNote.id ? { ...n, title: editingTitle.trim() } : n))
       );
     }
     setEditDialogVisible(false);
@@ -167,11 +163,11 @@ export default function HomeScreen() {
 
   const handleDeleteNote = (noteId: string) => {
     setMenuVisible(null);
-    Alert.alert("削除の確認", "このメモを削除しますか？", [
-      { text: "キャンセル", style: "cancel" },
+    Alert.alert('削除の確認', 'このメモを削除しますか？', [
+      { text: 'キャンセル', style: 'cancel' },
       {
-        text: "削除",
-        style: "destructive",
+        text: '削除',
+        style: 'destructive',
         onPress: () => {
           setNotes((prev) => prev.filter((n) => n.id !== noteId));
         },
@@ -188,11 +184,7 @@ export default function HomeScreen() {
       >
         {/* Header - Sticky */}
         <View className="flex-row items-center justify-between px-4 py-3 bg-t-bg-primary">
-          <TouchableRipple
-            onPress={handleAccountClick}
-            className="rounded-lg"
-            borderless
-          >
+          <TouchableRipple onPress={handleAccountClick} className="rounded-lg" borderless>
             <View className="flex-row items-center gap-2 px-3 py-2 bg-t-bg-secondary rounded-lg">
               <MaterialCommunityIcons
                 name="account-circle"
@@ -200,7 +192,7 @@ export default function HomeScreen() {
                 color={colors.text.secondary}
               />
               <Text variant="titleSmall" className="text-t-text-primary font-medium">
-                {user?.name || "Workspace"}
+                {user?.name || 'Workspace'}
               </Text>
             </View>
           </TouchableRipple>
@@ -304,18 +296,12 @@ export default function HomeScreen() {
                   <View className="flex-row items-center gap-2">
                     <MaterialCommunityIcons
                       name={
-                        expandedCategories[category.category]
-                          ? "chevron-down"
-                          : "chevron-right"
+                        expandedCategories[category.category] ? 'chevron-down' : 'chevron-right'
                       }
                       size={18}
                       color={colors.text.secondary}
                     />
-                    <MaterialCommunityIcons
-                      name="folder"
-                      size={20}
-                      color={colors.text.secondary}
-                    />
+                    <MaterialCommunityIcons name="folder" size={20} color={colors.text.secondary} />
                     <Text variant="bodyMedium" className="text-t-text-primary font-medium">
                       {category.category}
                     </Text>
@@ -358,10 +344,7 @@ export default function HomeScreen() {
 
       {/* Edit Title Dialog */}
       <Portal>
-        <Dialog
-          visible={editDialogVisible}
-          onDismiss={() => setEditDialogVisible(false)}
-        >
+        <Dialog visible={editDialogVisible} onDismiss={() => setEditDialogVisible(false)}>
           <Dialog.Title>タイトルを編集</Dialog.Title>
           <Dialog.Content>
             <TextInput
@@ -372,9 +355,7 @@ export default function HomeScreen() {
             />
           </Dialog.Content>
           <Dialog.Actions>
-            <Button onPress={() => setEditDialogVisible(false)}>
-              キャンセル
-            </Button>
+            <Button onPress={() => setEditDialogVisible(false)}>キャンセル</Button>
             <Button onPress={handleSaveTitle}>保存</Button>
           </Dialog.Actions>
         </Dialog>
@@ -385,7 +366,7 @@ export default function HomeScreen() {
         icon="microphone"
         color={colors.text.inverse}
         className="absolute bottom-6 self-center bg-t-brand-600 rounded-3xl"
-        onPress={() => router.push("/record")}
+        onPress={() => router.push('/record')}
         accessibilityLabel="録音を開始"
       />
     </View>

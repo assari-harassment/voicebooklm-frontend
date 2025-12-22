@@ -1,10 +1,10 @@
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useRef, useState } from "react";
-import { Animated, Easing, View } from "react-native";
-import { Button, Text } from "react-native-paper";
-import { colors } from "../src/constants/colors";
-import { apiClient } from "../src/services/apiClient";
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
+import { Animated, Easing, View } from 'react-native';
+import { Button, Text } from 'react-native-paper';
+import { colors } from '../src/constants/colors';
+import { apiClient } from '../src/services/apiClient';
 
 export default function ProcessingScreen() {
   const { duration, filePath } = useLocalSearchParams<{
@@ -12,7 +12,7 @@ export default function ProcessingScreen() {
     filePath: string;
   }>();
   const spinValue = useRef(new Animated.Value(0)).current;
-  const [status, setStatus] = useState("音声ファイルをアップロード中...");
+  const [status, setStatus] = useState('音声ファイルをアップロード中...');
   const [error, setError] = useState<string | null>(null);
 
   // スピンアニメーション
@@ -31,22 +31,22 @@ export default function ProcessingScreen() {
   useEffect(() => {
     const processAudio = async () => {
       if (!filePath) {
-        setError("録音ファイルが見つかりません");
+        setError('録音ファイルが見つかりません');
         return;
       }
 
       try {
-        setStatus("音声ファイルをアップロード中...");
+        setStatus('音声ファイルをアップロード中...');
 
         // APIを呼び出してメモを生成
-        const result = await apiClient.createMemoFromAudio(filePath, "ja-JP");
+        const result = await apiClient.createMemoFromAudio(filePath, 'ja-JP');
 
-        setStatus("完了！");
+        setStatus('完了！');
 
         // 少し待ってからメモ詳細画面に遷移
         setTimeout(() => {
           router.replace({
-            pathname: "/note/[id]",
+            pathname: '/note/[id]',
             params: {
               id: result.memoId,
               // APIレスポンスをJSON文字列として渡す
@@ -55,11 +55,10 @@ export default function ProcessingScreen() {
           });
         }, 500);
       } catch (err) {
-        console.error("Failed to process audio:", err);
-        const errorMessage =
-          err instanceof Error ? err.message : "処理に失敗しました";
+        console.error('Failed to process audio:', err);
+        const errorMessage = err instanceof Error ? err.message : '処理に失敗しました';
         setError(errorMessage);
-        setStatus("エラーが発生しました");
+        setStatus('エラーが発生しました');
       }
     };
 
@@ -68,16 +67,16 @@ export default function ProcessingScreen() {
 
   const spin = spinValue.interpolate({
     inputRange: [0, 1],
-    outputRange: ["0deg", "360deg"],
+    outputRange: ['0deg', '360deg'],
   });
 
   const handleRetry = () => {
     setError(null);
-    router.replace("/record");
+    router.replace('/record');
   };
 
   const handleGoHome = () => {
-    router.replace("/home");
+    router.replace('/home');
   };
 
   if (error) {
@@ -89,28 +88,17 @@ export default function ProcessingScreen() {
             size={64}
             color={colors.danger[500]}
           />
-          <Text
-            variant="headlineSmall"
-            className="text-t-text-primary mt-6 font-semibold"
-          >
+          <Text variant="headlineSmall" className="text-t-text-primary mt-6 font-semibold">
             エラーが発生しました
           </Text>
           <Text variant="bodyMedium" className="text-t-danger-500 mt-2 text-center">
             {error}
           </Text>
           <View className="mt-8 w-full gap-3">
-            <Button
-              mode="contained"
-              onPress={handleRetry}
-              className="bg-t-brand-600"
-            >
+            <Button mode="contained" onPress={handleRetry} className="bg-t-brand-600">
               再度録音する
             </Button>
-            <Button
-              mode="outlined"
-              onPress={handleGoHome}
-              className="border-t-border-primary"
-            >
+            <Button mode="outlined" onPress={handleGoHome} className="border-t-border-primary">
               ホームに戻る
             </Button>
           </View>
@@ -128,27 +116,20 @@ export default function ProcessingScreen() {
         </Animated.View>
 
         {/* ステータステキスト */}
-        <Text
-          variant="headlineSmall"
-          className="text-t-text-primary mt-6 font-semibold"
-        >
+        <Text variant="headlineSmall" className="text-t-text-primary mt-6 font-semibold">
           {status}
         </Text>
 
         {/* 録音時間 */}
         {duration && (
           <Text variant="bodyMedium" className="text-t-text-secondary mt-2">
-            録音時間: {Math.floor(Number(duration) / 60)}分
-            {Number(duration) % 60}秒
+            録音時間: {Math.floor(Number(duration) / 60)}分{Number(duration) % 60}秒
           </Text>
         )}
 
         {/* 説明テキスト */}
-        <Text
-          variant="bodySmall"
-          className="text-t-text-tertiary mt-4 text-center leading-5"
-        >
-          AIがメモを生成しています{"\n"}
+        <Text variant="bodySmall" className="text-t-text-tertiary mt-4 text-center leading-5">
+          AIがメモを生成しています{'\n'}
           しばらくお待ちください
         </Text>
       </View>

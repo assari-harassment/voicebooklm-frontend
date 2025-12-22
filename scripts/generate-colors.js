@@ -8,25 +8,19 @@
  * 色を変更する場合は global.css のみを編集し、このスクリプトを実行してください。
  */
 
-const fs = require("fs");
-const path = require("path");
+const fs = require('fs');
+const path = require('path');
 
-const globalCssPath = path.join(__dirname, "..", "global.css");
-const colorsOutputPath = path.join(
-  __dirname,
-  "..",
-  "src",
-  "constants",
-  "colors.ts"
-);
+const globalCssPath = path.join(__dirname, '..', 'global.css');
+const colorsOutputPath = path.join(__dirname, '..', 'src', 'constants', 'colors.ts');
 
 // global.css を読み込み
-const cssContent = fs.readFileSync(globalCssPath, "utf-8");
+const cssContent = fs.readFileSync(globalCssPath, 'utf-8');
 
 // :root セクションから CSS 変数を抽出
 const rootMatch = cssContent.match(/:root\s*\{([^}]+)\}/);
 if (!rootMatch) {
-  console.error("Error: :root section not found in global.css");
+  console.error('Error: :root section not found in global.css');
   process.exit(1);
 }
 
@@ -46,7 +40,7 @@ const colors = {
 };
 
 // 各行をパース
-const lines = rootContent.split("\n");
+const lines = rootContent.split('\n');
 for (const line of lines) {
   const match = line.match(/--color-(\w+)-(\w+):\s*(#[0-9a-fA-F]+)/);
   if (match) {
@@ -60,7 +54,7 @@ for (const line of lines) {
 // TypeScript ファイルを生成
 const generateSection = (name, obj, comment) => {
   const entries = Object.entries(obj);
-  if (entries.length === 0) return "";
+  if (entries.length === 0) return '';
 
   const props = entries
     .map(([key, value]) => {
@@ -68,7 +62,7 @@ const generateSection = (name, obj, comment) => {
       const propKey = /^\d+$/.test(key) ? key : key;
       return `    ${propKey}: "${value}",`;
     })
-    .join("\n");
+    .join('\n');
 
   return `  // ${comment}
   ${name}: {
@@ -93,23 +87,23 @@ const tsContent = `/**
  */
 
 export const colors = {
-${generateSection("bg", colors.bg, "Background")}
+${generateSection('bg', colors.bg, 'Background')}
 
-${generateSection("text", colors.text, "Text")}
+${generateSection('text', colors.text, 'Text')}
 
-${generateSection("border", colors.border, "Border")}
+${generateSection('border', colors.border, 'Border')}
 
-${generateSection("brand", colors.brand, "Brand (Blue - プライマリアクション)")}
+${generateSection('brand', colors.brand, 'Brand (Blue - プライマリアクション)')}
 
-${generateSection("accent", colors.accent, "Accent (Purple - 装飾、カテゴリ)")}
+${generateSection('accent', colors.accent, 'Accent (Purple - 装飾、カテゴリ)')}
 
-${generateSection("success", colors.success, "Success (Green - 成功、完了)")}
+${generateSection('success', colors.success, 'Success (Green - 成功、完了)')}
 
-${generateSection("danger", colors.danger, "Danger (Red - エラー、削除、録音)")}
+${generateSection('danger', colors.danger, 'Danger (Red - エラー、削除、録音)')}
 
-${generateSection("warning", colors.warning, "Warning (Orange - 警告、注意)")}
+${generateSection('warning', colors.warning, 'Warning (Orange - 警告、注意)')}
 
-${generateSection("info", colors.info, "Info (Cyan - 情報、ヒント)")}
+${generateSection('info', colors.info, 'Info (Cyan - 情報、ヒント)')}
 } as const;
 
 export type Colors = typeof colors;
@@ -117,10 +111,10 @@ export type Colors = typeof colors;
 
 // ファイルを書き出し
 fs.writeFileSync(colorsOutputPath, tsContent);
-console.log("✅ Generated: src/constants/colors.ts");
-console.log("   Source: global.css :root section");
-console.log("");
-console.log("Parsed colors:");
+console.log('✅ Generated: src/constants/colors.ts');
+console.log('   Source: global.css :root section');
+console.log('');
+console.log('Parsed colors:');
 for (const [category, values] of Object.entries(colors)) {
   const count = Object.keys(values).length;
   if (count > 0) {

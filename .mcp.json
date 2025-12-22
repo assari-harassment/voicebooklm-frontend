@@ -16,11 +16,16 @@
       "type": "stdio",
       "command": "uvx",
       "args": [
-        "--from", "git+https://github.com/oraios/serena",
-        "serena", "start-mcp-server",
-        "--context", "ide-assistant",
-        "--enable-web-dashboard", "false",
-        "--enable-gui-log-window", "false"
+        "--from",
+        "git+https://github.com/oraios/serena",
+        "serena",
+        "start-mcp-server",
+        "--context",
+        "ide-assistant",
+        "--enable-web-dashboard",
+        "false",
+        "--enable-gui-log-window",
+        "false"
       ],
       "env": {}
     }

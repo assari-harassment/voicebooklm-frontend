@@ -1,5 +1,15 @@
 import { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Modal, TextInput, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Modal,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from 'react-native';
 import { X } from 'lucide-react-native';
 import type { Note } from '../App';
 
@@ -28,17 +38,12 @@ export function EditTitleModal({ isOpen, note, onClose, onTitleChange }: EditTit
   };
 
   return (
-    <Modal
-      visible={isOpen}
-      transparent={true}
-      animationType="fade"
-      onRequestClose={onClose}
-    >
+    <Modal visible={isOpen} transparent={true} animationType="fade" onRequestClose={onClose}>
       <TouchableWithoutFeedback onPress={onClose}>
         <View className="flex-1 justify-center items-center bg-black/40 p-4">
           <TouchableWithoutFeedback>
-            <KeyboardAvoidingView 
-              behavior={Platform.OS === "ios" ? "padding" : "height"}
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
               className="w-full max-w-md bg-white rounded-2xl shadow-2xl"
             >
               <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-100">
@@ -64,10 +69,7 @@ export function EditTitleModal({ isOpen, note, onClose, onTitleChange }: EditTit
               </View>
 
               <View className="flex-row items-center justify-end gap-3 px-6 py-4 bg-gray-50 rounded-b-2xl">
-                <TouchableOpacity
-                  onPress={onClose}
-                  className="px-4 py-2 rounded-lg bg-gray-200"
-                >
+                <TouchableOpacity onPress={onClose} className="px-4 py-2 rounded-lg bg-gray-200">
                   <Text className="text-gray-700 font-medium">キャンセル</Text>
                 </TouchableOpacity>
                 <TouchableOpacity

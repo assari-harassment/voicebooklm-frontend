@@ -1,10 +1,10 @@
-import { Paths, File } from "expo-file-system";
-import { router } from "expo-router";
-import { useEffect, useRef, useState } from "react";
-import { Alert, Animated, View } from "react-native";
-import { Button, IconButton, Surface, Text } from "react-native-paper";
-import { colors } from "../src/constants/colors";
-import { audioRecorderService } from "../src/services/audioRecorder";
+import { Paths, File } from 'expo-file-system';
+import { router } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
+import { Alert, Animated, View } from 'react-native';
+import { Button, IconButton, Surface, Text } from 'react-native-paper';
+import { colors } from '../src/constants/colors';
+import { audioRecorderService } from '../src/services/audioRecorder';
 
 const BAR_WIDTH = 3;
 const BAR_MARGIN = 1;
@@ -44,13 +44,11 @@ export default function RecordScreen() {
       setIsRecording(true);
       setError(null);
     } catch (err) {
-      console.error("Recording failed:", err);
-      setError(err instanceof Error ? err.message : "録音を開始できませんでした");
-      Alert.alert(
-        "エラー",
-        "録音を開始できませんでした。マイクの権限を確認してください。",
-        [{ text: "OK", onPress: () => router.back() }]
-      );
+      console.error('Recording failed:', err);
+      setError(err instanceof Error ? err.message : '録音を開始できませんでした');
+      Alert.alert('エラー', '録音を開始できませんでした。マイクの権限を確認してください。', [
+        { text: 'OK', onPress: () => router.back() },
+      ]);
     }
   };
 
@@ -102,15 +100,15 @@ export default function RecordScreen() {
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   const handleCancel = () => {
-    Alert.alert("確認", "録音を破棄しますか?", [
-      { text: "キャンセル", style: "cancel" },
+    Alert.alert('確認', '録音を破棄しますか?', [
+      { text: 'キャンセル', style: 'cancel' },
       {
-        text: "破棄",
-        style: "destructive",
+        text: '破棄',
+        style: 'destructive',
         onPress: async () => {
           audioRecorderService.cancelRecording();
           // 録音ファイルを削除
@@ -121,7 +119,7 @@ export default function RecordScreen() {
                 fileToDelete.delete();
               }
             } catch (e) {
-              console.warn("Failed to delete recording file:", e);
+              console.warn('Failed to delete recording file:', e);
             }
           }
           setIsRecording(false);
@@ -142,18 +140,18 @@ export default function RecordScreen() {
       if (result) {
         // 録音データを処理画面に渡す
         router.replace({
-          pathname: "/processing",
+          pathname: '/processing',
           params: {
             duration: duration.toString(),
             filePath: result.filePath,
           },
         });
       } else {
-        Alert.alert("エラー", "録音データの取得に失敗しました");
+        Alert.alert('エラー', '録音データの取得に失敗しました');
       }
     } catch (err) {
-      console.error("Stop recording failed:", err);
-      Alert.alert("エラー", "録音の完了処理に失敗しました");
+      console.error('Stop recording failed:', err);
+      Alert.alert('エラー', '録音の完了処理に失敗しました');
     }
   };
 
@@ -182,7 +180,10 @@ export default function RecordScreen() {
   return (
     <View className="flex-1 bg-t-bg-secondary">
       {/* ヘッダー */}
-      <Surface className="flex-row justify-between items-center px-2 py-2 bg-t-bg-primary" elevation={0}>
+      <Surface
+        className="flex-row justify-between items-center px-2 py-2 bg-t-bg-primary"
+        elevation={0}
+      >
         <IconButton
           icon="arrow-left"
           size={20}
@@ -211,10 +212,7 @@ export default function RecordScreen() {
               style={{
                 transform: [
                   {
-                    translateX: Animated.add(
-                      scrollX,
-                      (VISIBLE_BARS + 5) * BAR_TOTAL_WIDTH
-                    ),
+                    translateX: Animated.add(scrollX, (VISIBLE_BARS + 5) * BAR_TOTAL_WIDTH),
                   },
                 ],
               }}
@@ -242,7 +240,7 @@ export default function RecordScreen() {
               style={{ backgroundColor: isPaused ? colors.text.secondary : colors.danger[500] }}
             />
             <Text variant="bodySmall" className="text-t-text-secondary ml-1.5">
-              {isPaused ? "一時停止中" : "録音中"}
+              {isPaused ? '一時停止中' : '録音中'}
             </Text>
           </View>
         </Surface>
@@ -252,9 +250,12 @@ export default function RecordScreen() {
       <View className="flex-1" />
 
       {/* コントロール */}
-      <Surface className="flex-row items-center px-4 py-4 bg-t-bg-primary border-t border-t-border-secondary" elevation={0}>
+      <Surface
+        className="flex-row items-center px-4 py-4 bg-t-bg-primary border-t border-t-border-secondary"
+        elevation={0}
+      >
         <IconButton
-          icon={isPaused ? "play" : "pause"}
+          icon={isPaused ? 'play' : 'pause'}
           size={24}
           onPress={handleTogglePause}
           className="bg-t-bg-tertiary rounded-xl"
@@ -265,7 +266,7 @@ export default function RecordScreen() {
           onPress={handleComplete}
           className="flex-1 ml-3 rounded-xl bg-t-brand-600"
           contentStyle={{ paddingVertical: 6 }}
-          labelStyle={{ fontSize: 16, fontWeight: "bold" }}
+          labelStyle={{ fontSize: 16, fontWeight: 'bold' }}
         >
           完了して要約する
         </Button>

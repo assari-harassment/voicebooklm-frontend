@@ -15,18 +15,27 @@ type HomeScreenProps = {
   onAccountClick: () => void;
 };
 
-export function HomeScreen({ notes, user, onNoteClick, onSearchClick, onFolderClick, onDeleteNote, onUpdateNote, onAccountClick }: HomeScreenProps) {
+export function HomeScreen({
+  notes,
+  user,
+  onNoteClick,
+  onSearchClick,
+  onFolderClick,
+  onDeleteNote,
+  onUpdateNote,
+  onAccountClick,
+}: HomeScreenProps) {
   const recentNotes = notes.slice(0, 3);
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
-    'Work': true,
-    'Personal': true,
-    'Archive': false,
+    Work: true,
+    Personal: true,
+    Archive: false,
   });
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
-  
+
   const folderStructure = [
     {
       category: 'Work',
@@ -35,7 +44,7 @@ export function HomeScreen({ notes, user, onNoteClick, onSearchClick, onFolderCl
         { name: 'Projects', indent: 1 },
         { name: 'Meetings', indent: 1 },
         { name: 'Client Notes', indent: 1 },
-      ]
+      ],
     },
     {
       category: 'Personal',
@@ -44,31 +53,29 @@ export function HomeScreen({ notes, user, onNoteClick, onSearchClick, onFolderCl
         { name: 'Learning', indent: 1 },
         { name: 'Ideas', indent: 1 },
         { name: 'Reading Notes', indent: 1 },
-      ]
+      ],
     },
     {
       category: 'Archive',
       color: 'bg-gray-500',
-      folders: [
-        { name: 'Old Projects', indent: 1 },
-      ]
+      folders: [{ name: 'Old Projects', indent: 1 }],
     },
   ];
 
   const toggleCategory = (category: string) => {
-    setExpandedCategories(prev => ({
+    setExpandedCategories((prev) => ({
       ...prev,
-      [category]: !prev[category]
+      [category]: !prev[category],
     }));
   };
 
   // フォルダー内のメモ数をカウント
   const getFolderCount = (folderName: string) => {
-    return notes.filter(note => note.folder === folderName).length;
+    return notes.filter((note) => note.folder === folderName).length;
   };
 
   const handleEditTitle = (noteId: string) => {
-    const note = notes.find(n => n.id === noteId);
+    const note = notes.find((n) => n.id === noteId);
     if (note) {
       setEditingNoteId(noteId);
       setEditingTitle(note.title);
@@ -83,40 +90,32 @@ export function HomeScreen({ notes, user, onNoteClick, onSearchClick, onFolderCl
     const day = String(date.getDate()).padStart(2, '0');
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
-    
+
     return `${year}-${month}/${day} ${hours}:${minutes}`;
   };
 
   const handleMenuPress = (note: Note) => {
-    Alert.alert(
-      'メニュー',
-      note.title,
-      [
-        { text: '編集', onPress: () => handleEditTitle(note.id) },
-        { 
-          text: '削除', 
-          style: 'destructive',
-          onPress: () => {
-            if (onDeleteNote) {
-              Alert.alert(
-                 '削除の確認',
-                 'このメモを削除しますか？',
-                 [
-                   { text: 'キャンセル', style: 'cancel' },
-                   { text: '削除', style: 'destructive', onPress: () => onDeleteNote(note.id) }
-                 ]
-              )
-            }
+    Alert.alert('メニュー', note.title, [
+      { text: '編集', onPress: () => handleEditTitle(note.id) },
+      {
+        text: '削除',
+        style: 'destructive',
+        onPress: () => {
+          if (onDeleteNote) {
+            Alert.alert('削除の確認', 'このメモを削除しますか？', [
+              { text: 'キャンセル', style: 'cancel' },
+              { text: '削除', style: 'destructive', onPress: () => onDeleteNote(note.id) },
+            ]);
           }
         },
-        { text: 'キャンセル', style: 'cancel' }
-      ]
-    );
+      },
+      { text: 'キャンセル', style: 'cancel' },
+    ]);
   };
 
   return (
     <View className="flex-1 bg-white">
-      <ScrollView 
+      <ScrollView
         className="flex-1 px-4"
         contentContainerStyle={{ paddingBottom: 96 }}
         stickyHeaderIndices={[0]}
@@ -158,7 +157,9 @@ export function HomeScreen({ notes, user, onNoteClick, onSearchClick, onFolderCl
                     className="flex-1 flex-row items-center justify-between"
                   >
                     <View className="flex-1">
-                      <Text className="mb-1 text-gray-900 font-medium text-base" numberOfLines={1}>{note.title}</Text>
+                      <Text className="mb-1 text-gray-900 font-medium text-base" numberOfLines={1}>
+                        {note.title}
+                      </Text>
                       <View className="flex-row items-center gap-2">
                         <View className="w-1 h-1 rounded-full bg-gray-400" />
                         <Text className="text-sm text-gray-500">{formatDate(note.date)}</Text>
@@ -166,7 +167,7 @@ export function HomeScreen({ notes, user, onNoteClick, onSearchClick, onFolderCl
                     </View>
                     <ChevronRight size={20} color="#9CA3AF" />
                   </TouchableOpacity>
-                  
+
                   {/* Menu Button */}
                   <TouchableOpacity
                     onPress={() => handleMenuPress(note)}
@@ -193,15 +194,19 @@ export function HomeScreen({ notes, user, onNoteClick, onSearchClick, onFolderCl
                   onPress={() => toggleCategory(category.category)}
                   className="w-full flex-row items-center gap-2 px-3 py-3 rounded"
                 >
-                  <ChevronRight 
-                    size={16} 
-                    color="#6B7280" 
-                    style={{ transform: [{ rotate: expandedCategories[category.category] ? '90deg' : '0deg' }] }}
+                  <ChevronRight
+                    size={16}
+                    color="#6B7280"
+                    style={{
+                      transform: [
+                        { rotate: expandedCategories[category.category] ? '90deg' : '0deg' },
+                      ],
+                    }}
                   />
                   <Folder size={20} color="#6B7280" />
                   <Text className="text-gray-700 font-medium">{category.category}</Text>
                 </TouchableOpacity>
-                
+
                 {expandedCategories[category.category] && (
                   <View className="ml-6">
                     {category.folders.map((folder) => (
@@ -212,7 +217,9 @@ export function HomeScreen({ notes, user, onNoteClick, onSearchClick, onFolderCl
                       >
                         <View className="flex-row items-center gap-2 flex-1">
                           <FileText size={16} color="#9CA3AF" />
-                          <Text className="text-gray-600" numberOfLines={1}>{folder.name}</Text>
+                          <Text className="text-gray-600" numberOfLines={1}>
+                            {folder.name}
+                          </Text>
                         </View>
                         <Text className="text-sm text-gray-400">{getFolderCount(folder.name)}</Text>
                       </TouchableOpacity>

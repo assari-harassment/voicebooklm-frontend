@@ -2,23 +2,23 @@
 
 ## フロントエンド
 
-| カテゴリ | 技術 |
-|----------|------|
-| フレームワーク | React Native + Expo SDK 54 |
-| 言語 | TypeScript 5.9 |
-| ルーティング | Expo Router |
-| UI | React Native Paper |
-| スタイリング | NativeWind (Tailwind CSS for RN) |
-| ナビゲーション | React Navigation |
-| 音声 | react-native-audio-api |
-| HTTP | Axios |
-| マークダウン | react-native-markdown-display |
+| カテゴリ       | 技術                             |
+| -------------- | -------------------------------- |
+| フレームワーク | React Native + Expo SDK 54       |
+| 言語           | TypeScript 5.9                   |
+| ルーティング   | Expo Router                      |
+| UI             | React Native Paper               |
+| スタイリング   | NativeWind (Tailwind CSS for RN) |
+| ナビゲーション | React Navigation                 |
+| 音声           | react-native-audio-api           |
+| HTTP           | Axios                            |
+| マークダウン   | react-native-markdown-display    |
 
 ## 外部サービス連携
 
-| サービス | 用途 |
-|----------|------|
-| Google OAuth | 認証 |
+| サービス             | 用途         |
+| -------------------- | ------------ |
+| Google OAuth         | 認証         |
 | Spring Boot REST API | バックエンド |
 
 ## 開発ツール
