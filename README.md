@@ -2,6 +2,16 @@
 
 Expo を使用したモバイルアプリの PoC プロジェクトです。
 
+## VSCode 拡張機能
+
+開発には以下の VSCode 拡張機能が必要です。プロジェクトを開くと自動でインストールを促されます。
+
+| 拡張機能                                                                                 | 用途               |
+| ---------------------------------------------------------------------------------------- | ------------------ |
+| [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)     | 静的解析           |
+| [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)   | コードフォーマット |
+| [Expo Tools](https://marketplace.visualstudio.com/items?itemName=expo.vscode-expo-tools) | Expo 開発支援      |
+
 ## 環境構築
 
 開発を始める前に、以下の環境をセットアップしてください。
@@ -33,7 +43,6 @@ mise install
 ### iOS 開発（Mac のみ）
 
 1. **Xcode** をインストール
-
    - App Store から [Xcode](https://apps.apple.com/app/xcode/id497799835) をインストール
    - バージョン 15.0 以上を推奨
 
@@ -49,11 +58,9 @@ mise install
 ### Android 開発
 
 1. **Android Studio** をインストール
-
    - [公式サイト](https://developer.android.com/studio) からダウンロード
 
 2. **react native document** を参照
-
    - [公式サイト](https://docs.expo.dev/get-started/set-up-your-environment/?platform=android&device=simulated&mode=development-build)
 
 ```
@@ -121,6 +128,7 @@ npx expo prebuild --clean && npx expo run:ios
 ```bash
 git submodule update --remote
 ```
+
 詳しくは`git submodule`で検索
 
 ## 利用可能なスクリプト
@@ -152,12 +160,12 @@ pip install uv
 
 ### 利用可能な機能
 
-| 機能 | 説明 |
-|-----|------|
-| **Serena** | コードのシンボル解析・リファクタリング支援 |
-| **Context7** | 最新のライブラリドキュメント取得 |
-| **sequential-thinking** | 複雑な問題の思考整理 |
-| **/commit** | 日本語コミットメッセージ自動生成 |
+| 機能                    | 説明                                       |
+| ----------------------- | ------------------------------------------ |
+| **Serena**              | コードのシンボル解析・リファクタリング支援 |
+| **Context7**            | 最新のライブラリドキュメント取得           |
+| **sequential-thinking** | 複雑な問題の思考整理                       |
+| **/commit**             | 日本語コミットメッセージ自動生成           |
 
 ### ドキュメント参照
 
