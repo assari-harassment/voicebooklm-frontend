@@ -170,3 +170,28 @@ pip install uv
 ### ドキュメント参照
 
 `docs/` に仕様書・設計書があります。Claude Code は自動的にこれらを参照します。
+
+## Git Hooks (husky)
+
+このプロジェクトでは [husky](https://typicode.github.io/husky/) を使用してコミット前に自動でコード品質チェックを行います。
+
+### セットアップ
+
+`npm install` を実行すると自動的に husky がセットアップされます。
+
+### 動作
+
+コミット時に以下が自動実行されます：
+
+| 対象ファイル     | 実行内容                |
+| ---------------- | ----------------------- |
+| `*.ts`, `*.tsx`  | ESLint --fix → Prettier |
+| `*.json`, `*.md` | Prettier                |
+
+### スキップ方法（非推奨）
+
+緊急時のみ使用してください：
+
+```bash
+git commit --no-verify -m "緊急修正"
+```
