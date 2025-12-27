@@ -1,6 +1,8 @@
 import axios, { isAxiosError } from 'axios';
 import { Api, CreateMemoResponse, TokenResponse } from './generated/apiSchema';
 import { File } from 'expo-file-system';
+import { setupAxiosInterceptors } from './interceptors';
+import { useAuthStore } from '@/src/shared/stores/authStore';
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8080';
 
@@ -22,6 +24,11 @@ class ApiClient {
         }
         return {};
       },
+    });
+
+    // Axios Interceptors をセットアップ
+    setupAxiosInterceptors(this.api.instance, {
+      onLogout: () => useAuthStore.getState().logout(),
     });
   }
 
