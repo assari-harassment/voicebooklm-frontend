@@ -30,6 +30,17 @@ function processQueue(error: Error | null, token: string | null = null) {
 }
 
 /**
+ * リフレッシュトークンのエンドポイントかどうかを判定
+ * URL文字列マッチングより堅牢な判定方法
+ */
+function isRefreshTokenEndpoint(url: string | undefined): boolean {
+  if (!url) return false;
+  // パスの末尾が /api/auth/refresh であるかを判定（クエリパラメータを除外）
+  const pathname = url.split('?')[0];
+  return pathname.endsWith('/api/auth/refresh');
+}
+
+/**
  * Axios Interceptors のセットアップ
  * 401エラー時に自動的にトークンをリフレッシュし、リクエストを再試行する
  */
@@ -50,7 +61,7 @@ export function setupAxiosInterceptors(
       // 401エラーかつリトライしていない場合
       if (error.response?.status === 401 && !originalRequest._retry) {
         // リフレッシュトークンのエンドポイント自体は除外
-        if (originalRequest.url?.includes('/api/auth/refresh')) {
+        if (isRefreshTokenEndpoint(originalRequest.url)) {
           return Promise.reject(error);
         }
 
@@ -69,12 +80,14 @@ export function setupAxiosInterceptors(
         originalRequest._retry = true;
         isRefreshing = true;
 
-        const refreshToken = useAuthStore.getState().refreshToken;
+        // レースコンディション対策: 状態を一括取得してスナップショットとして保持
+        const authState = useAuthStore.getState();
+        const refreshToken = authState.refreshToken;
 
         if (!refreshToken) {
           isRefreshing = false;
           config.onLogout();
-          return Promise.reject(error);
+          return Promise.reject(new Error('No refresh token available'));
         }
 
         try {
