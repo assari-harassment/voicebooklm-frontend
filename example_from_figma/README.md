@@ -1,1 +1,3 @@
 example_from_figmaディレクトリは参考コードで。実装の参考にするだけで使用はしないでください。
+
+example_from_figmaで発生しているtypescriptの型エラーチェックは無視してください
