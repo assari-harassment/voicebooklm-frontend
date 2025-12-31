@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { TokenResponse, UserResponse } from '@/src/api/generated/apiSchema';
-import { secureStorage, tokenStorage } from '@/src/shared/storage/tokenStorage';
+import { secureStorage } from '@/src/shared/storage/tokenStorage';
 
 interface AuthState {
   // 状態
@@ -40,11 +40,7 @@ export const useAuthStore = create<AuthState>()(
           refreshToken: tokens.refreshToken,
           isAuthenticated: true,
         });
-        // tokenStorage にも保存（persist middleware とは別に直接保存）
-        await tokenStorage.setTokens({
-          accessToken: tokens.accessToken,
-          refreshToken: tokens.refreshToken,
-        });
+        // zustand persist middleware が secureStorage 経由で自動保存
       },
 
       // ログアウト処理
@@ -55,8 +51,7 @@ export const useAuthStore = create<AuthState>()(
           user: null,
           isAuthenticated: false,
         });
-        // SecureStore からトークンを削除
-        await tokenStorage.clearTokens();
+        // zustand persist middleware が secureStorage 経由で自動削除
       },
 
       // トークンを設定（同期）
