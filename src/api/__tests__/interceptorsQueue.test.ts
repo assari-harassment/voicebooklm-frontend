@@ -21,9 +21,6 @@ jest.mock('../apiClient', () => ({
   },
 }));
 
-const mockUseAuthStore = useAuthStore as jest.Mocked<typeof useAuthStore>;
-const mockApiClient = apiClient as jest.Mocked<typeof apiClient>;
-
 describe('interceptors queue handling', () => {
   beforeEach(() => {
     jest.clearAllMocks();
