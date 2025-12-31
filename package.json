@@ -11,6 +11,9 @@
     "lint": "expo lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "generate:api": "swagger-typescript-api generate -p http://localhost:8080/v3/api-docs -o ./src/api/generated -n apiSchema.ts --axios",
     "generate:colors": "node scripts/generate-colors.js",
     "prepare": "husky"
@@ -54,14 +57,20 @@
     "zustand": "^5.0.9"
   },
   "devDependencies": {
+    "@testing-library/jest-native": "^5.4.3",
+    "@testing-library/react-native": "^13.3.3",
+    "@types/jest": "^30.0.0",
     "@types/react": "~19.1.0",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
+    "jest": "^30.2.0",
+    "jest-expo": "^54.0.16",
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
     "swagger-typescript-api": "^13.2.16",
+    "ts-jest": "^29.4.6",
     "typescript": "~5.9.2"
   },
   "private": true,
