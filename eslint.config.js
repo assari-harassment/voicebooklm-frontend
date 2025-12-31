@@ -11,7 +11,12 @@ module.exports = defineConfig([
   },
   // Jest テストファイルとモック用の設定
   {
-    files: ['**/__mocks__/**/*.js', '**/__tests__/**/*.ts', '**/__tests__/**/*.tsx', 'jest.setup.js'],
+    files: [
+      '**/__mocks__/**/*.js',
+      '**/__tests__/**/*.ts',
+      '**/__tests__/**/*.tsx',
+      'jest.setup.js',
+    ],
     languageOptions: {
       globals: {
         jest: 'readonly',
