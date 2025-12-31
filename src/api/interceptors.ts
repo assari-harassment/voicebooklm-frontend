@@ -33,7 +33,7 @@ function processQueue(error: Error | null, token: string | null = null) {
  * リフレッシュトークンのエンドポイントかどうかを判定
  * URL文字列マッチングより堅牢な判定方法
  */
-function isRefreshTokenEndpoint(url: string | undefined): boolean {
+export function isRefreshTokenEndpoint(url: string | undefined): boolean {
   if (!url) return false;
   // パスの末尾が /api/auth/refresh であるかを判定（クエリパラメータを除外）
   const pathname = url.split('?')[0];
