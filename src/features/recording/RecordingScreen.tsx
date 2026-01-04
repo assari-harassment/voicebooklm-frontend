@@ -41,7 +41,7 @@ export function RecordingScreen() {
       setIsRecording(true);
       setError(null);
     } catch (err) {
-      console.error('Recording failed:', err);
+      if (__DEV__) console.error('Recording failed:', err);
       setError(err instanceof Error ? err.message : '録音を開始できませんでした');
       Alert.alert('エラー', '録音を開始できませんでした。マイクの権限を確認してください。', [
         { text: 'OK', onPress: () => router.back() },
@@ -106,7 +106,7 @@ export function RecordingScreen() {
                 fileToDelete.delete();
               }
             } catch (e) {
-              console.warn('Failed to delete recording file:', e);
+              if (__DEV__) console.warn('Failed to delete recording file:', e);
             }
           }
           setIsRecording(false);
@@ -137,7 +137,7 @@ export function RecordingScreen() {
         Alert.alert('エラー', '録音データの取得に失敗しました');
       }
     } catch (err) {
-      console.error('Stop recording failed:', err);
+      if (__DEV__) console.error('Stop recording failed:', err);
       Alert.alert('エラー', '録音の完了処理に失敗しました');
     }
   };

@@ -69,8 +69,10 @@ class ApiClient {
 
     // axiosで直接送信（生成されたAPIクライアントはFormData処理に問題があるため）
     try {
-      console.log('Uploading audio file:', audioFilePath);
-      console.log('Token:', this.accessToken ? 'Set' : 'Not set');
+      if (__DEV__) {
+        console.log('Uploading audio file:', audioFilePath);
+        console.log('Token:', this.accessToken ? 'Set' : 'Not set');
+      }
 
       const response = await axios.post<CreateMemoResponse>(
         `${API_BASE_URL}/api/voice/memos`,
@@ -86,7 +88,7 @@ class ApiClient {
 
       return response.data;
     } catch (error) {
-      if (isAxiosError(error)) {
+      if (__DEV__ && isAxiosError(error)) {
         console.error('API Error Status:', error.response?.status);
         console.error('API Error Data:', JSON.stringify(error.response?.data));
         console.error('API Error Headers:', JSON.stringify(error.response?.headers));
