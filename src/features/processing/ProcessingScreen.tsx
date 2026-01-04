@@ -43,7 +43,7 @@ export function ProcessingScreen() {
           });
         }, 500);
       } catch (err) {
-        console.error('Failed to process audio:', err);
+        if (__DEV__) console.error('Failed to process audio:', err);
         const errorMessage = err instanceof Error ? err.message : '処理に失敗しました';
         setError(errorMessage);
         setStatus('エラーが発生しました');

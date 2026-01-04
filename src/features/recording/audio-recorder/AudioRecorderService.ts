@@ -35,7 +35,7 @@ class AudioRecorderService {
       const permission = await AudioManager.requestRecordingPermissions();
       return permission === 'Granted';
     } catch (error) {
-      console.error('Permission request failed:', error);
+      if (__DEV__) console.error('Permission request failed:', error);
       return false;
     }
   }
@@ -45,14 +45,14 @@ class AudioRecorderService {
       const permission = await AudioManager.checkRecordingPermissions();
       return permission === 'Granted';
     } catch (error) {
-      console.error('Permission check failed:', error);
+      if (__DEV__) console.error('Permission check failed:', error);
       return false;
     }
   }
 
   async startRecording(outputFilePath: string): Promise<void> {
     if (this.isRecording) {
-      console.warn('Already recording');
+      if (__DEV__) console.warn('Already recording');
       return;
     }
 

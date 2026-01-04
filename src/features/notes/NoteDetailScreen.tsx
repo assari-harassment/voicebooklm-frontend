@@ -42,7 +42,7 @@ export function NoteDetailScreen() {
           date: new Date(),
         };
       } catch (e) {
-        console.error('Failed to parse memoData:', e);
+        if (__DEV__) console.error('Failed to parse memoData:', e);
         return { ...sampleNote, id: id || sampleNote.id };
       }
     }

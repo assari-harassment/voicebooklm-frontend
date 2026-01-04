@@ -1,5 +1,6 @@
 import { apiClient } from '@/src/api';
 import type { TokenResponse } from '@/src/api/generated/apiSchema';
+import { useAuthStore } from '@/src/shared/stores/authStore';
 import {
   GoogleSignin,
   isErrorWithCode,
@@ -22,6 +23,7 @@ GoogleSignin.configure({
 // コンポーネント
 export function LoginScreen() {
   const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAuthStore();
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
@@ -42,7 +44,7 @@ export function LoginScreen() {
 
         // バックエンド API で認証
         const tokenResponse = await loginWithBackend(idToken);
-        handleLoginSuccess(tokenResponse);
+        await handleLoginSuccess(tokenResponse);
       }
     } catch (error) {
       handleSignInError(error);
@@ -57,10 +59,9 @@ export function LoginScreen() {
   };
 
   const handleLoginSuccess = (tokens: TokenResponse) => {
-    // アクセストークンをAPIクライアントに設定
-    apiClient.setAccessToken(tokens.accessToken);
-    // TODO: リフレッシュトークンをセキュアストレージに保存
-    console.log('Login successful, token set');
+    // useAuthStore.login() でトークンを保存
+    // APIクライアントへのトークン設定は AuthProvider で行う
+    login(tokens);
     // ホーム画面に遷移（replaceで戻れないようにする）
     router.replace('/home');
   };

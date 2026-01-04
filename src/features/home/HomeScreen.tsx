@@ -15,22 +15,19 @@ export function HomeScreen() {
   const [user] = useState<User | null>(sampleUser);
 
   const handleNoteClick = (noteId: string) => {
-    console.log('Note clicked:', noteId);
     // TODO: Navigate to note detail
+    router.push(`/note/${noteId}`);
   };
 
   const handleSearchClick = () => {
-    console.log('Search clicked');
     // TODO: Navigate to search
   };
 
-  const handleFolderClick = (folderName: string) => {
-    console.log('Folder clicked:', folderName);
+  const handleFolderClick = (_folderName: string) => {
     // TODO: Navigate to folder view
   };
 
   const handleAccountClick = () => {
-    console.log('Account clicked');
     // TODO: Show account menu
   };
 

@@ -36,6 +36,14 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+# testing
+coverage/
+*.lcov
+.nyc_output/
+
+# eslint
+.eslintcache
+
 app-example
 
 # generated native folders
