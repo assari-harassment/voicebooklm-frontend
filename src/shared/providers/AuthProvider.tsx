@@ -43,7 +43,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         if (status === 401 || status === 403) {
           // トークンが明確に無効な場合のみログアウト
-          await logout();
+          logout();
         } else {
           // ネットワークエラー等の一時的な問題は、既存トークンを信頼して続行
           if (__DEV__) {

@@ -1,5 +1,5 @@
-import type { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/src/shared/stores/authStore';
+import type { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { apiClient } from './apiClient';
 
 interface InterceptorConfig {
@@ -17,9 +17,14 @@ let failedQueue: {
 
 /**
  * テスト用: インターセプターの内部状態をリセット
- * 本番コードでは通常呼び出す必要はありません
+ * 本番コードでは呼び出してはいけません
  */
 export function resetInterceptorState(): void {
+  if (typeof __DEV__ !== 'undefined' && !__DEV__) {
+    throw new Error(
+      'resetInterceptorState is for testing only and must not be called in production.'
+    );
+  }
   isRefreshing = false;
   failedQueue = [];
 }
@@ -29,9 +34,9 @@ export function resetInterceptorState(): void {
  */
 function processQueue(error: Error | null, token: string | null = null) {
   failedQueue.forEach((request) => {
-    if (error) {
-      request.reject(error);
-    } else if (token) {
+    if (error || !token) {
+      request.reject(error ?? new Error('Token refresh failed: no token received'));
+    } else {
       request.resolve(token);
     }
   });
@@ -40,7 +45,7 @@ function processQueue(error: Error | null, token: string | null = null) {
 
 /**
  * リフレッシュトークンのエンドポイントかどうかを判定
- * URL文字列マッチングより堅牢な判定方法
+ * クエリパラメータを除外してパスの末尾で判定する
  */
 export function isRefreshTokenEndpoint(url: string | undefined): boolean {
   if (!url) return false;

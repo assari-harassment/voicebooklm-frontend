@@ -1,7 +1,7 @@
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import type { TokenResponse, UserResponse } from '@/src/api/generated/apiSchema';
 import { secureStorage } from '@/src/shared/storage/tokenStorage';
+import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
 interface AuthState {
   // 状態
@@ -13,8 +13,8 @@ interface AuthState {
   isHydrated: boolean;
 
   // アクション
-  login: (tokens: TokenResponse) => Promise<void>;
-  logout: () => Promise<void>;
+  login: (tokens: TokenResponse) => void;
+  logout: () => void;
   setTokens: (tokens: TokenResponse) => void;
   setUser: (user: UserResponse | null) => void;
   setLoading: (loading: boolean) => void;
@@ -33,24 +33,22 @@ export const useAuthStore = create<AuthState>()(
       isHydrated: false,
 
       // ログイン処理
-      login: async (tokens: TokenResponse) => {
+      login: (tokens: TokenResponse) => {
         set({
           accessToken: tokens.accessToken,
           refreshToken: tokens.refreshToken,
           isAuthenticated: true,
         });
-        // zustand persist middleware が secureStorage 経由で自動保存
       },
 
       // ログアウト処理
-      logout: async () => {
+      logout: () => {
         set({
           accessToken: null,
           refreshToken: null,
           user: null,
           isAuthenticated: false,
         });
-        // zustand persist middleware が secureStorage 経由で自動削除
       },
 
       // トークンを設定（同期）
@@ -91,13 +89,11 @@ export const useAuthStore = create<AuthState>()(
           if (error && __DEV__) {
             console.error('Auth hydration failed:', error);
           }
-          if (state) {
-            state.setHydrated(true);
-            // トークンが存在すれば認証済みとする（isAuthenticated のみ設定）
-            if (state.accessToken && state.refreshToken) {
-              useAuthStore.setState({ isAuthenticated: true });
-            }
-          }
+          const hasTokens = Boolean(state?.accessToken && state?.refreshToken);
+          useAuthStore.setState({
+            isHydrated: true,
+            isAuthenticated: hasTokens,
+          });
         };
       },
     }

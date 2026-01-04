@@ -58,10 +58,10 @@ export function LoginScreen() {
     return tokens;
   };
 
-  const handleLoginSuccess = async (tokens: TokenResponse) => {
+  const handleLoginSuccess = (tokens: TokenResponse) => {
     // useAuthStore.login() でトークンを保存
     // APIクライアントへのトークン設定は AuthProvider で行う
-    await login(tokens);
+    login(tokens);
     // ホーム画面に遷移（replaceで戻れないようにする）
     router.replace('/home');
   };
