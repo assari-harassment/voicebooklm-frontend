@@ -25,10 +25,32 @@ export const secureStorage: StateStorage = {
   },
 
   setItem: async (name: string, value: string): Promise<void> => {
-    await SecureStore.setItemAsync(name, value);
+    try {
+      await SecureStore.setItemAsync(name, value);
+    } catch (error) {
+      // エラーをログ出力して再スロー（Zustand middlewareにエラーを伝播）
+      if (typeof __DEV__ !== 'undefined' && __DEV__) {
+        console.error('[secureStorage.setItem] Failed to save item to SecureStore:', {
+          key: name,
+          error,
+        });
+      }
+      throw error;
+    }
   },
 
   removeItem: async (name: string): Promise<void> => {
-    await SecureStore.deleteItemAsync(name);
+    try {
+      await SecureStore.deleteItemAsync(name);
+    } catch (error) {
+      // エラーをログ出力して再スロー（Zustand middlewareにエラーを伝播）
+      if (typeof __DEV__ !== 'undefined' && __DEV__) {
+        console.error('[secureStorage.removeItem] Failed to remove item from SecureStore:', {
+          key: name,
+          error,
+        });
+      }
+      throw error;
+    }
   },
 };

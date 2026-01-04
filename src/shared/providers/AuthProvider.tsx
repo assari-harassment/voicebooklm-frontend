@@ -37,9 +37,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // /api/auth/me でトークンの有効性を検証
         const user = await apiClient.getCurrentUser();
         setUser(user);
-      } catch {
-        // トークンが無効な場合はログアウト
-        await logout();
+      } catch (error: unknown) {
+        // エラー種別に応じて処理を分岐
+        const status = (error as { response?: { status?: number } })?.response?.status;
+
+        if (status === 401 || status === 403) {
+          // トークンが明確に無効な場合のみログアウト
+          await logout();
+        } else {
+          // ネットワークエラー等の一時的な問題は、既存トークンを信頼して続行
+          if (__DEV__) {
+            console.warn(
+              '[AuthProvider] Token validation failed, continuing with existing token:',
+              error
+            );
+          }
+        }
       } finally {
         setIsInitializing(false);
       }

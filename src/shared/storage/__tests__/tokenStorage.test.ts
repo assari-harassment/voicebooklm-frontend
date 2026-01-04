@@ -70,6 +70,15 @@ describe('tokenStorage', () => {
 
       expect(mockSetItemAsync).toHaveBeenCalledWith('auth-storage', jsonValue);
     });
+
+    it('SecureStore がエラーをスローした場合はエラーを再スローする', async () => {
+      const testError = new Error('SecureStore write error');
+      mockSetItemAsync.mockRejectedValue(testError);
+
+      await expect(secureStorage.setItem('test-key', 'value')).rejects.toThrow(
+        'SecureStore write error'
+      );
+    });
   });
 
   describe('removeItem', () => {
@@ -85,6 +94,15 @@ describe('tokenStorage', () => {
       mockDeleteItemAsync.mockResolvedValue();
 
       await expect(secureStorage.removeItem('non-existent')).resolves.not.toThrow();
+    });
+
+    it('SecureStore がエラーをスローした場合はエラーを再スローする', async () => {
+      const testError = new Error('SecureStore delete error');
+      mockDeleteItemAsync.mockRejectedValue(testError);
+
+      await expect(secureStorage.removeItem('test-key')).rejects.toThrow(
+        'SecureStore delete error'
+      );
     });
   });
 });
