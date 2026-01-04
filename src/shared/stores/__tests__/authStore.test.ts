@@ -140,6 +140,9 @@ describe('authStore', () => {
         callback(undefined, undefined);
 
         // state が存在するケース（トークンなし）
+        // 注: zustandのonRehydrateStorageコールバックには完全なstore状態が渡される
+        // （partializeはストレージ永続化時のフィルタリングのみに影響）
+        // ここではsetHydratedの呼び出しのみをテストするためモックを使用
         const mockState = {
           setHydrated: jest.fn(),
           accessToken: null,
