@@ -127,27 +127,6 @@ describe('authStore', () => {
     });
   });
 
-  describe('initialize', () => {
-    it('トークンが存在する場合は認証済みにする', async () => {
-      // 直接状態を設定
-      useAuthStore.setState({
-        accessToken: 'test-token',
-        refreshToken: 'test-refresh',
-        isAuthenticated: false,
-      });
-
-      await useAuthStore.getState().initialize();
-
-      expect(useAuthStore.getState().isAuthenticated).toBe(true);
-    });
-
-    it('トークンがない場合は何もしない', async () => {
-      await useAuthStore.getState().initialize();
-
-      expect(useAuthStore.getState().isAuthenticated).toBe(false);
-    });
-  });
-
   describe('onRehydrateStorage (persist callback)', () => {
     it('hydration成功時にisHydratedをtrueに設定する', () => {
       // persist の onRehydrateStorage コールバックをテスト
@@ -160,17 +139,15 @@ describe('authStore', () => {
         // 状態なし（state が undefined）のケース
         callback(undefined, undefined);
 
-        // state が存在するケース
+        // state が存在するケース（トークンなし）
         const mockState = {
           setHydrated: jest.fn(),
-          setTokens: jest.fn(),
           accessToken: null,
           refreshToken: null,
         };
         callback(mockState as unknown as ReturnType<typeof useAuthStore.getState>, undefined);
 
         expect(mockState.setHydrated).toHaveBeenCalledWith(true);
-        expect(mockState.setTokens).not.toHaveBeenCalled();
       }
     });
 
@@ -179,21 +156,22 @@ describe('authStore', () => {
       const onRehydrateStorage = persistOptions?.onRehydrateStorage;
 
       if (onRehydrateStorage) {
+        // useAuthStore.setState をスパイ
+        const setStateSpy = jest.spyOn(useAuthStore, 'setState');
+
         const callback = onRehydrateStorage();
 
         const mockState = {
           setHydrated: jest.fn(),
-          setTokens: jest.fn(),
           accessToken: 'stored-access-token',
           refreshToken: 'stored-refresh-token',
         };
         callback(mockState as unknown as ReturnType<typeof useAuthStore.getState>, undefined);
 
         expect(mockState.setHydrated).toHaveBeenCalledWith(true);
-        expect(mockState.setTokens).toHaveBeenCalledWith({
-          accessToken: 'stored-access-token',
-          refreshToken: 'stored-refresh-token',
-        });
+        expect(setStateSpy).toHaveBeenCalledWith({ isAuthenticated: true });
+
+        setStateSpy.mockRestore();
       }
     });
 
@@ -219,11 +197,11 @@ describe('authStore', () => {
 
       if (onRehydrateStorage) {
         const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+        const setStateSpy = jest.spyOn(useAuthStore, 'setState');
         const callback = onRehydrateStorage();
 
         const mockState = {
           setHydrated: jest.fn(),
-          setTokens: jest.fn(),
           accessToken: 'token',
           refreshToken: 'refresh',
         };
@@ -232,8 +210,9 @@ describe('authStore', () => {
 
         expect(consoleSpy).toHaveBeenCalledWith('Auth hydration failed:', testError);
         expect(mockState.setHydrated).toHaveBeenCalledWith(true);
-        expect(mockState.setTokens).toHaveBeenCalled();
+        expect(setStateSpy).toHaveBeenCalledWith({ isAuthenticated: true });
         consoleSpy.mockRestore();
+        setStateSpy.mockRestore();
       }
     });
   });

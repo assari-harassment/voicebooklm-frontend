@@ -19,7 +19,6 @@ interface AuthState {
   setUser: (user: UserResponse | null) => void;
   setLoading: (loading: boolean) => void;
   setHydrated: (hydrated: boolean) => void;
-  initialize: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -77,14 +76,6 @@ export const useAuthStore = create<AuthState>()(
       setHydrated: (hydrated: boolean) => {
         set({ isHydrated: hydrated });
       },
-
-      // 初期化処理（アプリ起動時に呼び出す）
-      initialize: async () => {
-        const state = get();
-        if (state.accessToken && state.refreshToken) {
-          set({ isAuthenticated: true });
-        }
-      },
     }),
     {
       name: 'auth-storage',
@@ -102,12 +93,9 @@ export const useAuthStore = create<AuthState>()(
           }
           if (state) {
             state.setHydrated(true);
-            // トークンが存在すれば認証済みとする
+            // トークンが存在すれば認証済みとする（isAuthenticated のみ設定）
             if (state.accessToken && state.refreshToken) {
-              state.setTokens({
-                accessToken: state.accessToken,
-                refreshToken: state.refreshToken,
-              });
+              useAuthStore.setState({ isAuthenticated: true });
             }
           }
         };

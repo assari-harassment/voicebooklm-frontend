@@ -12,8 +12,14 @@ export const secureStorage: StateStorage = {
   getItem: async (name: string): Promise<string | null> => {
     try {
       return await SecureStore.getItemAsync(name);
-    } catch {
-      // 破損データの場合は null を返す
+    } catch (error) {
+      // エラー発生時は null を返す
+      if (typeof __DEV__ !== 'undefined' && __DEV__) {
+        console.error('[secureStorage.getItem] Failed to get item from SecureStore:', {
+          key: name,
+          error,
+        });
+      }
       return null;
     }
   },

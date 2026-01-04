@@ -16,6 +16,15 @@ let failedQueue: {
 }[] = [];
 
 /**
+ * テスト用: インターセプターの内部状態をリセット
+ * 本番コードでは通常呼び出す必要はありません
+ */
+export function resetInterceptorState(): void {
+  isRefreshing = false;
+  failedQueue = [];
+}
+
+/**
  * キュー内のリクエストを処理
  */
 function processQueue(error: Error | null, token: string | null = null) {
