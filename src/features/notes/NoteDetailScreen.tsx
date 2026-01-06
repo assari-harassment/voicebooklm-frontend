@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { Text } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { NoteContent } from './note-content';
 import { NoteHeader } from './note-header';
@@ -23,6 +24,8 @@ function formatDate(date: Date) {
 
 // コンポーネント
 export function NoteDetailScreen() {
+  const insets = useSafeAreaInsets();
+
   const { id, memoData } = useLocalSearchParams<{
     id: string;
     memoData?: string;
@@ -87,7 +90,11 @@ export function NoteDetailScreen() {
     <View className="flex-1 bg-t-bg-primary">
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 16, paddingBottom: 32 }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingTop: insets.top + 16,
+          paddingBottom: 32,
+        }}
       >
         {/* Header */}
         <NoteHeader
