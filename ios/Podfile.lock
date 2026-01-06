@@ -14,7 +14,7 @@ PODS:
   - EXJSONUtils (0.15.0)
   - EXManifests (1.0.10):
     - ExpoModulesCore
-  - Expo (54.0.29):
+  - Expo (54.0.30):
     - ExpoModulesCore
     - hermes-engine
     - RCTRequired
@@ -210,11 +210,11 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - ExpoAdapterGoogleSignIn (16.0.0):
+  - ExpoAdapterGoogleSignIn (16.1.1):
     - ExpoModulesCore
     - GoogleSignIn (~> 9.0)
     - React-Core
-  - ExpoAsset (12.0.11):
+  - ExpoAsset (12.0.12):
     - ExpoModulesCore
   - ExpoFileSystem (19.0.21):
     - ExpoModulesCore
@@ -222,7 +222,7 @@ PODS:
     - ExpoModulesCore
   - ExpoHaptics (15.0.8):
     - ExpoModulesCore
-  - ExpoHead (6.0.19):
+  - ExpoHead (6.0.21):
     - ExpoModulesCore
     - RNScreens
   - ExpoImage (3.0.11):
@@ -234,7 +234,7 @@ PODS:
     - SDWebImageWebPCoder (~> 0.14.6)
   - ExpoKeepAwake (15.0.8):
     - ExpoModulesCore
-  - ExpoLinking (8.0.10):
+  - ExpoLinking (8.0.11):
     - ExpoModulesCore
   - ExpoModulesCore (3.0.29):
     - hermes-engine
@@ -259,7 +259,9 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - ExpoSplashScreen (31.0.12):
+  - ExpoSecureStore (15.0.8):
+    - ExpoModulesCore
+  - ExpoSplashScreen (31.0.13):
     - ExpoModulesCore
   - ExpoSymbols (1.0.8):
     - ExpoModulesCore
@@ -2120,7 +2122,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - RNGoogleSignin (16.0.0):
+  - RNGoogleSignin (16.1.1):
     - GoogleSignIn (~> 9.0)
     - hermes-engine
     - RCTRequired
@@ -2264,6 +2266,51 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
+  - RNSVG (15.12.1):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - RNSVG/common (= 15.12.1)
+    - Yoga
+  - RNSVG/common (15.12.1):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - RNWorklets (0.5.1):
     - hermes-engine
     - RCTRequired
@@ -2367,6 +2414,7 @@ DEPENDENCIES:
   - ExpoKeepAwake (from `../node_modules/expo-keep-awake/ios`)
   - ExpoLinking (from `../node_modules/expo-linking/ios`)
   - ExpoModulesCore (from `../node_modules/expo-modules-core`)
+  - ExpoSecureStore (from `../node_modules/expo-secure-store/ios`)
   - ExpoSplashScreen (from `../node_modules/expo-splash-screen/ios`)
   - ExpoSymbols (from `../node_modules/expo-symbols/ios`)
   - ExpoSystemUI (from `../node_modules/expo-system-ui/ios`)
@@ -2445,6 +2493,7 @@ DEPENDENCIES:
   - "RNGoogleSignin (from `../node_modules/@react-native-google-signin/google-signin`)"
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
+  - RNSVG (from `../node_modules/react-native-svg`)
   - RNWorklets (from `../node_modules/react-native-worklets`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -2502,6 +2551,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-linking/ios"
   ExpoModulesCore:
     :path: "../node_modules/expo-modules-core"
+  ExpoSecureStore:
+    :path: "../node_modules/expo-secure-store/ios"
   ExpoSplashScreen:
     :path: "../node_modules/expo-splash-screen/ios"
   ExpoSymbols:
@@ -2657,6 +2708,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
     :path: "../node_modules/react-native-screens"
+  RNSVG:
+    :path: "../node_modules/react-native-svg"
   RNWorklets:
     :path: "../node_modules/react-native-worklets"
   Yoga:
@@ -2668,22 +2721,23 @@ SPEC CHECKSUMS:
   EXConstants: 805f35b1b295c542ca6acce836f21a1f9ee104d5
   EXJSONUtils: 1d3e4590438c3ee593684186007028a14b3686cd
   EXManifests: a8d97683e5c7a3b026ffbd58559c64dc655b747b
-  Expo: 8fa2204bf8483fe546b4ec87c90d3ca189afc8db
+  Expo: 60c21ba34593688a2a6e8445c1f8b44abb0e3fae
   expo-dev-client: 425ee077d6754a98cfe3a2e2410d29b440b24c9d
   expo-dev-launcher: a4f4cdef064ab1fb8621e5b8c7c457cd6e9568c3
   expo-dev-menu: 05b18812110c175814c6af0d09dd658abcc5e00d
   expo-dev-menu-interface: 600df12ea01efecdd822daaf13cc0ac091775533
-  ExpoAdapterGoogleSignIn: 5965ec283d2c0f53c483c4e2080ea055a881dfe9
-  ExpoAsset: 23a958e97d3d340919fe6774db35d563241e6c03
+  ExpoAdapterGoogleSignIn: 21ff1daeef3d21cb0b45772d8029102cc728d6b1
+  ExpoAsset: f867e55ceb428aab99e1e8c082b5aee7c159ea18
   ExpoFileSystem: 858a44267a3e6e9057e0888ad7c7cfbf55d52063
   ExpoFont: 35ac6191ed86bbf56b3ebd2d9154eda9fad5b509
   ExpoHaptics: d3a6375d8dcc3a1083d003bc2298ff654fafb536
-  ExpoHead: 5d3fd633fce8f2c3a2cb97ff39fd497b7dd3d268
+  ExpoHead: 9719a74953454fac328e90f34eea55ebbb3bbbf9
   ExpoImage: 686f972bff29525733aa13357f6691dc90aa03d8
   ExpoKeepAwake: 55f75eca6499bb9e4231ebad6f3e9cb8f99c0296
-  ExpoLinking: f4c4a351523da72a6bfa7e1f4ca92aee1043a3ca
+  ExpoLinking: 8f0aaf69aa56f832913030503b6263dc6f647f37
   ExpoModulesCore: f3da4f1ab5a8375d0beafab763739dbee8446583
-  ExpoSplashScreen: 76af87337650d06926aa7d0157fe98b4fddca336
+  ExpoSecureStore: d32f751874a2ceb5aaeebeb3578e165c1ba2b24a
+  ExpoSplashScreen: bc3cffefca2716e5f22350ca109badd7e50ec14d
   ExpoSymbols: 349ee2b4d7d5ff3ea8436467914f8a67635aa354
   ExpoSystemUI: 2ad325f361a2fcd96a464e8574e19935c461c9cc
   ExpoWebBrowser: 17b064c621789e41d4816c95c93f429b84971f52
@@ -2765,9 +2819,10 @@ SPEC CHECKSUMS:
   ReactNativeDependencies: 71ce9c28beb282aa720ea7b46980fff9669f428a
   RNAudioAPI: f432b67ce053e6ffaed5292c4d238de9ab4e18ef
   RNGestureHandler: 2914750df066d89bf9d8f48a10ad5f0051108ac3
-  RNGoogleSignin: 5c6ca84f819ce8dc978639b2aea804dffdc92818
+  RNGoogleSignin: 2a2b0d17c0184d886d8e3066060ca5e6fe04249c
   RNReanimated: e5c702a3e24cc1c68b2de67671713f35461678f4
   RNScreens: d8d6f1792f6e7ac12b0190d33d8d390efc0c1845
+  RNSVG: 31d6639663c249b7d5abc9728dde2041eb2a3c34
   RNWorklets: 76fce72926e28e304afb44f0da23b2d24f2c1fa0
   SDWebImage: e9c98383c7572d713c1a0d7dd2783b10599b9838
   SDWebImageAVIFCoder: afe194a084e851f70228e4be35ef651df0fc5c57
