@@ -58,17 +58,7 @@
         }
       ],
       "expo-secure-store",
-      [
-        "expo-build-properties",
-        {
-          "ios": {
-            "forceStaticLinking": []
-          },
-          "apple": {
-            "privacyManifestAggregationEnabled": true
-          }
-        }
-      ]
+      "expo-build-properties"
     ],
     "experiments": {
       "typedRoutes": true,
