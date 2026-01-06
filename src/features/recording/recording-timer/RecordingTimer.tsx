@@ -29,6 +29,7 @@ export function RecordingTimer({ duration, onBackPress }: RecordingTimerProps) {
         icon="arrow-left"
         size={20}
         onPress={onBackPress}
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         className="bg-t-bg-primary border border-t-border-secondary"
         accessibilityLabel="戻る"
       />
