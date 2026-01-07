@@ -31,7 +31,7 @@ export function RecordingControls({ isPaused, onTogglePause, onComplete }: Recor
         contentStyle={{ paddingVertical: 6 }}
         labelStyle={{ fontSize: 16, fontWeight: 'bold' }}
       >
-        完了して要約する
+        完了してAI整形する
       </Button>
     </Surface>
   );
