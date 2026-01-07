@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Alert, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 
+import { useProcessingStore } from '@/src/shared/stores/processingStore';
+
 import { audioRecorderService } from './audio-recorder';
 import { AudioWaveform } from './audio-waveform';
 import { RecordingControls } from './recording-controls';
@@ -125,14 +127,10 @@ export function RecordingScreen() {
       setIsRecording(false);
 
       if (result) {
-        // 録音データを処理画面に渡す
-        router.replace({
-          pathname: '/processing',
-          params: {
-            duration: duration.toString(),
-            filePath: result.filePath,
-          },
-        });
+        // バックグラウンドで処理を開始
+        useProcessingStore.getState().startProcessing(result.filePath);
+        // ホーム画面に遷移
+        router.replace('/home');
       } else {
         Alert.alert('エラー', '録音データの取得に失敗しました');
       }
