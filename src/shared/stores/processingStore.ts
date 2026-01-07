@@ -10,6 +10,7 @@ interface ProcessingState {
   memoResult: CreateMemoResponse | null;
   error: string | null;
   filePath: string | null;
+  language: string | null;
 
   // アクション
   startProcessing: (filePath: string, language?: string) => Promise<void>;
@@ -26,6 +27,7 @@ export const useProcessingStore = create<ProcessingState>()((set, get) => ({
   memoResult: null,
   error: null,
   filePath: null,
+  language: null,
 
   // 処理開始（バックグラウンドでAPI呼び出し）
   startProcessing: async (filePath: string, language = 'ja-JP') => {
@@ -39,6 +41,7 @@ export const useProcessingStore = create<ProcessingState>()((set, get) => ({
       memoResult: null,
       error: null,
       filePath,
+      language,
     });
 
     try {
@@ -64,7 +67,7 @@ export const useProcessingStore = create<ProcessingState>()((set, get) => ({
 
   // 再試行
   retry: async () => {
-    const filePath = get().filePath;
+    const { filePath, language } = get();
     if (!filePath) {
       return;
     }
@@ -76,7 +79,7 @@ export const useProcessingStore = create<ProcessingState>()((set, get) => ({
     });
 
     try {
-      const result = await apiClient.createMemoFromAudio(filePath, 'ja-JP');
+      const result = await apiClient.createMemoFromAudio(filePath, language ?? 'ja-JP');
 
       set({
         status: 'completed',
@@ -120,16 +123,12 @@ export const useProcessingStore = create<ProcessingState>()((set, get) => ({
       memoResult: null,
       error: null,
       filePath: null,
+      language: null,
     });
   },
 
   // バナーを閉じる
   dismissBanner: () => {
-    set({
-      status: 'idle',
-      memoResult: null,
-      error: null,
-      filePath: null,
-    });
+    get().reset();
   },
 }));

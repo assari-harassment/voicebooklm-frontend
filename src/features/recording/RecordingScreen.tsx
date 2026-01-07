@@ -127,8 +127,13 @@ export function RecordingScreen() {
       setIsRecording(false);
 
       if (result) {
-        // バックグラウンドで処理を開始
-        useProcessingStore.getState().startProcessing(result.filePath);
+        // バックグラウンドで処理を開始（エラーはトーストで表示される）
+        useProcessingStore
+          .getState()
+          .startProcessing(result.filePath)
+          .catch((err) => {
+            if (__DEV__) console.error('Processing failed:', err);
+          });
         // ホーム画面に遷移
         router.replace('/home');
       } else {

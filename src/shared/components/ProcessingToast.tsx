@@ -224,14 +224,14 @@ const styles = StyleSheet.create({
   toast: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.bg.primary,
     borderRadius: 10,
     paddingTop: 12,
     paddingBottom: 12,
     paddingLeft: 10,
     paddingRight: 12,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: colors.border.primary,
     // シャドウ (iOS)
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 1 },
@@ -258,12 +258,12 @@ const styles = StyleSheet.create({
   mainText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#101828',
+    color: colors.text.primary,
     lineHeight: 20,
   },
   subText: {
     fontSize: 12,
-    color: '#99a1af',
+    color: colors.text.tertiary,
     lineHeight: 16,
     marginTop: 2,
   },
