@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "expo-poc",
-    "slug": "expo-poc",
+    "name": "voicenotelm",
+    "slug": "voicenotelm",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "expopoc",
+    "scheme": "voicenotelm",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {

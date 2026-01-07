@@ -1,4 +1,4 @@
-# expo-poc
+# voicenotelm
 
 Expo を使用したモバイルアプリの PoC プロジェクトです。
 
