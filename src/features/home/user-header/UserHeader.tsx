@@ -3,6 +3,7 @@ import type { User } from '@/src/shared/types';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { View } from 'react-native';
 import { IconButton, Text, TouchableRipple } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // 型定義
 interface UserHeaderProps {
@@ -13,9 +14,19 @@ interface UserHeaderProps {
 
 // コンポーネント
 export function UserHeader({ user, onAccountClick, onSearchClick }: UserHeaderProps) {
+  const insets = useSafeAreaInsets();
+
   return (
-    <View className="flex-row items-center justify-between px-4 py-3 bg-t-bg-primary">
-      <TouchableRipple onPress={onAccountClick} className="rounded-lg" borderless>
+    <View
+      className="flex-row items-center justify-between px-4 bg-t-bg-primary"
+      style={{ paddingTop: insets.top + 12, paddingBottom: 12 }}
+    >
+      <TouchableRipple
+        onPress={onAccountClick}
+        className="rounded-lg"
+        borderless
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+      >
         <View className="flex-row items-center gap-2 px-3 py-2 bg-t-bg-secondary rounded-lg">
           <MaterialCommunityIcons name="account-circle" size={24} color={colors.text.secondary} />
           <Text variant="titleSmall" className="text-t-text-primary font-medium">
@@ -27,6 +38,7 @@ export function UserHeader({ user, onAccountClick, onSearchClick }: UserHeaderPr
         icon="magnify"
         size={24}
         onPress={onSearchClick}
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         className="bg-t-bg-primary border border-t-border-secondary"
         accessibilityLabel="検索"
       />

@@ -1,5 +1,6 @@
 import { View } from 'react-native';
 import { IconButton, Surface, Text } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // ユーティリティ
 function formatTime(seconds: number) {
@@ -16,15 +17,19 @@ interface RecordingTimerProps {
 
 // コンポーネント
 export function RecordingTimer({ duration, onBackPress }: RecordingTimerProps) {
+  const insets = useSafeAreaInsets();
+
   return (
     <Surface
-      className="flex-row justify-between items-center px-2 py-2 bg-t-bg-primary"
+      className="flex-row justify-between items-center px-2 bg-t-bg-primary"
+      style={{ paddingTop: insets.top + 8, paddingBottom: 8 }}
       elevation={0}
     >
       <IconButton
         icon="arrow-left"
         size={20}
         onPress={onBackPress}
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         className="bg-t-bg-primary border border-t-border-secondary"
         accessibilityLabel="戻る"
       />

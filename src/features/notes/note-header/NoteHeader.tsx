@@ -60,6 +60,7 @@ export function NoteHeader({
           icon="arrow-left"
           size={20}
           onPress={onBackPress}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           className="bg-t-bg-primary border border-t-border-secondary"
           accessibilityLabel="ホームに戻る"
         />
@@ -71,6 +72,7 @@ export function NoteHeader({
               icon="dots-vertical"
               size={20}
               onPress={() => setMenuVisible(true)}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               className="bg-t-bg-primary border border-t-border-secondary"
               accessibilityLabel="メニュー"
             />
