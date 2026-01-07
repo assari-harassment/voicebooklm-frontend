@@ -113,6 +113,19 @@ export function ProcessingToast() {
     return 'タップして確認する';
   };
 
+  // アクセシビリティ用のラベルとヒント
+  const getAccessibilityLabel = () => {
+    if (isProcessing) return 'AI整形を実行中。バックグラウンドで処理しています';
+    if (isError) return 'AI整形に失敗しました。タップで再試行、長押しで破棄';
+    return 'AI整形が完了しました。タップして確認';
+  };
+
+  const getAccessibilityHint = () => {
+    if (isProcessing) return '';
+    if (isError) return '再試行するにはタップ、破棄するには長押ししてください';
+    return 'メモの詳細画面に移動します';
+  };
+
   const handlePress = () => {
     if (isProcessing) return;
 
@@ -188,13 +201,24 @@ export function ProcessingToast() {
       pointerEvents="box-none"
     >
       {isProcessing ? (
-        toastContent
+        <View
+          accessible
+          accessibilityRole="alert"
+          accessibilityLabel={getAccessibilityLabel()}
+          accessibilityLiveRegion="polite"
+        >
+          {toastContent}
+        </View>
       ) : (
         <TouchableOpacity
           onPress={handlePress}
           onLongPress={handleLongPress}
           delayLongPress={500}
           activeOpacity={0.8}
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel={getAccessibilityLabel()}
+          accessibilityHint={getAccessibilityHint()}
         >
           {toastContent}
         </TouchableOpacity>
