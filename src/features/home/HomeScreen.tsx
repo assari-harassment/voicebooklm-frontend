@@ -3,6 +3,8 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 
+import { useProcessingStore } from '@/src/shared/stores/processingStore';
+
 import { FolderList } from './folder-list';
 import { RecentNotes } from './recent-notes';
 import { RecordFab } from './record-fab';
@@ -14,8 +16,10 @@ export function HomeScreen() {
   const [notes, setNotes] = useState<Note[]>(sampleNotes);
   const [user] = useState<User | null>(sampleUser);
 
+  // トースト表示中はFABを無効化
+  const isToastVisible = useProcessingStore((state) => state.status !== 'idle');
+
   const handleNoteClick = (noteId: string) => {
-    // TODO: Navigate to note detail
     router.push(`/note/${noteId}`);
   };
 
@@ -74,7 +78,7 @@ export function HomeScreen() {
       </ScrollView>
 
       {/* 録音ボタン (FAB) */}
-      <RecordFab onPress={handleStartRecording} />
+      <RecordFab onPress={handleStartRecording} disabled={isToastVisible} />
     </View>
   );
 }

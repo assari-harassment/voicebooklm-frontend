@@ -40,7 +40,7 @@ export function NoteDetailScreen() {
           id: parsed.memoId,
           title: parsed.title,
           content: parsed.content,
-          tags: parsed.tags,
+          tags: parsed.tags || [],
           transcription: parsed.transcription,
           date: new Date(),
         };

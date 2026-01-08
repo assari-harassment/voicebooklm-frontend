@@ -1,3 +1,6 @@
+import { View } from 'react-native';
+
+import { ProcessingToast } from '@/src/shared/components';
 import { AuthProvider } from '@/src/shared/providers/AuthProvider';
 import { Stack } from 'expo-router';
 import { PaperProvider } from 'react-native-paper';
@@ -9,7 +12,10 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <PaperProvider>
         <AuthProvider>
-          <Stack screenOptions={{ headerShown: false }} />
+          <View style={{ flex: 1 }}>
+            <Stack screenOptions={{ headerShown: false }} />
+            <ProcessingToast />
+          </View>
         </AuthProvider>
       </PaperProvider>
     </SafeAreaProvider>

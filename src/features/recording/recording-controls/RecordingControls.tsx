@@ -25,11 +25,13 @@ export function RecordingControls({ isPaused, onTogglePause, onComplete }: Recor
       <Button
         mode="contained"
         onPress={onComplete}
-        className="flex-1 ml-3 rounded-xl bg-t-brand-600"
+        className="ml-3 rounded-xl"
+        style={{ flex: 1 }}
+        buttonColor={colors.brand[600]}
         contentStyle={{ paddingVertical: 6 }}
         labelStyle={{ fontSize: 16, fontWeight: 'bold' }}
       >
-        完了して要約する
+        完了してAI整形する
       </Button>
     </Surface>
   );
