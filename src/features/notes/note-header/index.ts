@@ -1,1 +1,0 @@
-export { NoteHeader } from './NoteHeader';
