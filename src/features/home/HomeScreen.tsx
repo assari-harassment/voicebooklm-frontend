@@ -1,4 +1,4 @@
-import type { Note, User } from '@/src/shared/types';
+import type { Note } from '@/src/shared/types';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
@@ -8,13 +8,11 @@ import { useProcessingStore } from '@/src/shared/stores/processingStore';
 import { FolderList } from './folder-list';
 import { RecentNotes } from './recent-notes';
 import { RecordFab } from './record-fab';
-import { folderStructure, sampleNotes, sampleUser } from './sample-data';
-import { UserHeader } from './user-header';
+import { folderStructure, sampleNotes } from './sample-data';
 
 // コンポーネント
 export function HomeScreen() {
   const [notes, setNotes] = useState<Note[]>(sampleNotes);
-  const [user] = useState<User | null>(sampleUser);
 
   // トースト表示中はFABを無効化
   const isToastVisible = useProcessingStore((state) => state.status !== 'idle');
@@ -23,16 +21,8 @@ export function HomeScreen() {
     router.push(`/note/${noteId}`);
   };
 
-  const handleSearchClick = () => {
-    // TODO: Navigate to search
-  };
-
   const handleFolderClick = (_folderName: string) => {
     // TODO: Navigate to folder view
-  };
-
-  const handleAccountClick = () => {
-    // TODO: Show account menu
   };
 
   const handleEditNote = (noteId: string, newTitle: string) => {
@@ -49,18 +39,7 @@ export function HomeScreen() {
 
   return (
     <View className="flex-1 bg-t-bg-primary">
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ paddingBottom: 96 }}
-        stickyHeaderIndices={[0]}
-      >
-        {/* Header - Sticky */}
-        <UserHeader
-          user={user}
-          onAccountClick={handleAccountClick}
-          onSearchClick={handleSearchClick}
-        />
-
+      <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 96 }}>
         {/* 最近のメモ */}
         <RecentNotes
           notes={notes}

@@ -1,5 +1,14 @@
 import { View } from 'react-native';
 
+import {
+  defaultScreenOptions,
+  homeScreenOptions,
+  indexScreenOptions,
+  loginScreenOptions,
+  noteDetailScreenOptions,
+  processingScreenOptions,
+  recordScreenOptions,
+} from '@/src/navigation/screen-options';
 import { ProcessingToast } from '@/src/shared/components';
 import { AuthProvider } from '@/src/shared/providers/AuthProvider';
 import { Stack } from 'expo-router';
@@ -13,7 +22,14 @@ export default function RootLayout() {
       <PaperProvider>
         <AuthProvider>
           <View style={{ flex: 1 }}>
-            <Stack screenOptions={{ headerShown: false }} />
+            <Stack screenOptions={defaultScreenOptions}>
+              <Stack.Screen name="index" options={indexScreenOptions} />
+              <Stack.Screen name="login" options={loginScreenOptions} />
+              <Stack.Screen name="home" options={homeScreenOptions} />
+              <Stack.Screen name="note/[id]" options={noteDetailScreenOptions} />
+              <Stack.Screen name="record" options={recordScreenOptions} />
+              <Stack.Screen name="processing" options={processingScreenOptions} />
+            </Stack>
             <ProcessingToast />
           </View>
         </AuthProvider>

@@ -1,12 +1,10 @@
 import type { CreateMemoResponse } from '@/src/api/generated/apiSchema';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { Text } from 'react-native-paper';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { NoteContent } from './note-content';
-import { NoteHeader } from './note-header';
 import { NoteTags } from './note-tags';
 import type { NoteData } from './sample-data';
 import { sampleNote } from './sample-data';
@@ -24,8 +22,6 @@ function formatDate(date: Date) {
 
 // コンポーネント
 export function NoteDetailScreen() {
-  const insets = useSafeAreaInsets();
-
   const { id, memoData } = useLocalSearchParams<{
     id: string;
     memoData?: string;
@@ -53,15 +49,6 @@ export function NoteDetailScreen() {
   }, [memoData, id]);
 
   const [note, setNote] = useState<NoteData>(initialNote);
-  const [showTranscription, setShowTranscription] = useState(false);
-
-  const handleGoHome = () => {
-    router.replace('/home');
-  };
-
-  const handleTitleChange = (newTitle: string) => {
-    setNote((prev) => ({ ...prev, title: newTitle }));
-  };
 
   const handleAddTag = (tag: string) => {
     setNote((prev) => ({
@@ -77,36 +64,16 @@ export function NoteDetailScreen() {
     }));
   };
 
-  const handleToggleTranscription = () => {
-    setShowTranscription(!showTranscription);
-  };
-
-  const handleDeleteNote = () => {
-    // TODO: APIでメモを削除
-    router.replace('/home');
-  };
-
   return (
     <View className="flex-1 bg-t-bg-primary">
       <ScrollView
         className="flex-1"
         contentContainerStyle={{
           paddingHorizontal: 16,
-          paddingTop: insets.top + 16,
+          paddingTop: 16,
           paddingBottom: 32,
         }}
       >
-        {/* Header */}
-        <NoteHeader
-          title={note.title}
-          hasTranscription={!!note.transcription}
-          showTranscription={showTranscription}
-          onBackPress={handleGoHome}
-          onTitleChange={handleTitleChange}
-          onToggleTranscription={handleToggleTranscription}
-          onDeleteNote={handleDeleteNote}
-        />
-
         {/* タイトル */}
         <Text variant="headlineMedium" className="font-bold text-t-text-primary mb-3">
           {note.title}
@@ -129,7 +96,7 @@ export function NoteDetailScreen() {
         <NoteContent
           content={note.content}
           transcription={note.transcription}
-          showTranscription={showTranscription}
+          showTranscription={false}
         />
       </ScrollView>
     </View>

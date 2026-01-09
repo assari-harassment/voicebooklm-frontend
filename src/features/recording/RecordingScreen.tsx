@@ -1,5 +1,7 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { HeaderButton } from '@react-navigation/elements';
 import { File, Paths } from 'expo-file-system';
-import { router } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
@@ -9,7 +11,7 @@ import { useProcessingStore } from '@/src/shared/stores/processingStore';
 import { audioRecorderService } from './audio-recorder';
 import { AudioWaveform } from './audio-waveform';
 import { RecordingControls } from './recording-controls';
-import { RecordingTimer } from './recording-timer';
+import { RecordingHeaderTitle } from './recording-header-title';
 
 // コンポーネント
 export function RecordingScreen() {
@@ -169,8 +171,18 @@ export function RecordingScreen() {
 
   return (
     <View className="flex-1 bg-t-bg-secondary">
-      {/* ヘッダー（タイマー表示） */}
-      <RecordingTimer duration={duration} onBackPress={handleCancel} />
+      {/* ヘッダー設定 */}
+      <Stack.Screen
+        options={{
+          headerTitle: () => <RecordingHeaderTitle duration={duration} />,
+          headerLeft: ({ tintColor }) => (
+            <HeaderButton onPress={handleCancel} accessibilityLabel="録音をキャンセル">
+              <MaterialCommunityIcons name="close" size={24} color={tintColor} />
+            </HeaderButton>
+          ),
+          headerBackVisible: false,
+        }}
+      />
 
       {/* 波形表示エリア */}
       <AudioWaveform waveformData={waveformData} isPaused={isPaused} isRecording={isRecording} />
