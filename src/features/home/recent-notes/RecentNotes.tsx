@@ -41,9 +41,8 @@ export function RecentNotes({ memos, onMemoClick, onMenuClick }: RecentNotesProp
         {memos.map((memo) => (
           <Surface
             key={memo.memoId}
-            className="rounded-xl"
             elevation={1}
-            style={{ backgroundColor: 'white' }}
+            style={{ backgroundColor: 'white', borderRadius: 12 }}
           >
             <View className="flex-row items-center">
               <TouchableRipple

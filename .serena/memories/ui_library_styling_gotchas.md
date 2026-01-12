@@ -26,6 +26,7 @@ React Native Paper（v5+）はMaterial Design 3のテーマを使用しており
 
 - `className="bg-white"` や `className="bg-t-bg-primary"` が効かない
 - 薄い紫やグレーがかった色になる（MD3のデフォルト）
+- `className="rounded-xl"` などの角丸が効かない、または中途半端になる
 
 ### 解決パターン
 
