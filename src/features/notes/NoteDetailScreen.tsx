@@ -1,4 +1,4 @@
-import type { CreateMemoResponse } from '@/src/api/generated/apiSchema';
+import type { VoiceMemoCreatedResponse } from '@/src/api/generated/apiSchema';
 import { useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
@@ -31,7 +31,7 @@ export function NoteDetailScreen() {
   const initialNote = useMemo<NoteData>(() => {
     if (memoData) {
       try {
-        const parsed: CreateMemoResponse = JSON.parse(memoData);
+        const parsed: VoiceMemoCreatedResponse = JSON.parse(memoData);
         return {
           id: parsed.memoId,
           title: parsed.title,

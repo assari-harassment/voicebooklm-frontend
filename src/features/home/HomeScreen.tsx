@@ -1,36 +1,26 @@
-import type { Note } from '@/src/shared/types';
 import { router } from 'expo-router';
-import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
+import { ActivityIndicator, Text } from 'react-native-paper';
 
 import { useProcessingStore } from '@/src/shared/stores/processingStore';
 
 import { FolderList } from './folder-list';
-import { RecentNotes } from './recent-notes';
+import { RecentNotes, useRecentMemos } from './recent-notes';
 import { RecordFab } from './record-fab';
 import { folderStructure, sampleNotes } from './sample-data';
 
-// コンポーネント
 export function HomeScreen() {
-  const [notes, setNotes] = useState<Note[]>(sampleNotes);
+  const { memos, isLoading, error } = useRecentMemos();
 
   // トースト表示中はFABを無効化
   const isToastVisible = useProcessingStore((state) => state.status !== 'idle');
 
-  const handleNoteClick = (noteId: string) => {
-    router.push(`/note/${noteId}`);
+  const handleMemoClick = (memoId: string) => {
+    router.push(`/note/${memoId}`);
   };
 
   const handleFolderClick = (_folderName: string) => {
     // TODO: Navigate to folder view
-  };
-
-  const handleEditNote = (noteId: string, newTitle: string) => {
-    setNotes((prev) => prev.map((n) => (n.id === noteId ? { ...n, title: newTitle } : n)));
-  };
-
-  const handleDeleteNote = (noteId: string) => {
-    setNotes((prev) => prev.filter((n) => n.id !== noteId));
   };
 
   const handleStartRecording = () => {
@@ -41,17 +31,40 @@ export function HomeScreen() {
     <View className="flex-1 bg-t-bg-primary">
       <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 96 }}>
         {/* 最近のメモ */}
-        <RecentNotes
-          notes={notes}
-          onNoteClick={handleNoteClick}
-          onEditNote={handleEditNote}
-          onDeleteNote={handleDeleteNote}
-        />
+        {isLoading ? (
+          <View className="px-4 mb-6">
+            <View className="flex-row items-center gap-2 mb-3">
+              <View className="w-1 h-5 rounded-sm bg-t-brand-500" />
+              <Text variant="titleMedium" className="font-bold text-t-text-primary">
+                最近のメモ
+              </Text>
+            </View>
+            <View className="py-8 items-center">
+              <ActivityIndicator size="small" />
+            </View>
+          </View>
+        ) : error ? (
+          <View className="px-4 mb-6">
+            <View className="flex-row items-center gap-2 mb-3">
+              <View className="w-1 h-5 rounded-sm bg-t-brand-500" />
+              <Text variant="titleMedium" className="font-bold text-t-text-primary">
+                最近のメモ
+              </Text>
+            </View>
+            <View className="py-8 items-center">
+              <Text variant="bodyMedium" className="text-t-danger-500">
+                メモの取得に失敗しました
+              </Text>
+            </View>
+          </View>
+        ) : (
+          <RecentNotes memos={memos} onMemoClick={handleMemoClick} />
+        )}
 
         {/* フォルダ一覧 */}
         <FolderList
           folderStructure={folderStructure}
-          notes={notes}
+          notes={sampleNotes}
           onFolderClick={handleFolderClick}
         />
       </ScrollView>
