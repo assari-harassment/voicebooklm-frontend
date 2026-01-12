@@ -39,7 +39,12 @@ export function RecentNotes({ memos, onMemoClick, onMenuClick }: RecentNotesProp
       {/* メモカード一覧 */}
       <View className="gap-2">
         {memos.map((memo) => (
-          <Surface key={memo.memoId} className="rounded-xl bg-t-bg-primary" elevation={1}>
+          <Surface
+            key={memo.memoId}
+            className="rounded-xl"
+            elevation={1}
+            style={{ backgroundColor: 'white' }}
+          >
             <View className="flex-row items-center">
               <TouchableRipple
                 onPress={() => onMemoClick(memo.memoId)}
