@@ -27,7 +27,7 @@ interface RecentNotesProps {
 
 export function RecentNotes({ memos, onMemoClick, onMenuClick }: RecentNotesProps) {
   return (
-    <View className="px-4 mb-6">
+    <View className="px-4 pt-4 mb-6">
       {/* セクションヘッダー */}
       <View className="flex-row items-center gap-2 mb-3">
         <View className="w-1 h-5 rounded-sm bg-t-brand-500" />
