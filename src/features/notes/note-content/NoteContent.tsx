@@ -1,7 +1,6 @@
 import { colors } from '@/src/shared/constants';
-import { View } from 'react-native';
 import Markdown from 'react-native-markdown-display';
-import { Chip, Surface, Text } from 'react-native-paper';
+import { Surface, Text } from 'react-native-paper';
 
 // スタイル
 const markdownStyles = {
@@ -60,28 +59,12 @@ interface NoteContentProps {
 // コンポーネント
 export function NoteContent({ content, transcription, showTranscription }: NoteContentProps) {
   return (
-    <>
-      {/* 表示切り替えインジケーター */}
-      {transcription && (
-        <View className="mb-3">
-          <Chip
-            icon={showTranscription ? 'microphone' : 'text-box'}
-            className="self-start bg-t-brand-50"
-            textStyle={{ color: colors.brand[600], fontSize: 12 }}
-          >
-            {showTranscription ? '文字起こし' : 'AI要約'}
-          </Chip>
-        </View>
+    <Surface className="bg-t-bg-primary rounded-xl p-1" elevation={0}>
+      {showTranscription && transcription ? (
+        <Text className="text-t-text-primary text-base leading-6 p-2">{transcription}</Text>
+      ) : (
+        <Markdown style={markdownStyles}>{content}</Markdown>
       )}
-
-      {/* 本文（Markdown）または文字起こし */}
-      <Surface className="bg-t-bg-primary rounded-xl p-1" elevation={0}>
-        {showTranscription && transcription ? (
-          <Text className="text-t-text-primary text-base leading-6 p-2">{transcription}</Text>
-        ) : (
-          <Markdown style={markdownStyles}>{content}</Markdown>
-        )}
-      </Surface>
-    </>
+    </Surface>
   );
 }

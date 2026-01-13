@@ -30,10 +30,14 @@ export function NoteTags({ tags, onAddTag, onRemoveTag }: NoteTagsProps) {
           <Chip
             key={tag}
             onClose={() => onRemoveTag(tag)}
-            className="bg-t-bg-tertiary"
+            style={{
+              backgroundColor: colors.bg.tertiary,
+              borderWidth: 1,
+              borderColor: colors.border.primary,
+            }}
             textStyle={{ color: colors.text.primary, fontSize: 14 }}
           >
-            #{tag}
+            {tag}
           </Chip>
         ))}
         {isAddingTag ? (
@@ -58,7 +62,11 @@ export function NoteTags({ tags, onAddTag, onRemoveTag }: NoteTagsProps) {
           <Chip
             icon="plus"
             onPress={() => setIsAddingTag(true)}
-            className="bg-t-bg-primary border border-t-border-primary border-dashed"
+            style={{
+              backgroundColor: colors.bg.primary,
+              borderWidth: 1,
+              borderColor: colors.border.primary,
+            }}
             textStyle={{ color: colors.text.secondary, fontSize: 14 }}
           >
             タグを追加
