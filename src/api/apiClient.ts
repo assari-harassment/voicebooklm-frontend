@@ -2,6 +2,7 @@ import axios, { isAxiosError } from 'axios';
 import {
   Api,
   ListMemosResponse,
+  MemoDetailResponse,
   TokenResponse,
   VoiceMemoCreatedResponse,
 } from './generated/apiSchema';
@@ -147,6 +148,21 @@ class ApiClient {
   }): Promise<ListMemosResponse> {
     const response = await this.api.api.listMemos(params, { secure: true });
     return response.data;
+  }
+
+  /**
+   * メモ詳細を取得
+   */
+  async getMemo(memoId: string): Promise<MemoDetailResponse> {
+    const response = await this.api.api.getMemo(memoId, { secure: true });
+    return response.data;
+  }
+
+  /**
+   * メモを削除
+   */
+  async deleteMemo(memoId: string): Promise<void> {
+    await this.api.api.deleteMemo(memoId, { secure: true });
   }
 }
 
