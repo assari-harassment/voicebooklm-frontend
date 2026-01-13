@@ -10,19 +10,6 @@
  * ---------------------------------------------------------------
  */
 
-export interface CreateMemoResponse {
-  /** @format uuid */
-  memoId: string;
-  title: string;
-  content: string;
-  tags: string[];
-  transcription?: string;
-  transcriptionStatus: string;
-  formattingStatus: string;
-  processingTimeMillis: ProcessingTimeResponse;
-  fallback: FallbackUsageResponse;
-}
-
 export interface FallbackUsageResponse {
   transcription: boolean;
   formatting: boolean;
@@ -39,6 +26,19 @@ export interface ProcessingTimeResponse {
   total: number;
 }
 
+export interface VoiceMemoCreatedResponse {
+  /** @format uuid */
+  memoId: string;
+  title: string;
+  content: string;
+  tags: string[];
+  transcription?: string;
+  transcriptionStatus: string;
+  formattingStatus: string;
+  processingTimeMillis: ProcessingTimeResponse;
+  fallback: FallbackUsageResponse;
+}
+
 /** エラーレスポンス */
 export interface ErrorResponse {
   /**
@@ -51,6 +51,55 @@ export interface ErrorResponse {
    * @example "UNAUTHORIZED"
    */
   code: string;
+}
+
+export interface FolderResponse {
+  /** @format uuid */
+  id: string;
+  name: string;
+  /** @format uuid */
+  parentId?: string;
+  path: string;
+}
+
+export interface CreateFolderRequest {
+  /**
+   * @minLength 0
+   * @maxLength 50
+   */
+  name: string;
+  /** @format uuid */
+  parentId?: string;
+}
+
+/** 開発用トークン取得レスポンス */
+export interface DevTokenResponse {
+  /** アクセストークン（JWT） */
+  accessToken: string;
+  /** ユーザーID */
+  userId: string;
+  /** メールアドレス */
+  email: string;
+  /** 使い方の説明 */
+  message: string;
+}
+
+/** 開発用シードデータ作成レスポンス */
+export interface DevSeedResponse {
+  /**
+   * 作成されたフォルダー数
+   * @format int32
+   */
+  foldersCreated: number;
+  /**
+   * 作成されたメモ数
+   * @format int32
+   */
+  memosCreated: number;
+  /** スキップされたかどうか（既存データがある場合） */
+  skipped: boolean;
+  /** 結果メッセージ */
+  message: string;
 }
 
 /** トークンリフレッシュリクエスト */
@@ -92,6 +141,80 @@ export interface GoogleAuthRequest {
    * @example "eyJhbGciOiJSUzI1NiIsInR"
    */
   idToken: string;
+}
+
+export interface MemoDetailResponse {
+  /** @format uuid */
+  memoId: string;
+  title?: string;
+  content?: string;
+  tags: string[];
+  transcriptionText?: string;
+  transcriptionStatus: string;
+  formattingStatus: string;
+  /** @format date-time */
+  createdAt: string;
+  /** @format date-time */
+  updatedAt: string;
+}
+
+export interface UpdateMemoRequest {
+  /**
+   * @minLength 0
+   * @maxLength 100
+   */
+  title?: string;
+  content?: string;
+  tags?: string[];
+}
+
+export interface UpdateFolderRequest {
+  /**
+   * @minLength 0
+   * @maxLength 50
+   */
+  name?: string;
+  /** @format uuid */
+  parentId?: string;
+  moveToRoot: boolean;
+}
+
+/** タグ一覧レスポンス */
+export interface TagsResponse {
+  /**
+   * タグ名のリスト
+   * @example ["開発","コード","ミーティング"]
+   */
+  tags: string[];
+}
+
+export interface FolderInfo {
+  /** @format uuid */
+  id: string;
+  name: string;
+  path: string;
+}
+
+export interface ListMemosResponse {
+  memos: MemoListItemResponse[];
+}
+
+export interface MemoListItemResponse {
+  /** @format uuid */
+  memoId: string;
+  title?: string;
+  tags: string[];
+  transcriptionStatus: string;
+  formattingStatus: string;
+  folder?: FolderInfo;
+  /** @format date-time */
+  createdAt: string;
+  /** @format date-time */
+  updatedAt: string;
+}
+
+export interface ListFoldersResponse {
+  folders: FolderResponse[];
 }
 
 /** ユーザー情報レスポンス */
@@ -315,7 +438,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       },
       params: RequestParams = {}
     ) =>
-      this.request<CreateMemoResponse, ErrorResponse>({
+      this.request<VoiceMemoCreatedResponse, ErrorResponse>({
         path: `/api/voice/memos`,
         method: 'POST',
         query: query,
@@ -323,6 +446,83 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         secure: true,
         type: ContentType.FormData,
         format: 'json',
+        ...params,
+      }),
+
+    /**
+     * @description 認証ユーザーのフォルダー一覧をパス情報付きで取得する。
+     *
+     * @tags Folder
+     * @name ListFolders
+     * @summary フォルダー一覧取得
+     * @request GET:/api/folders
+     * @secure
+     */
+    listFolders: (params: RequestParams = {}) =>
+      this.request<ListFoldersResponse, ErrorResponse>({
+        path: `/api/folders`,
+        method: 'GET',
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description 新しいフォルダーを作成する。親フォルダーを指定して階層構造を作成可能。
+     *
+     * @tags Folder
+     * @name CreateFolder
+     * @summary フォルダー作成
+     * @request POST:/api/folders
+     * @secure
+     */
+    createFolder: (data: CreateFolderRequest, params: RequestParams = {}) =>
+      this.request<FolderResponse, ErrorResponse>({
+        path: `/api/folders`,
+        method: 'POST',
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description 指定したメールアドレスのユーザーのアクセストークンを取得する。 OAuth不要で、Swagger UIからすぐにAPIテストができる。 **注意**: dev 環境でのみ有効。本番環境では使用不可。
+     *
+     * @tags Dev
+     * @name GetToken
+     * @summary 開発用トークン取得
+     * @request POST:/api/dev/token
+     * @secure
+     */
+    getToken: (
+      query: {
+        /** ユーザーのメールアドレス */
+        email: string;
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<DevTokenResponse, DevTokenResponse>({
+        path: `/api/dev/token`,
+        method: 'POST',
+        query: query,
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description 認証ユーザー用にテスト用のフォルダーとメモを作成する。 データは seed-data.yml から読み込まれる。 冪等性を持ち、既にフォルダーが存在する場合はスキップする。
+     *
+     * @tags Dev
+     * @name Seed
+     * @summary テストデータ作成
+     * @request POST:/api/dev/seed
+     * @secure
+     */
+    seed: (params: RequestParams = {}) =>
+      this.request<DevSeedResponse, DevSeedResponse>({
+        path: `/api/dev/seed`,
+        method: 'POST',
+        secure: true,
         ...params,
       }),
 
@@ -380,6 +580,186 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         body: data,
         secure: true,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description 指定されたIDのメモの詳細情報を取得します。セキュリティ上、権限のないメモも404として返します。
+     *
+     * @tags Memo
+     * @name GetMemo
+     * @summary メモ詳細取得
+     * @request GET:/api/memos/{id}
+     * @secure
+     */
+    getMemo: (id: string, params: RequestParams = {}) =>
+      this.request<MemoDetailResponse, ErrorResponse>({
+        path: `/api/memos/${id}`,
+        method: 'GET',
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description 指定されたメモを削除します。
+     *
+     * @tags Memo
+     * @name DeleteMemo
+     * @summary メモ削除
+     * @request DELETE:/api/memos/{id}
+     * @secure
+     */
+    deleteMemo: (id: string, params: RequestParams = {}) =>
+      this.request<void, ErrorResponse>({
+        path: `/api/memos/${id}`,
+        method: 'DELETE',
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description メモの部分更新を行います。指定されたフィールドのみ更新されます。
+     *
+     * @tags Memo
+     * @name UpdateMemo
+     * @summary メモ更新
+     * @request PATCH:/api/memos/{id}
+     * @secure
+     */
+    updateMemo: (id: string, data: UpdateMemoRequest, params: RequestParams = {}) =>
+      this.request<MemoDetailResponse, ErrorResponse>({
+        path: `/api/memos/${id}`,
+        method: 'PATCH',
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description フォルダーを削除する。子フォルダーまたはメモが存在する場合は削除できない。
+     *
+     * @tags Folder
+     * @name DeleteFolder
+     * @summary フォルダー削除
+     * @request DELETE:/api/folders/{id}
+     * @secure
+     */
+    deleteFolder: (id: string, params: RequestParams = {}) =>
+      this.request<void, ErrorResponse>({
+        path: `/api/folders/${id}`,
+        method: 'DELETE',
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description フォルダーのリネームまたは移動を行う。両方同時に指定可能。
+     *
+     * @tags Folder
+     * @name UpdateFolder
+     * @summary フォルダー更新
+     * @request PATCH:/api/folders/{id}
+     * @secure
+     */
+    updateFolder: (id: string, data: UpdateFolderRequest, params: RequestParams = {}) =>
+      this.request<FolderResponse, ErrorResponse>({
+        path: `/api/folders/${id}`,
+        method: 'PATCH',
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description 認証ユーザーが使用している全タグを取得する。 ソート順と件数制限が指定可能。 人気タグを取得する場合: sort=usage_count&order=desc&limit=10
+     *
+     * @tags Tag
+     * @name ListTags
+     * @summary タグ一覧取得
+     * @request GET:/api/tags
+     * @secure
+     */
+    listTags: (
+      query?: {
+        /**
+         * ソート項目（name: 名前順, usage_count: 使用回数順）
+         * @default "name"
+         */
+        sort?: string;
+        /**
+         * ソート順序（asc, desc）
+         * @default "asc"
+         */
+        order?: string;
+        /**
+         * 取得件数制限
+         * @format int32
+         */
+        limit?: number;
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<TagsResponse, ErrorResponse>({
+        path: `/api/tags`,
+        method: 'GET',
+        query: query,
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description 認証ユーザーのメモを取得する。フォルダーによるフィルタリング、キーワード検索、ソート、件数制限が可能。
+     *
+     * @tags Memo
+     * @name ListMemos
+     * @summary メモ一覧取得
+     * @request GET:/api/memos
+     * @secure
+     */
+    listMemos: (
+      query?: {
+        /**
+         * フォルダーIDでフィルタリング
+         * @format uuid
+         */
+        folderId?: string;
+        /**
+         * true の場合、子孫フォルダーのメモも含める
+         * @default false
+         */
+        includeDescendants?: boolean;
+        /**
+         * true の場合、未分類メモのみ取得
+         * @default false
+         */
+        uncategorizedOnly?: boolean;
+        /** キーワード検索（タイトルまたはコンテントに含まれるメモを検索） */
+        keyword?: string;
+        /**
+         * ソート項目（updated_at, created_at, title）
+         * @default "updated_at"
+         */
+        sort?: string;
+        /**
+         * ソート順序（asc, desc）
+         * @default "desc"
+         */
+        order?: string;
+        /**
+         * 取得件数制限
+         * @format int32
+         */
+        limit?: number;
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<ListMemosResponse, ErrorResponse>({
+        path: `/api/memos`,
+        method: 'GET',
+        query: query,
+        secure: true,
         ...params,
       }),
 

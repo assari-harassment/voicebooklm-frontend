@@ -1,5 +1,10 @@
 import axios, { isAxiosError } from 'axios';
-import { Api, CreateMemoResponse, TokenResponse } from './generated/apiSchema';
+import {
+  Api,
+  ListMemosResponse,
+  TokenResponse,
+  VoiceMemoCreatedResponse,
+} from './generated/apiSchema';
 import { File } from 'expo-file-system';
 import { setupAxiosInterceptors } from './interceptors';
 import { useAuthStore } from '@/src/shared/stores/authStore';
@@ -48,7 +53,7 @@ class ApiClient {
   async createMemoFromAudio(
     audioFilePath: string,
     language: string = 'ja-JP'
-  ): Promise<CreateMemoResponse> {
+  ): Promise<VoiceMemoCreatedResponse> {
     // ファイルの存在確認
     const file = new File(audioFilePath);
     if (!file.exists) {
@@ -74,7 +79,7 @@ class ApiClient {
         console.log('Token:', this.accessToken ? 'Set' : 'Not set');
       }
 
-      const response = await axios.post<CreateMemoResponse>(
+      const response = await axios.post<VoiceMemoCreatedResponse>(
         `${API_BASE_URL}/api/voice/memos`,
         formData,
         {
@@ -125,6 +130,22 @@ class ApiClient {
    */
   async refreshToken(refreshToken: string) {
     const response = await this.api.api.refreshToken({ refreshToken }, { secure: false });
+    return response.data;
+  }
+
+  /**
+   * メモ一覧を取得
+   */
+  async listMemos(params?: {
+    folderId?: string;
+    includeDescendants?: boolean;
+    uncategorizedOnly?: boolean;
+    keyword?: string;
+    sort?: string;
+    order?: string;
+    limit?: number;
+  }): Promise<ListMemosResponse> {
+    const response = await this.api.api.listMemos(params, { secure: true });
     return response.data;
   }
 }

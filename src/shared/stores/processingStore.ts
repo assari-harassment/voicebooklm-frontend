@@ -1,4 +1,4 @@
-import type { CreateMemoResponse } from '@/src/api/generated/apiSchema';
+import type { VoiceMemoCreatedResponse } from '@/src/api/generated/apiSchema';
 import { apiClient } from '@/src/api';
 import { create } from 'zustand';
 
@@ -7,7 +7,7 @@ export type ProcessingStatus = 'idle' | 'processing' | 'completed' | 'error';
 interface ProcessingState {
   // 状態
   status: ProcessingStatus;
-  memoResult: CreateMemoResponse | null;
+  memoResult: VoiceMemoCreatedResponse | null;
   error: string | null;
   filePath: string | null;
   language: string | null;
@@ -15,7 +15,7 @@ interface ProcessingState {
   // アクション
   startProcessing: (filePath: string, language?: string) => Promise<void>;
   retry: () => Promise<void>;
-  setCompleted: (result: CreateMemoResponse) => void;
+  setCompleted: (result: VoiceMemoCreatedResponse) => void;
   setError: (error: string) => void;
   reset: () => void;
   dismissBanner: () => void;
@@ -99,7 +99,7 @@ export const useProcessingStore = create<ProcessingState>()((set, get) => ({
   },
 
   // 処理完了（手動設定用）
-  setCompleted: (result: CreateMemoResponse) => {
+  setCompleted: (result: VoiceMemoCreatedResponse) => {
     set({
       status: 'completed',
       memoResult: result,

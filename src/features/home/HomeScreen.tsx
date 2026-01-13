@@ -1,36 +1,25 @@
-import type { Note } from '@/src/shared/types';
 import { router } from 'expo-router';
-import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 
 import { useProcessingStore } from '@/src/shared/stores/processingStore';
 
 import { FolderList } from './folder-list';
-import { RecentNotes } from './recent-notes';
+import { RecentNotes, useRecentMemos } from './recent-notes';
 import { RecordFab } from './record-fab';
 import { folderStructure, sampleNotes } from './sample-data';
 
-// コンポーネント
 export function HomeScreen() {
-  const [notes, setNotes] = useState<Note[]>(sampleNotes);
+  const { memos, isLoading, error } = useRecentMemos();
 
   // トースト表示中はFABを無効化
   const isToastVisible = useProcessingStore((state) => state.status !== 'idle');
 
-  const handleNoteClick = (noteId: string) => {
-    router.push(`/note/${noteId}`);
+  const handleMemoClick = (memoId: string) => {
+    router.push(`/note/${memoId}`);
   };
 
   const handleFolderClick = (_folderName: string) => {
     // TODO: Navigate to folder view
-  };
-
-  const handleEditNote = (noteId: string, newTitle: string) => {
-    setNotes((prev) => prev.map((n) => (n.id === noteId ? { ...n, title: newTitle } : n)));
-  };
-
-  const handleDeleteNote = (noteId: string) => {
-    setNotes((prev) => prev.filter((n) => n.id !== noteId));
   };
 
   const handleStartRecording = () => {
@@ -38,20 +27,20 @@ export function HomeScreen() {
   };
 
   return (
-    <View className="flex-1 bg-t-bg-primary">
+    <View className="flex-1 bg-t-bg-secondary">
       <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 96 }}>
         {/* 最近のメモ */}
         <RecentNotes
-          notes={notes}
-          onNoteClick={handleNoteClick}
-          onEditNote={handleEditNote}
-          onDeleteNote={handleDeleteNote}
+          memos={memos}
+          onMemoClick={handleMemoClick}
+          isLoading={isLoading}
+          error={error}
         />
 
         {/* フォルダ一覧 */}
         <FolderList
           folderStructure={folderStructure}
-          notes={notes}
+          notes={sampleNotes}
           onFolderClick={handleFolderClick}
         />
       </ScrollView>
