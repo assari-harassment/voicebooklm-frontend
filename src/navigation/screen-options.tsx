@@ -52,6 +52,11 @@ export const homeScreenOptions: NativeStackNavigationOptions = {
  */
 export const noteDetailScreenOptions: NativeStackNavigationOptions = {
   title: '',
+  headerTransparent: true,
+  headerStyle: {
+    backgroundColor: 'transparent',
+  },
+  headerBlurEffect: undefined,
 };
 
 /**

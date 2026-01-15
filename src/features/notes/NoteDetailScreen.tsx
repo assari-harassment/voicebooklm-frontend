@@ -3,6 +3,7 @@ import { apiClient } from '@/src/api';
 import { ConfirmDialog } from '@/src/shared/components';
 import { colors } from '@/src/shared/constants';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useHeaderHeight } from '@react-navigation/elements';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { ScrollView, TouchableOpacity, View } from 'react-native';
@@ -27,6 +28,7 @@ function formatDate(isoString: string) {
 // コンポーネント
 export function NoteDetailScreen() {
   const navigation = useNavigation();
+  const headerHeight = useHeaderHeight();
   const { id, memoData } = useLocalSearchParams<{
     id: string;
     memoData?: string;
@@ -161,7 +163,7 @@ export function NoteDetailScreen() {
         className="flex-1"
         contentContainerStyle={{
           paddingHorizontal: 16,
-          paddingTop: 16,
+          paddingTop: headerHeight,
           paddingBottom: 32,
         }}
       >
