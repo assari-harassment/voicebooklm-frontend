@@ -11,7 +11,7 @@ export function AppLogo() {
         resizeMode="contain"
       />
       <Text variant="headlineLarge" className="font-bold text-t-text-primary mb-2">
-        VoiceBookLM
+        VoiceNoteLM
       </Text>
       <Text variant="bodyLarge" className="text-t-text-secondary">
         音声からアイデアを記録

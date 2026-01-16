@@ -18,7 +18,7 @@ export function AuthLoadingScreen() {
 
       {/* App Name */}
       <Text variant="headlineLarge" className="font-bold text-t-text-primary mb-8">
-        VoiceBookLM
+        VoiceNoteLM
       </Text>
 
       {/* Loading Indicator */}

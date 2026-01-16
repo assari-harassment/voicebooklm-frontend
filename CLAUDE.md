@@ -1,4 +1,4 @@
-# VoiceBookLM Frontend
+# VoiceNoteLM Frontend
 
 ## ドキュメント
 

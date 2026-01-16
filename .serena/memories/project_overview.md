@@ -1,8 +1,8 @@
-# VoiceBookLM Frontend
+# VoiceNoteLM Frontend
 
 ## プロジェクト概要
 
-VoiceBookLMは、**音声ファースト × 自動整理**をコンセプトとしたAI搭載ボイスメモアプリケーションのフロントエンドです。
+VoiceNoteLMは、**音声ファースト × 自動整理**をコンセプトとしたAI搭載ボイスメモアプリケーションのフロントエンドです。
 
 ### コンセプト
 
