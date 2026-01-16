@@ -1,8 +1,21 @@
 import { colors } from '@/src/shared/constants';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { TextInput as RNTextInput, View } from 'react-native';
+import { StyleSheet, TextInput as RNTextInput, View } from 'react-native';
 import { Chip } from 'react-native-paper';
+
+// チップのボーダー・シャドウスタイル（タグチップと追加ボタンで共通）
+const styles = StyleSheet.create({
+  chipBase: {
+    borderWidth: 1,
+    borderColor: colors.border.primary,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+});
 
 // 型定義
 interface NoteTagsProps {
@@ -34,18 +47,7 @@ export function NoteTags({ tags, onAddTag, onRemoveTag }: NoteTagsProps) {
             closeIcon={() => (
               <MaterialCommunityIcons name="close" size={16} color={colors.text.secondary} />
             )}
-            style={{
-              backgroundColor: colors.bg.tertiary,
-              borderWidth: 1,
-              borderColor: colors.border.primary,
-              // シャドウ（iOS）
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.08,
-              shadowRadius: 2,
-              // シャドウ（Android）
-              elevation: 1,
-            }}
+            style={[styles.chipBase, { backgroundColor: colors.bg.tertiary }]}
             textStyle={{ color: colors.text.primary, fontSize: 14 }}
           >
             {tag}
@@ -75,18 +77,7 @@ export function NoteTags({ tags, onAddTag, onRemoveTag }: NoteTagsProps) {
               <MaterialCommunityIcons name="plus" size={size} color={colors.text.secondary} />
             )}
             onPress={() => setIsAddingTag(true)}
-            style={{
-              backgroundColor: colors.bg.primary,
-              borderWidth: 1,
-              borderColor: colors.border.primary,
-              // シャドウ（iOS）
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.08,
-              shadowRadius: 2,
-              // シャドウ（Android）
-              elevation: 1,
-            }}
+            style={[styles.chipBase, { backgroundColor: colors.bg.primary }]}
             textStyle={{ color: colors.text.secondary, fontSize: 14 }}
           >
             タグを追加

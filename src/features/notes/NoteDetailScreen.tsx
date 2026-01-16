@@ -6,7 +6,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
-import { ScrollView, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, TouchableOpacity, View } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
 
 import { NoteContent } from './note-content';
@@ -69,6 +69,7 @@ export function NoteDetailScreen() {
   const memo = parsedMemoData || fetchedMemo;
 
   // タグの状態（ローカル編集用）
+  // TODO: タグの追加・削除をAPIに保存する機能を実装する
   const [localTags, setLocalTags] = useState<string[]>([]);
 
   // メモが取得できたらタグを初期化
@@ -89,6 +90,7 @@ export function NoteDetailScreen() {
       router.replace('/home');
     } catch (e) {
       if (__DEV__) console.error('Failed to delete memo:', e);
+      Alert.alert('エラー', 'メモの削除に失敗しました。もう一度お試しください。');
       setIsDeleting(false);
     }
   }, [memo]);

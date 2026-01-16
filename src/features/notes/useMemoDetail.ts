@@ -18,6 +18,8 @@ export function useMemoDetail(memoId: string): UseMemoDetailResult {
   const [error, setError] = useState<Error | null>(null);
 
   const fetchMemo = useCallback(async () => {
+    // memoIdが空文字列またはundefinedの場合は不要なAPI呼び出しを避ける
+    // （例：録音後の直接遷移でmemoDataが渡される場合など）
     if (!memoId) {
       setIsLoading(false);
       return;
