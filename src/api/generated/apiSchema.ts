@@ -53,6 +53,25 @@ export interface ErrorResponse {
   code: string;
 }
 
+export interface MemoDetailResponse {
+  /** @format uuid */
+  memoId: string;
+  title?: string;
+  content?: string;
+  tags: string[];
+  transcriptionText?: string;
+  transcriptionStatus: string;
+  formattingStatus: string;
+  /** @format date-time */
+  createdAt: string;
+  /** @format date-time */
+  updatedAt: string;
+}
+
+export interface ResummarizeRequest {
+  editedTranscription: string;
+}
+
 export interface FolderResponse {
   /** @format uuid */
   id: string;
@@ -60,6 +79,8 @@ export interface FolderResponse {
   /** @format uuid */
   parentId?: string;
   path: string;
+  /** @format int32 */
+  memoCount: number;
 }
 
 export interface CreateFolderRequest {
@@ -141,21 +162,6 @@ export interface GoogleAuthRequest {
    * @example "eyJhbGciOiJSUzI1NiIsInR"
    */
   idToken: string;
-}
-
-export interface MemoDetailResponse {
-  /** @format uuid */
-  memoId: string;
-  title?: string;
-  content?: string;
-  tags: string[];
-  transcriptionText?: string;
-  transcriptionStatus: string;
-  formattingStatus: string;
-  /** @format date-time */
-  createdAt: string;
-  /** @format date-time */
-  updatedAt: string;
 }
 
 export interface UpdateMemoRequest {
@@ -450,6 +456,25 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
+     * @description 編集された文字起こしテキストから再度AI整形（要約）を行います。
+     *
+     * @tags Memo
+     * @name Resummarize
+     * @summary メモ再要約
+     * @request POST:/api/memos/{id}/resummarize
+     * @secure
+     */
+    resummarize: (id: string, data: ResummarizeRequest, params: RequestParams = {}) =>
+      this.request<MemoDetailResponse, ErrorResponse>({
+        path: `/api/memos/${id}/resummarize`,
+        method: 'POST',
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
      * @description 認証ユーザーのフォルダー一覧をパス情報付きで取得する。
      *
      * @tags Folder
@@ -673,7 +698,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
-     * @description 認証ユーザーが使用している全タグを取得する。 ソート順と件数制限が指定可能。 人気タグを取得する場合: sort=usage_count&order=desc&limit=10
+     * @description 認証ユーザーが使用している全タグを取得する。 ソート順と件数制限が指定可能。 例：）人気タグを取得する場合: sort=usage_count&order=desc&limit=10
      *
      * @tags Tag
      * @name ListTags

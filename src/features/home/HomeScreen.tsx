@@ -6,7 +6,6 @@ import { useProcessingStore } from '@/src/shared/stores/processingStore';
 import { FolderList } from './folder-list';
 import { RecentNotes, useRecentMemos } from './recent-notes';
 import { RecordFab } from './record-fab';
-import { folderStructure, sampleNotes } from './sample-data';
 
 export function HomeScreen() {
   const { memos, isLoading, error } = useRecentMemos();
@@ -16,10 +15,6 @@ export function HomeScreen() {
 
   const handleMemoClick = (memoId: string) => {
     router.push(`/note/${memoId}`);
-  };
-
-  const handleFolderClick = (_folderName: string) => {
-    // TODO: Navigate to folder view
   };
 
   const handleStartRecording = () => {
@@ -38,11 +33,7 @@ export function HomeScreen() {
         />
 
         {/* フォルダ一覧 */}
-        <FolderList
-          folderStructure={folderStructure}
-          notes={sampleNotes}
-          onFolderClick={handleFolderClick}
-        />
+        <FolderList onMemoClick={handleMemoClick} />
       </ScrollView>
 
       {/* 録音ボタン (FAB) */}

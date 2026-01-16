@@ -1,6 +1,7 @@
 import axios, { isAxiosError } from 'axios';
 import {
   Api,
+  ListFoldersResponse,
   ListMemosResponse,
   MemoDetailResponse,
   TokenResponse,
@@ -163,6 +164,14 @@ class ApiClient {
    */
   async deleteMemo(memoId: string): Promise<void> {
     await this.api.api.deleteMemo(memoId, { secure: true });
+  }
+
+  /**
+   * フォルダー一覧を取得
+   */
+  async listFolders(): Promise<ListFoldersResponse> {
+    const response = await this.api.api.listFolders({ secure: true });
+    return response.data;
   }
 }
 
