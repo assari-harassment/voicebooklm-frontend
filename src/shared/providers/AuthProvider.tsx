@@ -41,8 +41,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // エラー種別に応じて処理を分岐
         const status = (error as { response?: { status?: number } })?.response?.status;
 
-        if (status === 401 || status === 403) {
-          // トークンが明確に無効な場合のみログアウト
+        if (status === 401 || status === 403 || status === 404) {
+          // トークンが無効、またはユーザーが存在しない場合はログアウト
           logout();
         } else {
           // ネットワークエラー等の一時的な問題は、既存トークンを信頼して続行
