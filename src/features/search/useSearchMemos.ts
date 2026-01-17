@@ -7,6 +7,7 @@ interface UseSearchMemosResult {
   isLoading: boolean;
   isLoadingMore: boolean;
   error: Error | null;
+  loadMoreError: Error | null;
   search: (keyword: string) => void;
   loadMore: () => void;
   totalCount: number;
@@ -42,6 +43,7 @@ export function useSearchMemos(): UseSearchMemosResult {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [loadMoreError, setLoadMoreError] = useState<Error | null>(null);
   const [totalCount, setTotalCount] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const debounceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -85,10 +87,11 @@ export function useSearchMemos(): UseSearchMemosResult {
     try {
       if (isLoadMore) {
         setIsLoadingMore(true);
+        setLoadMoreError(null);
       } else {
         setIsLoading(true);
+        setError(null);
       }
-      setError(null);
 
       const response = await apiClient.listMemos({
         keyword: trimmedKeyword,
@@ -105,25 +108,36 @@ export function useSearchMemos(): UseSearchMemosResult {
 
       const newMemos = isLoadMore ? [...memosRef.current, ...response.memos] : response.memos;
 
-      // キャッシュに保存
-      searchCache.set(cacheKey, {
-        memos: newMemos,
-        total: response.total,
-        hasMore: response.hasMore,
-        timestamp: Date.now(),
-      });
+      // キャッシュに保存（初回取得時のみ）
+      if (!isLoadMore) {
+        searchCache.set(cacheKey, {
+          memos: newMemos,
+          total: response.total,
+          hasMore: response.hasMore,
+          timestamp: Date.now(),
+        });
+      }
 
       setMemos(newMemos);
       setTotalCount(response.total);
       setHasMore(response.hasMore);
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('検索に失敗しました'));
+      const errorObj = err instanceof Error ? err : new Error('検索に失敗しました');
+      // 追加読み込みエラーは既存結果を保持し、loadMoreErrorに設定
+      if (isLoadMore) {
+        setLoadMoreError(errorObj);
+      } else {
+        setError(errorObj);
+      }
       if (__DEV__) {
         console.error('Failed to search memos:', err);
       }
     } finally {
-      setIsLoading(false);
-      setIsLoadingMore(false);
+      // キーワードが変更されていたらローディング状態を更新しない
+      if (currentKeywordRef.current.trim().toLowerCase() === trimmedKeyword.toLowerCase()) {
+        setIsLoading(false);
+        setIsLoadingMore(false);
+      }
     }
   }, []);
 
@@ -157,11 +171,18 @@ export function useSearchMemos(): UseSearchMemosResult {
         setHasMore(false);
         setIsLoading(false);
         setIsLoadingMore(false);
+        setError(null);
+        setLoadMoreError(null);
         return;
       }
 
-      // ローディング状態を先に設定
+      // 新しい検索開始時に前の結果をクリアし、ローディング状態を設定
+      setMemos([]);
+      setTotalCount(0);
+      setHasMore(false);
       setIsLoading(true);
+      setError(null);
+      setLoadMoreError(null);
 
       // デバウンス処理
       debounceTimeoutRef.current = setTimeout(() => {
@@ -185,6 +206,7 @@ export function useSearchMemos(): UseSearchMemosResult {
     isLoading,
     isLoadingMore,
     error,
+    loadMoreError,
     search,
     loadMore,
     totalCount,

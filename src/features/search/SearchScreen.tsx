@@ -47,7 +47,17 @@ function ItemSeparator() {
 
 export function SearchScreen() {
   const [searchText, setSearchText] = useState('');
-  const { memos, isLoading, isLoadingMore, error, search, loadMore, totalCount } = useSearchMemos();
+  const {
+    memos,
+    isLoading,
+    isLoadingMore,
+    error,
+    loadMoreError,
+    search,
+    loadMore,
+    totalCount,
+    hasMore,
+  } = useSearchMemos();
 
   const handleSearchChange = (text: string) => {
     setSearchText(text);
@@ -96,15 +106,35 @@ export function SearchScreen() {
     return <EmptySearchResult />;
   }, [isLoading]);
 
-  // フッターコンポーネント（追加読み込み中のインジケータ）
+  // フッターコンポーネント（追加読み込み中のインジケータ / エラー / 終了メッセージ）
   const ListFooter = useCallback(() => {
-    if (!isLoadingMore) return null;
-    return (
-      <View className="py-4 items-center">
-        <ActivityIndicator size="small" />
-      </View>
-    );
-  }, [isLoadingMore]);
+    if (isLoadingMore) {
+      return (
+        <View className="py-4 items-center">
+          <ActivityIndicator size="small" />
+        </View>
+      );
+    }
+    if (loadMoreError) {
+      return (
+        <View className="py-4 items-center">
+          <Text variant="bodySmall" className="text-t-danger-500">
+            読み込みに失敗しました。もう一度お試しください。
+          </Text>
+        </View>
+      );
+    }
+    if (!hasMore && memos.length > 0) {
+      return (
+        <View className="py-4 items-center">
+          <Text variant="bodySmall" className="text-t-text-tertiary">
+            すべての結果を表示しました
+          </Text>
+        </View>
+      );
+    }
+    return null;
+  }, [isLoadingMore, loadMoreError, hasMore, memos.length]);
 
   return (
     <View className="flex-1 bg-t-bg-secondary">
@@ -166,7 +196,7 @@ export function SearchScreen() {
           ListEmptyComponent={ListEmpty}
           ListFooterComponent={ListFooter}
           onEndReached={loadMore}
-          onEndReachedThreshold={0.5}
+          onEndReachedThreshold={0.1}
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 16 }}
           showsVerticalScrollIndicator={false}
         />
