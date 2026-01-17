@@ -1,6 +1,7 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { HeaderButton } from '@react-navigation/elements';
 import type { NativeStackNavigationOptions } from '@react-navigation/native-stack';
+import { router } from 'expo-router';
 
 /**
  * 全画面共通のヘッダー設定
@@ -34,7 +35,16 @@ export const loginScreenOptions: NativeStackNavigationOptions = {
  */
 export const homeScreenOptions: NativeStackNavigationOptions = {
   title: '',
-  headerLeft: () => null,
+  headerLeft: ({ tintColor }) => (
+    <HeaderButton
+      onPress={() => {
+        router.push('/search');
+      }}
+      accessibilityLabel="検索"
+    >
+      <MaterialCommunityIcons name="magnify" size={24} color={tintColor} />
+    </HeaderButton>
+  ),
   headerRight: ({ tintColor }) => (
     <HeaderButton
       onPress={() => {
@@ -73,4 +83,11 @@ export const processingScreenOptions: NativeStackNavigationOptions = {
   title: '処理中',
   headerBackVisible: false,
   gestureEnabled: false,
+};
+
+/**
+ * search画面のヘッダー設定
+ */
+export const searchScreenOptions: NativeStackNavigationOptions = {
+  title: '検索',
 };
