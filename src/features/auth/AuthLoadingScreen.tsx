@@ -1,7 +1,6 @@
 import { colors } from '@/src/shared/constants';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { ActivityIndicator, View } from 'react-native';
-import { Surface, Text } from 'react-native-paper';
+import { ActivityIndicator, Image, View } from 'react-native';
+import { Text } from 'react-native-paper';
 
 /**
  * 認証復元中のローディング画面
@@ -11,24 +10,15 @@ export function AuthLoadingScreen() {
   return (
     <View className="flex-1 bg-t-bg-primary justify-center items-center">
       {/* Logo */}
-      <Surface
-        elevation={0}
-        style={{
-          width: 80,
-          height: 80,
-          borderRadius: 24,
-          backgroundColor: colors.brand[600],
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginBottom: 24,
-        }}
-      >
-        <MaterialCommunityIcons name="microphone" size={40} color={colors.text.inverse} />
-      </Surface>
+      <Image
+        source={require('@/assets/images/icon.png')}
+        style={{ width: 80, height: 80, borderRadius: 24, marginBottom: 24 }}
+        resizeMode="contain"
+      />
 
       {/* App Name */}
       <Text variant="headlineLarge" className="font-bold text-t-text-primary mb-8">
-        VoiceBookLM
+        VoiceNoteLM
       </Text>
 
       {/* Loading Indicator */}
