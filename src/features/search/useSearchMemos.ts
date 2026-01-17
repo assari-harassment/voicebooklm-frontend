@@ -93,9 +93,23 @@ export function useSearchMemos(): UseSearchMemosResult {
         setError(null);
       }
 
-      // タグ検索パターン: #タグ名 または tag:タグ名
-      const tagPattern = /^(?:#|tag:)(.+)$/;
-      const tagMatch = trimmedKeyword.match(tagPattern);
+      // タグ検索パターン: #タグ名 または tag:タグ名 を複数抽出
+      // 例: "#開発 #コード ミーティング" → tags: ["開発", "コード"], keyword: "ミーティング"
+      const tagPattern = /(?:#|tag:)(\S+)/g;
+      const tags: string[] = [];
+      let match;
+      while ((match = tagPattern.exec(trimmedKeyword)) !== null) {
+        const tag = match[1].trim();
+        if (tag) {
+          tags.push(tag);
+        }
+      }
+
+      // タグ部分を除去してキーワードを抽出
+      const keywordPart = trimmedKeyword
+        .replace(/(?:#|tag:)\S+/g, '')
+        .trim()
+        .replace(/\s+/g, ' '); // 連続する空白を1つにまとめる
 
       const params: {
         keyword?: string;
@@ -111,12 +125,11 @@ export function useSearchMemos(): UseSearchMemosResult {
         offset: currentOffset,
       };
 
-      if (tagMatch) {
-        // タグ検索
-        params.tags = [tagMatch[1].trim()];
-      } else {
-        // 通常のキーワード検索
-        params.keyword = trimmedKeyword;
+      if (tags.length > 0) {
+        params.tags = tags;
+      }
+      if (keywordPart) {
+        params.keyword = keywordPart;
       }
 
       const response = await apiClient.listMemos(params);
