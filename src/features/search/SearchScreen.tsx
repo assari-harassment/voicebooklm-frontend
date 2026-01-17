@@ -1,3 +1,4 @@
+import type { MemoListItemResponse } from '@/src/api/generated/apiSchema';
 import { MemoCard } from '@/src/shared/components/MemoCard';
 import { colors } from '@/src/shared/constants';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -5,8 +6,9 @@ import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { FlatList, TextInput, View } from 'react-native';
 import { ActivityIndicator, IconButton, Surface, Text } from 'react-native-paper';
+import { SearchHistory } from './SearchHistory';
+import { useSearchHistory } from './useSearchHistory';
 import { useSearchMemos } from './useSearchMemos';
-import type { MemoListItemResponse } from '@/src/api/generated/apiSchema';
 
 /**
  * 検索結果がない場合の表示
@@ -58,6 +60,7 @@ export function SearchScreen() {
     totalCount,
     hasMore,
   } = useSearchMemos();
+  const { recentHistory, isHydrated, recordSearch } = useSearchHistory();
 
   const handleSearchChange = (text: string) => {
     setSearchText(text);
@@ -68,6 +71,24 @@ export function SearchScreen() {
     setSearchText('');
     search('');
   };
+
+  // Enter押下時に履歴を記録
+  const handleSearchSubmit = () => {
+    const trimmed = searchText.trim();
+    if (trimmed) {
+      recordSearch(trimmed);
+    }
+  };
+
+  // 履歴アイテムクリック時に検索実行
+  const handleHistoryItemPress = useCallback(
+    (keyword: string) => {
+      setSearchText(keyword);
+      search(keyword);
+      recordSearch(keyword);
+    },
+    [search, recordSearch]
+  );
 
   const handleMemoPress = useCallback((memoId: string) => {
     router.push(`/note/${memoId}`);
@@ -82,10 +103,12 @@ export function SearchScreen() {
 
   const keyExtractor = useCallback((item: MemoListItemResponse) => item.memoId, []);
 
-  // 検索前の状態
+  // 検索前の状態（検索テキストが空）
   const isInitialState = !isLoading && !error && searchText.trim().length === 0;
   // 検索中の状態（検索テキストがあり、ローディング中またはエラーではない）
   const hasSearchText = searchText.trim().length > 0;
+  // 検索履歴を表示するかどうか（hydration完了後のみ履歴を表示）
+  const showSearchHistory = isHydrated && isInitialState && recentHistory.length > 0;
 
   // ヘッダーコンポーネント
   const ListHeader = useCallback(() => {
@@ -150,6 +173,7 @@ export function SearchScreen() {
               placeholderTextColor={colors.text.tertiary}
               value={searchText}
               onChangeText={handleSearchChange}
+              onSubmitEditing={handleSearchSubmit}
               autoFocus
               returnKeyType="search"
             />
@@ -182,8 +206,13 @@ export function SearchScreen() {
         </View>
       )}
 
-      {/* 初期状態（検索前） */}
-      {isInitialState && <InitialSearchState />}
+      {/* 初期状態（検索前）- 履歴がある場合は履歴を表示 */}
+      {showSearchHistory && (
+        <SearchHistory history={recentHistory} onHistoryItemPress={handleHistoryItemPress} />
+      )}
+
+      {/* 初期状態（検索前）- 履歴がない場合はプレースホルダを表示 */}
+      {isInitialState && !showSearchHistory && <InitialSearchState />}
 
       {/* 検索結果 */}
       {!(isLoading && memos.length === 0) && !error && hasSearchText && (
