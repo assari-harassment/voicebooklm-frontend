@@ -101,7 +101,7 @@ export function RecordingScreen() {
         text: '破棄',
         style: 'destructive',
         onPress: async () => {
-          audioRecorderService.cancelRecording();
+          await audioRecorderService.cancelRecording();
           // 録音ファイルを削除
           if (recordingFilePath.current) {
             try {
