@@ -203,6 +203,9 @@ export interface FolderInfo {
 
 export interface ListMemosResponse {
   memos: MemoListItemResponse[];
+  /** @format int32 */
+  total: number;
+  hasMore: boolean;
 }
 
 export interface MemoListItemResponse {
@@ -735,7 +738,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
-     * @description 認証ユーザーのメモを取得する。フォルダーによるフィルタリング、キーワード検索、ソート、件数制限が可能。
+     * @description 認証ユーザーのメモを取得する。フォルダーによるフィルタリング、キーワード検索、ソート、ページネーションが可能。
      *
      * @tags Memo
      * @name ListMemos
@@ -777,6 +780,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @format int32
          */
         limit?: number;
+        /**
+         * 取得開始位置（0から開始）
+         * @format int32
+         */
+        offset?: number;
       },
       params: RequestParams = {}
     ) =>
