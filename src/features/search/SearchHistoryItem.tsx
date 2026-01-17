@@ -23,6 +23,8 @@ export function SearchHistoryItem({ keyword, onPress }: SearchHistoryItemProps) 
         borderless
         style={{ borderRadius: 12 }}
         rippleColor="rgba(0, 0, 0, 0.1)"
+        accessibilityRole="button"
+        accessibilityLabel={`検索履歴: ${keyword}`}
       >
         <View className="flex-row items-center justify-between px-4 py-3">
           <Text variant="bodyLarge" className="text-t-text-primary flex-1" numberOfLines={1}>

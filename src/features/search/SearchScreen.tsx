@@ -103,12 +103,12 @@ export function SearchScreen() {
 
   const keyExtractor = useCallback((item: MemoListItemResponse) => item.memoId, []);
 
-  // 検索前の状態（hydration完了かつ検索テキストが空）
-  const isInitialState = isHydrated && !isLoading && !error && searchText.trim().length === 0;
+  // 検索前の状態（検索テキストが空）
+  const isInitialState = !isLoading && !error && searchText.trim().length === 0;
   // 検索中の状態（検索テキストがあり、ローディング中またはエラーではない）
   const hasSearchText = searchText.trim().length > 0;
-  // 検索履歴を表示するかどうか
-  const showSearchHistory = isInitialState && recentHistory.length > 0;
+  // 検索履歴を表示するかどうか（hydration完了後のみ履歴を表示）
+  const showSearchHistory = isHydrated && isInitialState && recentHistory.length > 0;
 
   // ヘッダーコンポーネント
   const ListHeader = useCallback(() => {
