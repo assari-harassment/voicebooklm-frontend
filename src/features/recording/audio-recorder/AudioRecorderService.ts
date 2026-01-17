@@ -68,42 +68,48 @@ class AudioRecorderService {
     // オーディオセッション設定
     AudioManager.setAudioSessionOptions({
       iosCategory: 'playAndRecord',
-      iosMode: 'default',
+      iosMode: 'measurement', // 音声認識用に最適化（オーディオ処理の介入を最小化）
       iosOptions: ['defaultToSpeaker', 'allowBluetooth'],
     });
+
+    // オーディオセッションを有効化
+    await AudioManager.setAudioSessionActivity(true);
 
     // AudioContext作成
     this.audioContext = new AudioContext({ sampleRate: SAMPLE_RATE });
 
-    // レコーダー作成
-    this.recorder = new AudioRecorder({
-      sampleRate: SAMPLE_RATE,
-      bufferLengthInSamples: BUFFER_LENGTH_IN_SAMPLES,
-    });
+    // レコーダー作成 (0.11.x: パラメータなしコンストラクタ)
+    this.recorder = new AudioRecorder();
 
     // RecorderAdapterを通じて接続
     const recorderAdapter = this.audioContext.createRecorderAdapter();
     this.recorder.connect(recorderAdapter);
     recorderAdapter.connect(this.audioContext.destination);
 
-    // オーディオデータの収集
+    // オーディオデータの収集 (0.11.x: 2引数形式)
     this.audioBuffers = [];
-    this.recorder.onAudioReady((event) => {
-      if (this.isPaused) return;
+    this.recorder.onAudioReady(
+      { sampleRate: SAMPLE_RATE, bufferLength: BUFFER_LENGTH_IN_SAMPLES, channelCount: 1 },
+      (event) => {
+        if (this.isPaused) return;
 
-      // バッファをコピーして保存
-      const channelData = event.buffer.getChannelData(0);
-      const bufferCopy = new Float32Array(channelData.length);
-      bufferCopy.set(channelData);
-      this.audioBuffers.push(bufferCopy);
+        // バッファをコピーして保存
+        const channelData = event.buffer.getChannelData(0);
+        const bufferCopy = new Float32Array(channelData.length);
+        bufferCopy.set(channelData);
+        this.audioBuffers.push(bufferCopy);
 
-      // 音量レベルを計算してコールバック
-      const level = this.calculateAudioLevel(channelData);
-      this.notifyAudioLevel(level);
-    });
+        // 音量レベルを計算してコールバック
+        const level = this.calculateAudioLevel(channelData);
+        this.notifyAudioLevel(level);
+      }
+    );
 
-    // 録音開始
-    this.recorder.start();
+    // 録音開始 (0.11.x: 戻り値チェック)
+    const startResult = this.recorder.start();
+    if (startResult.status === 'error') {
+      throw new Error(`Recording failed to start: ${startResult.message}`);
+    }
     this.isRecording = true;
     this.isPaused = false;
     this.startTime = Date.now();
@@ -146,7 +152,8 @@ class AudioRecorderService {
       return null;
     }
 
-    // 録音停止
+    // 録音停止 (0.11.x: clearOnAudioReady追加)
+    this.recorder.clearOnAudioReady();
     this.recorder.stop();
     this.recorder.disconnect();
 
@@ -162,6 +169,9 @@ class AudioRecorderService {
       this.audioContext.close();
       this.audioContext = null;
     }
+
+    // オーディオセッションを無効化
+    await AudioManager.setAudioSessionActivity(false);
 
     const result: RecordingResult = {
       filePath: this.outputPath!,
@@ -248,10 +258,11 @@ class AudioRecorderService {
     }
   }
 
-  cancelRecording(): void {
+  async cancelRecording(): Promise<void> {
     if (!this.isRecording) return;
 
     if (this.recorder) {
+      this.recorder.clearOnAudioReady();
       this.recorder.stop();
       this.recorder.disconnect();
       this.recorder = null;
@@ -261,6 +272,9 @@ class AudioRecorderService {
       this.audioContext.close();
       this.audioContext = null;
     }
+
+    // オーディオセッションを無効化
+    await AudioManager.setAudioSessionActivity(false);
 
     this.isRecording = false;
     this.isPaused = false;
