@@ -146,6 +146,7 @@ class ApiClient {
     sort?: string;
     order?: string;
     limit?: number;
+    offset?: number;
   }): Promise<ListMemosResponse> {
     const response = await this.api.api.listMemos(params, { secure: true });
     return response.data;

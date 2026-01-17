@@ -47,7 +47,7 @@ function ItemSeparator() {
 
 export function SearchScreen() {
   const [searchText, setSearchText] = useState('');
-  const { memos, isLoading, error, search, totalCount } = useSearchMemos();
+  const { memos, isLoading, isLoadingMore, error, search, loadMore, totalCount } = useSearchMemos();
 
   const handleSearchChange = (text: string) => {
     setSearchText(text);
@@ -96,6 +96,16 @@ export function SearchScreen() {
     return <EmptySearchResult />;
   }, [isLoading]);
 
+  // フッターコンポーネント（追加読み込み中のインジケータ）
+  const ListFooter = useCallback(() => {
+    if (!isLoadingMore) return null;
+    return (
+      <View className="py-4 items-center">
+        <ActivityIndicator size="small" />
+      </View>
+    );
+  }, [isLoadingMore]);
+
   return (
     <View className="flex-1 bg-t-bg-secondary">
       {/* 検索バー */}
@@ -126,8 +136,8 @@ export function SearchScreen() {
         </Surface>
       </View>
 
-      {/* ローディング状態 */}
-      {isLoading && (
+      {/* ローディング状態（初回取得時のみ） */}
+      {isLoading && memos.length === 0 && (
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="small" />
         </View>
@@ -146,7 +156,7 @@ export function SearchScreen() {
       {isInitialState && <InitialSearchState />}
 
       {/* 検索結果 */}
-      {!isLoading && !error && hasSearchText && (
+      {!(isLoading && memos.length === 0) && !error && hasSearchText && (
         <FlatList
           data={memos}
           keyExtractor={keyExtractor}
@@ -154,6 +164,9 @@ export function SearchScreen() {
           ItemSeparatorComponent={ItemSeparator}
           ListHeaderComponent={ListHeader}
           ListEmptyComponent={ListEmpty}
+          ListFooterComponent={ListFooter}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.5}
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 16 }}
           showsVerticalScrollIndicator={false}
         />
