@@ -222,6 +222,10 @@ export interface MemoListItemResponse {
   updatedAt: string;
 }
 
+export interface TranscriptionResponse {
+  transcription: string;
+}
+
 export interface ListFoldersResponse {
   folders: FolderResponse[];
 }
@@ -765,6 +769,8 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         uncategorizedOnly?: boolean;
         /** キーワード検索（タイトルまたはコンテントに含まれるメモを検索） */
         keyword?: string;
+        /** タグでフィルタリング（AND検索: 指定されたすべてのタグを持つメモを取得） */
+        tags?: string[];
         /**
          * ソート項目（updated_at, created_at, title）
          * @default "updated_at"
@@ -792,6 +798,23 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/memos`,
         method: 'GET',
         query: query,
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description 指定されたIDのメモの文字起こしテキストを取得します。再要約画面で使用します。
+     *
+     * @tags Memo
+     * @name GetTranscription
+     * @summary 文字起こしテキスト取得
+     * @request GET:/api/memos/{id}/transcription
+     * @secure
+     */
+    getTranscription: (id: string, params: RequestParams = {}) =>
+      this.request<TranscriptionResponse, ErrorResponse>({
+        path: `/api/memos/${id}/transcription`,
+        method: 'GET',
         secure: true,
         ...params,
       }),

@@ -93,13 +93,33 @@ export function useSearchMemos(): UseSearchMemosResult {
         setError(null);
       }
 
-      const response = await apiClient.listMemos({
-        keyword: trimmedKeyword,
+      // タグ検索パターン: #タグ名 または tag:タグ名
+      const tagPattern = /^(?:#|tag:)(.+)$/;
+      const tagMatch = trimmedKeyword.match(tagPattern);
+
+      const params: {
+        keyword?: string;
+        tags?: string[];
+        sort: string;
+        order: string;
+        limit: number;
+        offset: number;
+      } = {
         sort: 'updated_at',
         order: 'desc',
         limit: PAGE_SIZE,
         offset: currentOffset,
-      });
+      };
+
+      if (tagMatch) {
+        // タグ検索
+        params.tags = [tagMatch[1].trim()];
+      } else {
+        // 通常のキーワード検索
+        params.keyword = trimmedKeyword;
+      }
+
+      const response = await apiClient.listMemos(params);
 
       // キーワードが変更されていたら結果を破棄
       if (currentKeywordRef.current.trim().toLowerCase() !== trimmedKeyword.toLowerCase()) {

@@ -6,6 +6,7 @@ import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { FlatList, TextInput, View } from 'react-native';
 import { ActivityIndicator, IconButton, Surface, Text } from 'react-native-paper';
+import { PopularTags } from './popular-tags';
 import { SearchHistory } from './SearchHistory';
 import { useSearchHistory } from './useSearchHistory';
 import { useSearchMemos } from './useSearchMemos';
@@ -86,6 +87,17 @@ export function SearchScreen() {
       setSearchText(keyword);
       search(keyword);
       recordSearch(keyword);
+    },
+    [search, recordSearch]
+  );
+
+  // タグクリック時に検索実行
+  const handleTagPress = useCallback(
+    (tag: string) => {
+      const tagKeyword = `#${tag}`;
+      setSearchText(tagKeyword);
+      search(tagKeyword);
+      recordSearch(tagKeyword);
     },
     [search, recordSearch]
   );
@@ -206,13 +218,21 @@ export function SearchScreen() {
         </View>
       )}
 
-      {/* 初期状態（検索前）- 履歴がある場合は履歴を表示 */}
-      {showSearchHistory && (
-        <SearchHistory history={recentHistory} onHistoryItemPress={handleHistoryItemPress} />
-      )}
+      {/* 初期状態（検索前）- 人気タグと履歴を表示 */}
+      {isInitialState && (
+        <>
+          {/* 人気タグセクション */}
+          <PopularTags onTagPress={handleTagPress} />
 
-      {/* 初期状態（検索前）- 履歴がない場合はプレースホルダを表示 */}
-      {isInitialState && !showSearchHistory && <InitialSearchState />}
+          {/* 検索履歴セクション */}
+          {showSearchHistory && (
+            <SearchHistory history={recentHistory} onHistoryItemPress={handleHistoryItemPress} />
+          )}
+
+          {/* 人気タグも履歴もない場合のプレースホルダ */}
+          {!showSearchHistory && <InitialSearchState />}
+        </>
+      )}
 
       {/* 検索結果 */}
       {!(isLoading && memos.length === 0) && !error && hasSearchText && (

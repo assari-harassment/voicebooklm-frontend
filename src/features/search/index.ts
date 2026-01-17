@@ -1,3 +1,4 @@
+export { PopularTagChip, PopularTags, usePopularTags } from './popular-tags';
 export { SearchHistory } from './SearchHistory';
 export { SearchHistoryItem } from './SearchHistoryItem';
 export { SearchScreen } from './SearchScreen';
