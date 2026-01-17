@@ -8,6 +8,7 @@ import {
   noteDetailScreenOptions,
   processingScreenOptions,
   recordScreenOptions,
+  searchScreenOptions,
 } from '@/src/navigation/screen-options';
 import { ProcessingToast } from '@/src/shared/components';
 import { AuthProvider } from '@/src/shared/providers/AuthProvider';
@@ -26,6 +27,7 @@ export default function RootLayout() {
               <Stack.Screen name="index" options={indexScreenOptions} />
               <Stack.Screen name="login" options={loginScreenOptions} />
               <Stack.Screen name="home" options={homeScreenOptions} />
+              <Stack.Screen name="search" options={searchScreenOptions} />
               <Stack.Screen name="note/[id]" options={noteDetailScreenOptions} />
               <Stack.Screen name="record" options={recordScreenOptions} />
               <Stack.Screen name="processing" options={processingScreenOptions} />
