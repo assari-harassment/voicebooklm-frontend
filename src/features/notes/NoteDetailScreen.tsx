@@ -11,6 +11,8 @@ import { ActivityIndicator, Text } from 'react-native-paper';
 
 import { NoteContent } from './note-content';
 import { TagSection } from './note-tags';
+import { EditableTitle } from './note-title';
+import { useDebouncedSave } from './shared';
 import { useMemoDetail } from './useMemoDetail';
 
 // ユーティリティ
@@ -71,12 +73,76 @@ export function NoteDetailScreen() {
   // タグの状態（ローカル編集用）
   const [localTags, setLocalTags] = useState<string[]>([]);
 
-  // メモが取得できたらタグを初期化
+  // ローカルのタイトル・コンテンツ状態（Controlled Component用）
+  const [localTitle, setLocalTitle] = useState('');
+  const [localContent, setLocalContent] = useState('');
+
+  // メモが取得できたら初期化
   useEffect(() => {
     if (memo) {
       setLocalTags(memo.tags);
+      setLocalTitle(memo.title || '');
+      setLocalContent(memo.content || '');
     }
   }, [memo]);
+
+  // タイトル保存処理
+  const handleSaveTitle = useCallback(
+    async (newTitle: string) => {
+      if (!memo) return;
+
+      try {
+        await apiClient.updateMemo(memo.memoId, { title: newTitle });
+      } catch (error) {
+        console.error('Failed to save title:', error);
+        Alert.alert('エラー', 'タイトルの保存に失敗しました');
+      }
+    },
+    [memo]
+  );
+
+  // コンテンツ保存処理
+  const handleSaveContent = useCallback(
+    async (newContent: string) => {
+      if (!memo) return;
+
+      try {
+        await apiClient.updateMemo(memo.memoId, { content: newContent });
+      } catch (error) {
+        console.error('Failed to save content:', error);
+        Alert.alert('エラー', 'コンテンツの保存に失敗しました');
+      }
+    },
+    [memo]
+  );
+
+  // タイトル用のdebounced save
+  const { flush: flushTitle } = useDebouncedSave({
+    value: localTitle,
+    initialValue: memo?.title || '',
+    delay: 1000,
+    onSave: handleSaveTitle,
+  });
+
+  // コンテンツ用のdebounced save
+  const { flush: flushContent } = useDebouncedSave({
+    value: localContent,
+    initialValue: memo?.content || '',
+    delay: 1000,
+    onSave: handleSaveContent,
+  });
+
+  // 画面を離れる前に未保存の変更をflush
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      // 未保存の変更がある場合は、画面遷移を一時停止して保存を完了させる
+      e.preventDefault();
+      Promise.all([flushTitle(), flushContent()]).then(() => {
+        navigation.dispatch(e.data.action);
+      });
+    });
+    return unsubscribe;
+  }, [navigation, flushTitle, flushContent]);
 
   // 削除処理
   const handleDelete = useCallback(async () => {
@@ -98,16 +164,19 @@ export function NoteDetailScreen() {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <TouchableOpacity
-          onPress={() => setIsDeleteDialogVisible(true)}
-          className="flex-row items-center px-3 py-2"
-          disabled={!memo || isDeleting}
-        >
-          <MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.danger[600]} />
-          <Text variant="bodyMedium" style={{ color: colors.danger[600], marginLeft: 4 }}>
-            削除
-          </Text>
-        </TouchableOpacity>
+        <View className="flex-row items-center">
+          {/* 削除ボタン */}
+          <TouchableOpacity
+            onPress={() => setIsDeleteDialogVisible(true)}
+            className="flex-row items-center px-3 py-2"
+            disabled={!memo || isDeleting}
+          >
+            <MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.danger[600]} />
+            <Text variant="bodyMedium" style={{ color: colors.danger[600], marginLeft: 4 }}>
+              削除
+            </Text>
+          </TouchableOpacity>
+        </View>
       ),
     });
   }, [navigation, memo, isDeleting]);
@@ -187,11 +256,10 @@ export function NoteDetailScreen() {
           paddingTop: headerHeight,
           paddingBottom: 32,
         }}
+        keyboardShouldPersistTaps="handled"
       >
-        {/* タイトル */}
-        <Text variant="titleLarge" className="font-semibold text-t-text-primary mb-2">
-          {memo.title || '無題のメモ'}
-        </Text>
+        {/* タイトル（編集可能） */}
+        <EditableTitle value={localTitle} onChange={setLocalTitle} onBlur={flushTitle} />
 
         {/* メタ情報 */}
         <View className="mb-4">
@@ -218,11 +286,14 @@ export function NoteDetailScreen() {
         {/* タグ一覧 */}
         <TagSection tags={localTags} onAddTag={handleAddTag} onRemoveTag={handleRemoveTag} />
 
-        {/* 本文 */}
+        {/* 本文（編集可能） */}
         <NoteContent
-          content={memo.content || ''}
+          value={localContent}
+          onChange={setLocalContent}
+          onBlur={flushContent}
           transcription={memo.transcriptionText}
           showTranscription={false}
+          editable
         />
       </ScrollView>
 
