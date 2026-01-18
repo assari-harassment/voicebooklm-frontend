@@ -2,7 +2,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { HeaderButton } from '@react-navigation/elements';
 import { File, Paths } from 'expo-file-system';
 import { router, Stack } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 
@@ -11,7 +11,13 @@ import { useProcessingStore } from '@/src/shared/stores/processingStore';
 import { audioRecorderService } from './audio-recorder';
 import { AudioWaveform } from './audio-waveform';
 import { RecordingControls } from './recording-controls';
-import { RecordingHeaderTitle } from './recording-header-title';
+
+// 時間フォーマット用ヘルパー
+function formatTime(seconds: number) {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
 
 // コンポーネント
 export function RecordingScreen() {
@@ -94,7 +100,7 @@ export function RecordingScreen() {
     };
   }, [isRecording, isPaused]);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     Alert.alert('確認', '録音を破棄しますか?', [
       { text: 'キャンセル', style: 'cancel' },
       {
@@ -121,7 +127,7 @@ export function RecordingScreen() {
         },
       },
     ]);
-  };
+  }, []);
 
   const handleComplete = async () => {
     try {
@@ -170,11 +176,11 @@ export function RecordingScreen() {
   }
 
   return (
-    <View className="flex-1 bg-t-bg-secondary">
-      {/* ヘッダー設定 */}
+    <>
       <Stack.Screen
         options={{
-          headerTitle: () => <RecordingHeaderTitle duration={duration} />,
+          headerTitleAlign: 'center',
+          title: formatTime(duration),
           headerLeft: ({ tintColor }) => (
             <HeaderButton onPress={handleCancel} accessibilityLabel="録音をキャンセル">
               <MaterialCommunityIcons name="close" size={24} color={tintColor} />
@@ -183,19 +189,20 @@ export function RecordingScreen() {
           headerBackVisible: false,
         }}
       />
+      <View className="flex-1 bg-t-bg-secondary">
+        {/* 波形表示エリア */}
+        <AudioWaveform waveformData={waveformData} isPaused={isPaused} isRecording={isRecording} />
 
-      {/* 波形表示エリア */}
-      <AudioWaveform waveformData={waveformData} isPaused={isPaused} isRecording={isRecording} />
+        {/* 空白エリア（文字起こしなし） */}
+        <View className="flex-1" />
 
-      {/* 空白エリア（文字起こしなし） */}
-      <View className="flex-1" />
-
-      {/* コントロール */}
-      <RecordingControls
-        isPaused={isPaused}
-        onTogglePause={handleTogglePause}
-        onComplete={handleComplete}
-      />
-    </View>
+        {/* コントロール */}
+        <RecordingControls
+          isPaused={isPaused}
+          onTogglePause={handleTogglePause}
+          onComplete={handleComplete}
+        />
+      </View>
+    </>
   );
 }
