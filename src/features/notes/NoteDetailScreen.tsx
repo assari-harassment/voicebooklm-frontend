@@ -11,6 +11,8 @@ import { ActivityIndicator, Text } from 'react-native-paper';
 
 import { NoteContent } from './note-content';
 import { TagSection } from './note-tags';
+import { EditableTitle } from './note-title';
+import { useDebouncedSave } from './shared';
 import { useMemoDetail } from './useMemoDetail';
 
 // ユーティリティ
@@ -37,6 +39,9 @@ export function NoteDetailScreen() {
   // 削除確認ダイアログの状態
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // 画面離脱時の保存処理中フラグ
+  const [isSavingOnLeave, setIsSavingOnLeave] = useState(false);
 
   // 録音後の直接遷移時はmemoDataからパース、それ以外はAPIから取得
   const parsedMemoData = useMemo<MemoDetailResponse | null>(() => {
@@ -71,12 +76,158 @@ export function NoteDetailScreen() {
   // タグの状態（ローカル編集用）
   const [localTags, setLocalTags] = useState<string[]>([]);
 
-  // メモが取得できたらタグを初期化
+  // ローカルのタイトル・コンテンツ状態（Controlled Component用）
+  const [localTitle, setLocalTitle] = useState('');
+  const [localContent, setLocalContent] = useState('');
+
+  // メモが取得できたら初期化
   useEffect(() => {
     if (memo) {
       setLocalTags(memo.tags);
+      setLocalTitle(memo.title || '');
+      setLocalContent(memo.content || '');
     }
   }, [memo]);
+
+  // タイトル保存処理（再試行機能付き）
+  const handleSaveTitle = useCallback(
+    async (newTitle: string) => {
+      if (!memo) return;
+
+      const attemptSave = async (): Promise<void> => {
+        try {
+          await apiClient.updateMemo(memo.memoId, { title: newTitle });
+        } catch (error) {
+          if (__DEV__) {
+            console.error('Failed to save title:', error);
+          }
+          return new Promise((resolve) => {
+            Alert.alert(
+              'タイトルの保存に失敗',
+              '変更は保持されていますが、サーバーへの保存に失敗しました。',
+              [
+                {
+                  text: '閉じる',
+                  style: 'cancel',
+                  onPress: () => resolve(),
+                },
+                {
+                  text: '再試行',
+                  onPress: () => {
+                    attemptSave().then(resolve);
+                  },
+                },
+              ]
+            );
+          });
+        }
+      };
+
+      await attemptSave();
+    },
+    [memo]
+  );
+
+  // コンテンツ保存処理（再試行機能付き）
+  const handleSaveContent = useCallback(
+    async (newContent: string) => {
+      if (!memo) return;
+
+      const attemptSave = async (): Promise<void> => {
+        try {
+          await apiClient.updateMemo(memo.memoId, { content: newContent });
+        } catch (error) {
+          if (__DEV__) {
+            console.error('Failed to save content:', error);
+          }
+          return new Promise((resolve) => {
+            Alert.alert(
+              'コンテンツの保存に失敗',
+              '変更は保持されていますが、サーバーへの保存に失敗しました。',
+              [
+                {
+                  text: '閉じる',
+                  style: 'cancel',
+                  onPress: () => resolve(),
+                },
+                {
+                  text: '再試行',
+                  onPress: () => {
+                    attemptSave().then(resolve);
+                  },
+                },
+              ]
+            );
+          });
+        }
+      };
+
+      await attemptSave();
+    },
+    [memo]
+  );
+
+  // タイトル用のdebounced save
+  const { flush: flushTitle } = useDebouncedSave({
+    value: localTitle,
+    initialValue: memo?.title || '',
+    delay: 1000,
+    onSave: handleSaveTitle,
+  });
+
+  // コンテンツ用のdebounced save
+  const { flush: flushContent } = useDebouncedSave({
+    value: localContent,
+    initialValue: memo?.content || '',
+    delay: 1000,
+    onSave: handleSaveContent,
+  });
+
+  // 画面を離れる前に未保存の変更をflush
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      // すでに保存処理中であれば、これ以上ブロックせず遷移を許可する
+      if (isSavingOnLeave) {
+        return;
+      }
+
+      // 未保存の変更がある場合は、画面遷移を一時停止して保存を完了させる
+      e.preventDefault();
+      setIsSavingOnLeave(true);
+
+      Promise.all([flushTitle(), flushContent()])
+        .then(() => {
+          navigation.dispatch(e.data.action);
+        })
+        .catch((error) => {
+          if (__DEV__) {
+            console.error('Failed to save memo before leaving:', error);
+          }
+          Alert.alert(
+            'エラー',
+            'メモの自動保存に失敗しました。保存されていない変更がある可能性があります。',
+            [
+              {
+                text: 'キャンセル',
+                style: 'cancel',
+                onPress: () => {
+                  setIsSavingOnLeave(false);
+                },
+              },
+              {
+                text: '破棄して戻る',
+                style: 'destructive',
+                onPress: () => {
+                  setIsSavingOnLeave(false);
+                  navigation.dispatch(e.data.action);
+                },
+              },
+            ]
+          );
+        });
+    });
+    return unsubscribe;
+  }, [navigation, flushTitle, flushContent, isSavingOnLeave]);
 
   // 削除処理
   const handleDelete = useCallback(async () => {
@@ -98,16 +249,19 @@ export function NoteDetailScreen() {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <TouchableOpacity
-          onPress={() => setIsDeleteDialogVisible(true)}
-          className="flex-row items-center px-3 py-2"
-          disabled={!memo || isDeleting}
-        >
-          <MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.danger[600]} />
-          <Text variant="bodyMedium" style={{ color: colors.danger[600], marginLeft: 4 }}>
-            削除
-          </Text>
-        </TouchableOpacity>
+        <View className="flex-row items-center">
+          {/* 削除ボタン */}
+          <TouchableOpacity
+            onPress={() => setIsDeleteDialogVisible(true)}
+            className="flex-row items-center px-3 py-2"
+            disabled={!memo || isDeleting}
+          >
+            <MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.danger[600]} />
+            <Text variant="bodyMedium" style={{ color: colors.danger[600], marginLeft: 4 }}>
+              削除
+            </Text>
+          </TouchableOpacity>
+        </View>
       ),
     });
   }, [navigation, memo, isDeleting]);
@@ -187,11 +341,10 @@ export function NoteDetailScreen() {
           paddingTop: headerHeight,
           paddingBottom: 32,
         }}
+        keyboardShouldPersistTaps="handled"
       >
-        {/* タイトル */}
-        <Text variant="titleLarge" className="font-semibold text-t-text-primary mb-2">
-          {memo.title || '無題のメモ'}
-        </Text>
+        {/* タイトル（編集可能） */}
+        <EditableTitle value={localTitle} onChange={setLocalTitle} onBlur={flushTitle} />
 
         {/* メタ情報 */}
         <View className="mb-4">
@@ -218,11 +371,14 @@ export function NoteDetailScreen() {
         {/* タグ一覧 */}
         <TagSection tags={localTags} onAddTag={handleAddTag} onRemoveTag={handleRemoveTag} />
 
-        {/* 本文 */}
+        {/* 本文（編集可能） */}
         <NoteContent
-          content={memo.content || ''}
+          value={localContent}
+          onChange={setLocalContent}
+          onBlur={flushContent}
           transcription={memo.transcriptionText}
           showTranscription={false}
+          editable
         />
       </ScrollView>
 
