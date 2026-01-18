@@ -1,1 +1,0 @@
-export { RecordingHeaderTitle } from './RecordingHeaderTitle';
