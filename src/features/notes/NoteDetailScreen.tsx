@@ -168,7 +168,7 @@ export function NoteDetailScreen() {
   );
 
   // タイトル用のdebounced save
-  const { flush: flushTitle } = useDebouncedSave({
+  const { flush: flushTitle, isDirty: isDirtyTitle } = useDebouncedSave({
     value: localTitle,
     initialValue: memo?.title || '',
     delay: 1000,
@@ -176,7 +176,7 @@ export function NoteDetailScreen() {
   });
 
   // コンテンツ用のdebounced save
-  const { flush: flushContent } = useDebouncedSave({
+  const { flush: flushContent, isDirty: isDirtyContent } = useDebouncedSave({
     value: localContent,
     initialValue: memo?.content || '',
     delay: 1000,
@@ -188,6 +188,11 @@ export function NoteDetailScreen() {
     const unsubscribe = navigation.addListener('beforeRemove', (e) => {
       // すでに保存処理中であれば、これ以上ブロックせず遷移を許可する
       if (isSavingOnLeave) {
+        return;
+      }
+
+      // 未保存の変更がない場合は、そのまま遷移を許可する
+      if (!isDirtyTitle && !isDirtyContent) {
         return;
       }
 
@@ -227,7 +232,7 @@ export function NoteDetailScreen() {
         });
     });
     return unsubscribe;
-  }, [navigation, flushTitle, flushContent, isSavingOnLeave]);
+  }, [navigation, flushTitle, flushContent, isSavingOnLeave, isDirtyTitle, isDirtyContent]);
 
   // 削除処理
   const handleDelete = useCallback(async () => {
