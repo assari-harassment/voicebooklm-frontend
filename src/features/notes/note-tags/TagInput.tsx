@@ -37,9 +37,9 @@ export const TagInput = forwardRef<TagInputRef, TagInputProps>(
         autoCapitalize="none"
         autoCorrect={false}
         returnKeyType="done"
-        blurOnSubmit={false}
+        submitBehavior="submit"
         accessibilityLabel="新しいタグを入力"
-        accessibilityHint="Enter または カンマで追加、Backspaceで最後のタグを削除"
+        accessibilityHint="Enter または カンマで追加、Backspace 2回で最後のタグを削除"
       />
     );
   }

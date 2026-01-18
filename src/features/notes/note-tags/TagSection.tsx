@@ -28,7 +28,7 @@ export function TagSection({ tags, onAddTag, onRemoveTag }: TagSectionProps) {
     <Pressable
       onPress={handleSectionPress}
       style={styles.container}
-      accessibilityRole="none"
+      accessibilityRole="button"
       accessibilityLabel="タグセクション"
     >
       {/* アイコン */}

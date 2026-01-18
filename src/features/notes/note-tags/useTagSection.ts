@@ -38,17 +38,6 @@ export function useTagSection({ tags, onAddTag, onRemoveTag }: UseTagSectionProp
   // キー入力ハンドラ
   const handleKeyPress = useCallback(
     (key: string) => {
-      // カンマでタグ追加
-      if (key === ',') {
-        const value = inputValue.replace(/,/g, '').trim();
-        if (value) {
-          addTag(value);
-          // カンマが入力された分をクリア
-          setTimeout(() => setInputValue(''), 0);
-        }
-        return;
-      }
-
       // Backspaceの処理
       if (key === 'Backspace') {
         if (inputValue === '' && tags.length > 0) {
@@ -79,21 +68,26 @@ export function useTagSection({ tags, onAddTag, onRemoveTag }: UseTagSectionProp
         setHighlightedTagIndex(null);
       }
     },
-    [inputValue, tags, highlightedTagIndex, addTag, onRemoveTag]
+    [inputValue, tags, highlightedTagIndex, onRemoveTag]
   );
 
   // 入力値の変更ハンドラ
   const handleChangeText = useCallback(
     (text: string) => {
-      // カンマが含まれている場合、カンマ前の部分をタグとして追加
+      // カンマが含まれている場合、全てのカンマ区切り値をタグとして追加
       if (text.includes(',')) {
         const parts = text.split(',');
-        const tagPart = parts[0].trim();
-        if (tagPart) {
-          addTag(tagPart);
-        }
-        // カンマ後の部分を入力値として設定
-        setInputValue(parts.slice(1).join(','));
+        // 最後の要素を入力値として残す（末尾がカンマの場合は空文字列）
+        const lastPart = parts[parts.length - 1] ?? '';
+        // 最後の要素以外をタグとして追加
+        const tagParts = parts.slice(0, -1);
+        tagParts.forEach((part) => {
+          const tagPart = part.trim();
+          if (tagPart) {
+            addTag(tagPart);
+          }
+        });
+        setInputValue(lastPart);
         return;
       }
       setInputValue(text);

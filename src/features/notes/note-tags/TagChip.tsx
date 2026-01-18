@@ -11,17 +11,8 @@ interface TagChipProps {
 
 export function TagChip({ tag, isHighlighted = false, onRemove }: TagChipProps) {
   return (
-    <View
-      style={[
-        styles.container,
-        isHighlighted && styles.highlighted,
-        { backgroundColor: isHighlighted ? colors.danger[50] : colors.bg.tertiary },
-      ]}
-    >
-      <Text
-        variant="bodySmall"
-        style={[styles.text, isHighlighted && { color: colors.danger[600] }]}
-      >
+    <View style={[styles.container, isHighlighted && styles.highlighted]}>
+      <Text variant="bodySmall" style={[styles.text, isHighlighted && styles.highlightedText]}>
         {tag}
       </Text>
       <TouchableOpacity
@@ -51,13 +42,18 @@ const styles = StyleSheet.create({
     gap: 4,
     borderWidth: 1,
     borderColor: colors.border.primary,
+    backgroundColor: colors.bg.tertiary,
   },
   highlighted: {
     borderColor: colors.danger[100],
+    backgroundColor: colors.danger[50],
   },
   text: {
     color: colors.text.primary,
     fontSize: 13,
     lineHeight: 16,
+  },
+  highlightedText: {
+    color: colors.danger[600],
   },
 });
