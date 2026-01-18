@@ -37,6 +37,8 @@ export function EditableTitle({ value, onChange, onBlur }: EditableTitleProps) {
           maxLength={100}
           placeholder="タイトルを入力"
           placeholderTextColor={colors.text.tertiary}
+          accessibilityLabel="メモのタイトル"
+          accessibilityHint="メモのタイトルを入力してください"
           style={{
             flex: 1,
             fontSize: 22,
@@ -54,6 +56,9 @@ export function EditableTitle({ value, onChange, onBlur }: EditableTitleProps) {
       onPress={handlePress}
       className="flex-row items-center mb-2"
       activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel="タイトルを編集"
+      accessibilityHint="タップしてタイトルを編集できます"
     >
       <Text
         variant="titleLarge"

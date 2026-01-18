@@ -105,12 +105,14 @@ export function useDebouncedSave({
       timeoutRef.current = null;
     }
 
-    // 現在の値と最後に保存した値が異なる場合は保存
+    // pending があればそれを優先して保存し、なければ現在の値と最後に保存した値の差分を確認して保存
     if (pendingValueRef.current !== null) {
       await save(pendingValueRef.current);
       pendingValueRef.current = null;
+    } else if (value !== lastSavedValueRef.current) {
+      await save(value);
     }
-  }, [save]);
+  }, [save, value]);
 
   // クリーンアップ
   useEffect(() => {

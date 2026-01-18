@@ -34,6 +34,8 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
         placeholderTextColor={colors.text.tertiary}
         multiline
         autoFocus={autoFocus}
+        accessibilityLabel="メモの本文"
+        accessibilityHint="メモの内容を入力してください"
         style={{
           flex: 1,
           fontSize: 16,

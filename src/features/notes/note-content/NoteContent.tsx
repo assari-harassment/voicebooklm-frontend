@@ -109,7 +109,13 @@ export function NoteContent({
 
   // 表示モード
   return (
-    <TouchableOpacity onPress={handlePress} activeOpacity={editable ? 0.7 : 1} disabled={!editable}>
+    <TouchableOpacity
+      onPress={handlePress}
+      activeOpacity={editable ? 0.7 : 1}
+      disabled={!editable}
+      accessibilityRole={editable ? 'button' : undefined}
+      accessibilityLabel={editable ? 'メモを編集' : undefined}
+    >
       <Surface className="bg-t-bg-primary rounded-xl p-1" elevation={0}>
         {/* 編集可能ヒント */}
         {editable && (
