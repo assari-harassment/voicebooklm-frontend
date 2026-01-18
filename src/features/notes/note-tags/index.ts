@@ -1,1 +1,1 @@
-export { NoteTags } from './NoteTags';
+export { TagSection } from './TagSection';

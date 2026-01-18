@@ -1,5 +1,5 @@
-import type { MemoDetailResponse, VoiceMemoCreatedResponse } from '@/src/api/generated/apiSchema';
 import { apiClient } from '@/src/api';
+import type { MemoDetailResponse, VoiceMemoCreatedResponse } from '@/src/api/generated/apiSchema';
 import { ConfirmDialog } from '@/src/shared/components';
 import { colors } from '@/src/shared/constants';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -10,7 +10,7 @@ import { Alert, ScrollView, TouchableOpacity, View } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
 
 import { NoteContent } from './note-content';
-import { NoteTags } from './note-tags';
+import { TagSection } from './note-tags';
 import { useMemoDetail } from './useMemoDetail';
 
 // ユーティリティ
@@ -69,7 +69,6 @@ export function NoteDetailScreen() {
   const memo = parsedMemoData || fetchedMemo;
 
   // タグの状態（ローカル編集用）
-  // TODO: タグの追加・削除をAPIに保存する機能を実装する
   const [localTags, setLocalTags] = useState<string[]>([]);
 
   // メモが取得できたらタグを初期化
@@ -113,12 +112,32 @@ export function NoteDetailScreen() {
     });
   }, [navigation, memo, isDeleting]);
 
-  const handleAddTag = (tag: string) => {
-    setLocalTags((prev) => [...prev, tag]);
+  const handleAddTag = async (tag: string) => {
+    if (!memo) return;
+    const previousTags = localTags;
+    const newTags = [...localTags, tag];
+    setLocalTags(newTags);
+
+    try {
+      await apiClient.updateMemo(memo.memoId, { tags: newTags });
+    } catch {
+      setLocalTags(previousTags);
+      Alert.alert('エラー', 'タグの追加に失敗しました');
+    }
   };
 
-  const handleRemoveTag = (tagToRemove: string) => {
-    setLocalTags((prev) => prev.filter((tag) => tag !== tagToRemove));
+  const handleRemoveTag = async (tagToRemove: string) => {
+    if (!memo) return;
+    const previousTags = localTags;
+    const newTags = localTags.filter((tag) => tag !== tagToRemove);
+    setLocalTags(newTags);
+
+    try {
+      await apiClient.updateMemo(memo.memoId, { tags: newTags });
+    } catch {
+      setLocalTags(previousTags);
+      Alert.alert('エラー', 'タグの削除に失敗しました');
+    }
   };
 
   // ローディング状態
@@ -189,7 +208,7 @@ export function NoteDetailScreen() {
         </View>
 
         {/* タグ一覧 */}
-        <NoteTags tags={localTags} onAddTag={handleAddTag} onRemoveTag={handleRemoveTag} />
+        <TagSection tags={localTags} onAddTag={handleAddTag} onRemoveTag={handleRemoveTag} />
 
         {/* 本文 */}
         <NoteContent
