@@ -4,6 +4,7 @@ import {
   ListFoldersResponse,
   ListMemosResponse,
   MemoDetailResponse,
+  TagsResponse,
   TokenResponse,
   VoiceMemoCreatedResponse,
 } from './generated/apiSchema';
@@ -143,12 +144,25 @@ class ApiClient {
     includeDescendants?: boolean;
     uncategorizedOnly?: boolean;
     keyword?: string;
+    tags?: string[];
     sort?: string;
     order?: string;
     limit?: number;
     offset?: number;
   }): Promise<ListMemosResponse> {
     const response = await this.api.api.listMemos(params, { secure: true });
+    return response.data;
+  }
+
+  /**
+   * タグ一覧を取得する
+   */
+  async listTags(params?: {
+    sort?: string;
+    order?: string;
+    limit?: number;
+  }): Promise<TagsResponse> {
+    const response = await this.api.api.listTags(params, { secure: true });
     return response.data;
   }
 

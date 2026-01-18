@@ -1,3 +1,4 @@
+import { parseSearchQuery } from '@/src/features/search/parseSearchQuery';
 import { asyncStorage } from '@/src/shared/storage/asyncStorage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
@@ -29,8 +30,12 @@ export const useSearchHistoryStore = create<SearchHistoryState>()(
         if (!trimmed) return;
 
         const { history } = get();
-        // 大文字小文字を区別せずに重複を除去
-        const filtered = history.filter((item) => item.toLowerCase() !== trimmed.toLowerCase());
+        // タグの順序を正規化して重複を判定
+        // 例: "#開発 #コード" と "#コード #開発" は同じとみなす
+        const { normalizedKey } = parseSearchQuery(trimmed);
+        const filtered = history.filter(
+          (item) => parseSearchQuery(item).normalizedKey !== normalizedKey
+        );
         // 先頭に追加し、最大件数を維持
         const newHistory = [trimmed, ...filtered].slice(0, MAX_HISTORY_COUNT);
         set({ history: newHistory });
@@ -39,7 +44,10 @@ export const useSearchHistoryStore = create<SearchHistoryState>()(
       // 履歴を削除
       removeHistory: (keyword: string) => {
         const { history } = get();
-        const filtered = history.filter((item) => item.toLowerCase() !== keyword.toLowerCase());
+        const { normalizedKey } = parseSearchQuery(keyword);
+        const filtered = history.filter(
+          (item) => parseSearchQuery(item).normalizedKey !== normalizedKey
+        );
         set({ history: filtered });
       },
 

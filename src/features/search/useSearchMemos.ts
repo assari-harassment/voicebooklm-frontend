@@ -1,6 +1,7 @@
 import { apiClient } from '@/src/api';
 import type { MemoListItemResponse } from '@/src/api/generated/apiSchema';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { parseSearchQuery } from './parseSearchQuery';
 
 interface UseSearchMemosResult {
   memos: MemoListItemResponse[];
@@ -68,8 +69,14 @@ export function useSearchMemos(): UseSearchMemosResult {
       return;
     }
 
-    const cacheKey = trimmedKeyword.toLowerCase();
     const currentOffset = isLoadMore ? memosRef.current.length : 0;
+
+    // 検索クエリをパースしてタグ・キーワード・正規化キーを取得
+    const {
+      tags,
+      keyword: keywordPart,
+      normalizedKey: cacheKey,
+    } = parseSearchQuery(trimmedKeyword);
 
     // キャッシュチェック（初回取得時のみ）
     if (!isLoadMore) {
@@ -93,13 +100,28 @@ export function useSearchMemos(): UseSearchMemosResult {
         setError(null);
       }
 
-      const response = await apiClient.listMemos({
-        keyword: trimmedKeyword,
+      const params: {
+        keyword?: string;
+        tags?: string[];
+        sort: string;
+        order: string;
+        limit: number;
+        offset: number;
+      } = {
         sort: 'updated_at',
         order: 'desc',
         limit: PAGE_SIZE,
         offset: currentOffset,
-      });
+      };
+
+      if (tags.length > 0) {
+        params.tags = tags;
+      }
+      if (keywordPart) {
+        params.keyword = keywordPart;
+      }
+
+      const response = await apiClient.listMemos(params);
 
       // キーワードが変更されていたら結果を破棄
       if (currentKeywordRef.current.trim().toLowerCase() !== trimmedKeyword.toLowerCase()) {
