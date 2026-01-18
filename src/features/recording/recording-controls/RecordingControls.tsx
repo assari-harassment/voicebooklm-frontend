@@ -10,6 +10,9 @@ interface RecordingControlsProps {
 
 // コンポーネント
 export function RecordingControls({ isPaused, onTogglePause, onComplete }: RecordingControlsProps) {
+  // 一時停止時はアイコン色を灰色に
+  const iconColor = isPaused ? colors.text.tertiary : colors.text.primary;
+
   return (
     <Surface
       className="flex-row items-center px-4 py-4 bg-t-bg-primary border-t border-t-border-secondary"
@@ -20,7 +23,7 @@ export function RecordingControls({ isPaused, onTogglePause, onComplete }: Recor
         size={24}
         onPress={onTogglePause}
         className="bg-t-bg-tertiary rounded-xl"
-        iconColor={colors.text.primary}
+        iconColor={iconColor}
       />
       <Button
         mode="contained"
