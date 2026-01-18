@@ -53,6 +53,13 @@ export interface ErrorResponse {
   code: string;
 }
 
+export interface FolderInfo {
+  /** @format uuid */
+  id: string;
+  name: string;
+  path: string;
+}
+
 export interface MemoDetailResponse {
   /** @format uuid */
   memoId: string;
@@ -62,6 +69,7 @@ export interface MemoDetailResponse {
   transcriptionText?: string;
   transcriptionStatus: string;
   formattingStatus: string;
+  folder?: FolderInfo;
   /** @format date-time */
   createdAt: string;
   /** @format date-time */
@@ -192,13 +200,6 @@ export interface TagsResponse {
    * @example ["開発","コード","ミーティング"]
    */
   tags: string[];
-}
-
-export interface FolderInfo {
-  /** @format uuid */
-  id: string;
-  name: string;
-  path: string;
 }
 
 export interface ListMemosResponse {
