@@ -6,6 +6,7 @@ import {
   MemoDetailResponse,
   TagsResponse,
   TokenResponse,
+  UpdateMemoRequest,
   VoiceMemoCreatedResponse,
 } from './generated/apiSchema';
 import { File } from 'expo-file-system';
@@ -179,6 +180,14 @@ class ApiClient {
    */
   async deleteMemo(memoId: string): Promise<void> {
     await this.api.api.deleteMemo(memoId, { secure: true });
+  }
+
+  /**
+   * メモを更新
+   */
+  async updateMemo(memoId: string, data: UpdateMemoRequest): Promise<MemoDetailResponse> {
+    const response = await this.api.api.updateMemo(memoId, data, { secure: true });
+    return response.data;
   }
 
   /**
