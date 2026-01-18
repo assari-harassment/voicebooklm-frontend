@@ -10,7 +10,7 @@ import { Alert, ScrollView, TouchableOpacity, View } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
 
 import { NoteContent } from './note-content';
-import { NoteTags } from './note-tags';
+import { TagSection } from './note-tags';
 import { useMemoDetail } from './useMemoDetail';
 
 // ユーティリティ
@@ -189,7 +189,7 @@ export function NoteDetailScreen() {
         </View>
 
         {/* タグ一覧 */}
-        <NoteTags tags={localTags} onAddTag={handleAddTag} onRemoveTag={handleRemoveTag} />
+        <TagSection tags={localTags} onAddTag={handleAddTag} onRemoveTag={handleRemoveTag} />
 
         {/* 本文 */}
         <NoteContent
