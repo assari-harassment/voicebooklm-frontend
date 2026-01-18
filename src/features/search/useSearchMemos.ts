@@ -1,6 +1,7 @@
 import { apiClient } from '@/src/api';
 import type { MemoListItemResponse } from '@/src/api/generated/apiSchema';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { parseSearchQuery } from './parseSearchQuery';
 
 interface UseSearchMemosResult {
   memos: MemoListItemResponse[];
@@ -68,8 +69,14 @@ export function useSearchMemos(): UseSearchMemosResult {
       return;
     }
 
-    const cacheKey = trimmedKeyword.toLowerCase();
     const currentOffset = isLoadMore ? memosRef.current.length : 0;
+
+    // 検索クエリをパースしてタグ・キーワード・正規化キーを取得
+    const {
+      tags,
+      keyword: keywordPart,
+      normalizedKey: cacheKey,
+    } = parseSearchQuery(trimmedKeyword);
 
     // キャッシュチェック（初回取得時のみ）
     if (!isLoadMore) {
@@ -92,24 +99,6 @@ export function useSearchMemos(): UseSearchMemosResult {
         setIsLoading(true);
         setError(null);
       }
-
-      // タグ検索パターン: #タグ名 または tag:タグ名 を複数抽出
-      // 例: "#開発 #コード ミーティング" → tags: ["開発", "コード"], keyword: "ミーティング"
-      const tagPattern = /(?:#|tag:)(\S+)/g;
-      const tags: string[] = [];
-      let match;
-      while ((match = tagPattern.exec(trimmedKeyword)) !== null) {
-        const tag = match[1].trim();
-        if (tag) {
-          tags.push(tag);
-        }
-      }
-
-      // タグ部分を除去してキーワードを抽出
-      const keywordPart = trimmedKeyword
-        .replace(/(?:#|tag:)\S+/g, '')
-        .trim()
-        .replace(/\s+/g, ' '); // 連続する空白を1つにまとめる
 
       const params: {
         keyword?: string;
