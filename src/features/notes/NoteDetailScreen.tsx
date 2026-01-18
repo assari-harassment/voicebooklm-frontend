@@ -194,17 +194,25 @@ export function NoteDetailScreen() {
         </Text>
 
         {/* メタ情報 */}
-        <View className="flex-row items-center gap-3 mb-4">
-          {/* 日時 */}
-          <View className="flex-row items-center gap-2">
-            <View className="w-1 h-1 rounded-full bg-t-text-tertiary" />
-            <Text variant="bodySmall" className="text-t-text-secondary">
-              {formatDate(memo.updatedAt)}
-            </Text>
-          </View>
+        <View className="mb-4">
+          {/* フォルダ情報 */}
+          {memo.folder && (
+            <View className="flex-row items-center gap-1 mb-1">
+              <MaterialCommunityIcons
+                name="folder-outline"
+                size={16}
+                color={colors.text.secondary}
+              />
+              <Text variant="bodyMedium" className="text-t-text-secondary">
+                {memo.folder.path}
+              </Text>
+            </View>
+          )}
 
-          {/* フォルダ情報（あれば表示） */}
-          {/* TODO: MemoDetailResponseにfolder情報がないため、API拡張が必要 */}
+          {/* 日時 */}
+          <Text variant="bodySmall" className="text-t-text-tertiary">
+            {formatDate(memo.updatedAt)}
+          </Text>
         </View>
 
         {/* タグ一覧 */}
