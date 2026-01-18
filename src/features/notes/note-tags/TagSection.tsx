@@ -31,17 +31,13 @@ export function TagSection({ tags, onAddTag, onRemoveTag }: TagSectionProps) {
       accessibilityRole="none"
       accessibilityLabel="タグセクション"
     >
-      {/* ラベル部分 */}
-      <View style={styles.labelContainer}>
-        <MaterialCommunityIcons
-          name="tag-multiple-outline"
-          size={16}
-          color={colors.text.tertiary}
-        />
-      </View>
-
-      {/* 区切り線 */}
-      <View style={styles.divider} />
+      {/* アイコン */}
+      <MaterialCommunityIcons
+        name="tag-multiple-outline"
+        size={18}
+        color={colors.text.tertiary}
+        style={styles.icon}
+      />
 
       {/* タグ一覧 + 入力フィールド */}
       <View style={styles.tagsContainer}>
@@ -77,15 +73,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     marginBottom: 16,
   },
-  labelContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  divider: {
-    width: 1,
-    height: 20,
-    backgroundColor: colors.border.primary,
-    marginHorizontal: 12,
+  icon: {
+    marginRight: 10,
   },
   tagsContainer: {
     flex: 1,

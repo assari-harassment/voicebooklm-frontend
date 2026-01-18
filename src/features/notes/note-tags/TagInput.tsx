@@ -16,7 +16,7 @@ export interface TagInputRef {
 }
 
 export const TagInput = forwardRef<TagInputRef, TagInputProps>(
-  ({ value, onChangeText, onSubmit, onKeyPress, placeholder = '新しいタグ...' }, ref) => {
+  ({ value, onChangeText, onSubmit, onKeyPress, placeholder = 'タグを編集...' }, ref) => {
     const inputRef = useRef<TextInput>(null);
 
     useImperativeHandle(ref, () => ({
