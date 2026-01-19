@@ -7,8 +7,6 @@ import { useCallback, useState } from 'react';
 import { FlatList, TextInput, View } from 'react-native';
 import { ActivityIndicator, IconButton, Surface, Text } from 'react-native-paper';
 import { PopularTags } from './popular-tags';
-import { SearchHistory } from './SearchHistory';
-import { useSearchHistory } from './useSearchHistory';
 import { useSearchMemos } from './useSearchMemos';
 
 /**
@@ -61,7 +59,6 @@ export function SearchScreen() {
     totalCount,
     hasMore,
   } = useSearchMemos();
-  const { recentHistory, isHydrated, recordSearch } = useSearchHistory();
 
   const handleSearchChange = (text: string) => {
     setSearchText(text);
@@ -73,33 +70,14 @@ export function SearchScreen() {
     search('');
   };
 
-  // Enter押下時に履歴を記録
-  const handleSearchSubmit = () => {
-    const trimmed = searchText.trim();
-    if (trimmed) {
-      recordSearch(trimmed);
-    }
-  };
-
-  // 履歴アイテムクリック時に検索実行
-  const handleHistoryItemPress = useCallback(
-    (keyword: string) => {
-      setSearchText(keyword);
-      search(keyword);
-      recordSearch(keyword);
-    },
-    [search, recordSearch]
-  );
-
   // タグクリック時に検索実行
   const handleTagPress = useCallback(
     (tag: string) => {
       const tagKeyword = `#${tag}`;
       setSearchText(tagKeyword);
       search(tagKeyword);
-      recordSearch(tagKeyword);
     },
-    [search, recordSearch]
+    [search]
   );
 
   const handleMemoPress = useCallback((memoId: string) => {
@@ -119,8 +97,6 @@ export function SearchScreen() {
   const isInitialState = !isLoading && !error && searchText.trim().length === 0;
   // 検索中の状態（検索テキストがあり、ローディング中またはエラーではない）
   const hasSearchText = searchText.trim().length > 0;
-  // 検索履歴を表示するかどうか（hydration完了後のみ履歴を表示）
-  const showSearchHistory = isHydrated && isInitialState && recentHistory.length > 0;
 
   // ヘッダーコンポーネント
   const ListHeader = useCallback(() => {
@@ -185,7 +161,6 @@ export function SearchScreen() {
               placeholderTextColor={colors.text.tertiary}
               value={searchText}
               onChangeText={handleSearchChange}
-              onSubmitEditing={handleSearchSubmit}
               autoFocus
               returnKeyType="search"
             />
@@ -218,19 +193,14 @@ export function SearchScreen() {
         </View>
       )}
 
-      {/* 初期状態（検索前）- 人気タグと履歴を表示 */}
+      {/* 初期状態（検索前）- 人気タグを表示 */}
       {isInitialState && (
         <>
           {/* 人気タグセクション */}
           <PopularTags onTagPress={handleTagPress} />
 
-          {/* 検索履歴セクション */}
-          {showSearchHistory && (
-            <SearchHistory history={recentHistory} onHistoryItemPress={handleHistoryItemPress} />
-          )}
-
-          {/* 人気タグも履歴もない場合のプレースホルダ */}
-          {!showSearchHistory && <InitialSearchState />}
+          {/* プレースホルダ */}
+          <InitialSearchState />
         </>
       )}
 
