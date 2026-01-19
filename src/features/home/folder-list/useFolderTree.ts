@@ -2,7 +2,7 @@ import { apiClient } from '@/src/api';
 import type { FolderResponse, MemoListItemResponse } from '@/src/api/generated/apiSchema';
 import { useProcessingStore } from '@/src/shared/stores/processingStore';
 import { useFocusEffect } from '@react-navigation/native';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { FolderTreeNode, UseFolderTreeResult } from './types';
 
 /**
@@ -66,18 +66,23 @@ export function useFolderTree(): UseFolderTreeResult {
   const [loadingMemoFolderIds, setLoadingMemoFolderIds] = useState<Set<string>>(new Set());
   const [isLoadingFolders, setIsLoadingFolders] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const hasLoadedRef = useRef(false);
 
   const processingStatus = useProcessingStore((state) => state.status);
 
   // フォルダ一覧を取得
   const fetchFolders = useCallback(async () => {
     try {
-      setIsLoadingFolders(true);
+      // 初回ロード時のみローディング表示（Stale-While-Revalidate）
+      if (!hasLoadedRef.current) {
+        setIsLoadingFolders(true);
+      }
       setError(null);
 
       const response = await apiClient.listFolders();
       const tree = buildFolderTree(response.folders);
       setRootFolders(tree);
+      hasLoadedRef.current = true;
     } catch (err) {
       setError(err instanceof Error ? err : new Error('フォルダの取得に失敗しました'));
       if (__DEV__) {
