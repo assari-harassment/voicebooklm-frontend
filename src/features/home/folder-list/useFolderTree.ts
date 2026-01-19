@@ -72,7 +72,10 @@ export function useFolderTree(): UseFolderTreeResult {
   // フォルダ一覧を取得
   const fetchFolders = useCallback(async () => {
     try {
-      setIsLoadingFolders(true);
+      // 初回ロード時のみローディング表示（Stale-While-Revalidate）
+      if (rootFolders.length === 0) {
+        setIsLoadingFolders(true);
+      }
       setError(null);
 
       const response = await apiClient.listFolders();
@@ -86,7 +89,7 @@ export function useFolderTree(): UseFolderTreeResult {
     } finally {
       setIsLoadingFolders(false);
     }
-  }, []);
+  }, [rootFolders.length]);
 
   // フォルダ内のメモを取得
   const loadMemosForFolder = useCallback(

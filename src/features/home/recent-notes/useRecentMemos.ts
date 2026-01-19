@@ -24,7 +24,10 @@ export function useRecentMemos(): UseRecentMemosResult {
 
   const fetchMemos = useCallback(async () => {
     try {
-      setIsLoading(true);
+      // 初回ロード時のみローディング表示（Stale-While-Revalidate）
+      if (memos.length === 0) {
+        setIsLoading(true);
+      }
       setError(null);
 
       const response = await apiClient.listMemos({
@@ -42,7 +45,7 @@ export function useRecentMemos(): UseRecentMemosResult {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [memos.length]);
 
   // 画面フォーカス時に常に再取得
   useFocusEffect(
