@@ -1,91 +1,202 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { HeaderButton } from '@react-navigation/elements';
-import { File, Paths } from 'expo-file-system';
+import { useAudioRecorder } from '@siteed/expo-audio-studio';
 import { router, Stack } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, View } from 'react-native';
-import { Button, Text } from 'react-native-paper';
+import { useCallback, useEffect, useState } from 'react';
+import { Alert, View, ActivityIndicator, Platform } from 'react-native';
+import { Text } from 'react-native-paper';
 
+import { apiClient } from '@/src/api';
+import { ConfirmDialog } from '@/src/shared/components';
 import { useProcessingStore } from '@/src/shared/stores/processingStore';
+import { useRecordingStore } from '@/src/shared/stores/recordingStore';
 
-import { audioRecorderService } from './audio-recorder';
-import { AudioWaveform } from './audio-waveform';
+import { LiveTranscript } from './components/LiveTranscript';
+import { RecordingHeader } from './components/RecordingHeader';
 import { RecordingControls } from './recording-controls';
+import { streamingTranscriptionService } from './services/StreamingTranscriptionService';
 
-// 時間フォーマット用ヘルパー
-function formatTime(seconds: number) {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+// Base64からArrayBufferに変換
+function base64ToArrayBuffer(base64: string): ArrayBuffer {
+  const binaryString = atob(base64);
+  const len = binaryString.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes.buffer;
 }
 
-// コンポーネント
+// WAVヘッダーかどうかを判定 (RIFFシグネチャをチェック)
+function isWavHeader(buffer: ArrayBuffer): boolean {
+  if (buffer.byteLength < 4) return false;
+  const view = new Uint8Array(buffer);
+  // "RIFF" = 0x52, 0x49, 0x46, 0x46
+  return view[0] === 0x52 && view[1] === 0x49 && view[2] === 0x46 && view[3] === 0x46;
+}
+
 export function RecordingScreen() {
-  const [isRecording, setIsRecording] = useState(false);
   const [duration, setDuration] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const [waveformData, setWaveformData] = useState<number[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const updateCount = useRef(0);
-  const recordingFilePath = useRef<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [isCancelDialogVisible, setIsCancelDialogVisible] = useState(false);
+
+  // useAudioRecorderフック
+  const { startRecording, stopRecording, pauseRecording, resumeRecording, isRecording, isPaused } =
+    useAudioRecorder();
+
+  // リアルタイム文字起こし状態
+  const {
+    phase,
+    connectionState,
+    editableTranscript,
+    error: transcriptionError,
+    connect,
+    startTranscription,
+    cancel,
+    reset,
+    setEditableTranscript,
+  } = useRecordingStore();
 
   // 画面に入ったら自動的に録音開始
   useEffect(() => {
-    startRecording();
+    initializeRecording();
     return () => {
       // 画面離脱時にクリーンアップ
-      audioRecorderService.cancelRecording();
+      // handleComplete等で既にstopRecording()が呼ばれている場合はエラーを無視
+      stopRecording().catch(() => {
+        // 録音が既に停止している場合のエラーは無視
+      });
+      streamingTranscriptionService.disconnect();
+      reset();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const startRecording = async () => {
+  const initializeRecording = async () => {
     try {
-      // 出力ファイルパスを生成
-      const timestamp = Date.now();
-      const fileName = `recording_${timestamp}.wav`;
-      const file = new File(Paths.document, fileName);
-      const filePath = file.uri;
-      recordingFilePath.current = filePath;
+      setIsInitializing(true);
 
-      await audioRecorderService.startRecording(filePath);
-      setIsRecording(true);
+      // WebSocket接続
+      const token = apiClient.getAccessToken();
+      if (!token) {
+        throw new Error('認証トークンがありません');
+      }
+
+      await connect(token, 'ja-JP');
+
+      // 文字起こし開始
+      startTranscription();
+
+      // 音声録音開始
+      await startRecording({
+        sampleRate: 16000,
+        channels: 1,
+        encoding: 'pcm_16bit',
+        ...(Platform.OS !== 'web' && { bufferDurationSeconds: 0.1 }),
+        keepAwake: true,
+        output: {
+          primary: {
+            enabled: false, // ファイル保存なし（ストリーミングのみ）
+          },
+        },
+        onAudioStream: async (event) => {
+          if (__DEV__) {
+            console.log(
+              '[Recording] onAudioStream called, data type:',
+              typeof event.data,
+              'size:',
+              event.eventDataSize
+            );
+          }
+
+          // PCMデータをWebSocketに送信
+          if (event.data) {
+            let pcmBuffer: ArrayBuffer;
+
+            if (typeof event.data === 'string') {
+              // Native: Base64文字列
+              pcmBuffer = base64ToArrayBuffer(event.data);
+            } else if (event.data instanceof ArrayBuffer) {
+              // Web: ArrayBuffer直接
+              pcmBuffer = event.data;
+            } else if (event.data instanceof Uint8Array) {
+              // Web: Uint8Array - 正しいバイト範囲をコピー
+              pcmBuffer = event.data.buffer.slice(
+                event.data.byteOffset,
+                event.data.byteOffset + event.data.byteLength
+              );
+            } else if (event.data instanceof Int16Array) {
+              // Web: Int16Array - すでにPCM 16bit、正しいバイト範囲をコピー
+              pcmBuffer = event.data.buffer.slice(
+                event.data.byteOffset,
+                event.data.byteOffset + event.data.byteLength
+              );
+            } else if (event.data instanceof Float32Array) {
+              // Web: Float32Array - PCM 16bitに変換
+              const float32 = event.data;
+              const int16 = new Int16Array(float32.length);
+              for (let i = 0; i < float32.length; i++) {
+                const s = Math.max(-1, Math.min(1, float32[i]));
+                int16[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+              }
+              pcmBuffer = int16.buffer;
+            } else {
+              if (__DEV__) {
+                console.log(
+                  '[Recording] Unknown data format:',
+                  event.data?.constructor?.name,
+                  event.data
+                );
+              }
+              return;
+            }
+
+            // Web環境の場合、追加の処理が必要
+            if (Platform.OS === 'web') {
+              // WAVヘッダー（44バイト）またはRIFFシグネチャはスキップ
+              if (pcmBuffer.byteLength === 44 || isWavHeader(pcmBuffer)) {
+                if (__DEV__) {
+                  console.log('[Recording] Skipping WAV header, size:', pcmBuffer.byteLength);
+                }
+                return;
+              }
+
+              // 小さすぎるチャンクはスキップ（不完全なデータやメタデータの可能性）
+              // 最小サイズ: 16kHz × 10ms × 2バイト = 320バイト
+              const minChunkSize = 320;
+              if (pcmBuffer.byteLength < minChunkSize) {
+                if (__DEV__) {
+                  console.log('[Recording] Skipping small chunk, size:', pcmBuffer.byteLength);
+                }
+                return;
+              }
+
+              if (__DEV__) {
+                console.log(
+                  '[Recording] Web: Sending PCM data, size:',
+                  pcmBuffer.byteLength,
+                  'samples:',
+                  pcmBuffer.byteLength / 2
+                );
+              }
+            }
+
+            streamingTranscriptionService.sendAudioChunk(pcmBuffer);
+          }
+        },
+      });
+
       setError(null);
+      setIsInitializing(false);
     } catch (err) {
-      if (__DEV__) console.error('Recording failed:', err);
+      if (__DEV__) console.error('Recording initialization failed:', err);
       setError(err instanceof Error ? err.message : '録音を開始できませんでした');
+      setIsInitializing(false);
       Alert.alert('エラー', '録音を開始できませんでした。マイクの権限を確認してください。', [
         { text: 'OK', onPress: () => router.back() },
       ]);
     }
   };
-
-  // 波形データの更新（実際のオーディオレベルを使用）
-  useEffect(() => {
-    let waveformInterval: ReturnType<typeof setInterval> | undefined;
-    let currentLevel = 0;
-
-    // 実際のオーディオレベルを購読
-    const unsubscribe = audioRecorderService.onAudioLevel(({ level }) => {
-      currentLevel = level;
-    });
-
-    if (isRecording && !isPaused) {
-      waveformInterval = setInterval(() => {
-        updateCount.current += 1;
-
-        // 5回に1回バーを追加（実際の音量レベルを使用）
-        if (updateCount.current % 5 === 0) {
-          // 音量レベルを波形の高さに変換（最小10、最大80）
-          const height = Math.max(10, Math.min(80, currentLevel * 0.7 + 10));
-          setWaveformData((prev) => [...prev, height]);
-        }
-      }, 10);
-    }
-    return () => {
-      if (waveformInterval) clearInterval(waveformInterval);
-      unsubscribe();
-    };
-  }, [isRecording, isPaused]);
 
   // 秒数の更新
   useEffect(() => {
@@ -101,108 +212,158 @@ export function RecordingScreen() {
   }, [isRecording, isPaused]);
 
   const handleCancel = useCallback(() => {
-    Alert.alert('確認', '録音を破棄しますか?', [
-      { text: 'キャンセル', style: 'cancel' },
-      {
-        text: '破棄',
-        style: 'destructive',
-        onPress: async () => {
-          await audioRecorderService.cancelRecording();
-          // 録音ファイルを削除
-          if (recordingFilePath.current) {
-            try {
-              const fileToDelete = new File(recordingFilePath.current);
-              if (fileToDelete.exists) {
-                fileToDelete.delete();
-              }
-            } catch (e) {
-              if (__DEV__) console.warn('Failed to delete recording file:', e);
-            }
-          }
-          setIsRecording(false);
-          setDuration(0);
-          setWaveformData([]);
-          setIsPaused(false);
-          router.back();
-        },
-      },
-    ]);
+    setIsCancelDialogVisible(true);
   }, []);
+
+  const handleConfirmCancel = useCallback(async () => {
+    await stopRecording();
+    cancel();
+    setDuration(0);
+    setIsCancelDialogVisible(false);
+    router.back();
+  }, [cancel, stopRecording]);
 
   const handleComplete = async () => {
     try {
-      const result = await audioRecorderService.stopRecording();
-      setIsRecording(false);
+      setIsProcessing(true);
 
-      if (result) {
-        // バックグラウンドで処理を開始（エラーはトーストで表示される）
-        useProcessingStore
-          .getState()
-          .startProcessing(result.filePath)
-          .catch((err) => {
-            if (__DEV__) console.error('Processing failed:', err);
-          });
-        // ホーム画面に遷移
-        router.replace('/home');
-      } else {
-        Alert.alert('エラー', '録音データの取得に失敗しました');
+      // 録音停止
+      await stopRecording();
+
+      // WebSocket切断して文字起こしテキストを取得
+      const transcript = streamingTranscriptionService.stopWithoutFormat();
+
+      if (transcript && transcript.trim().length > 0) {
+        // バックグラウンドでAI整形を開始
+        useProcessingStore.getState().startProcessing(transcript, 'ja-JP');
       }
+
+      // ホーム画面に戻る
+      router.replace('/home');
     } catch (err) {
       if (__DEV__) console.error('Stop recording failed:', err);
+      setIsProcessing(false);
       Alert.alert('エラー', '録音の完了処理に失敗しました');
     }
   };
 
   const handleTogglePause = () => {
     if (isPaused) {
-      audioRecorderService.resumeRecording();
+      resumeRecording();
     } else {
-      audioRecorderService.pauseRecording();
+      pauseRecording();
     }
-    setIsPaused(!isPaused);
   };
+
+  // 処理中の表示
+  if (isProcessing) {
+    return (
+      <>
+        <Stack.Screen options={{ headerShown: false }} />
+        <View className="flex-1 bg-t-bg-secondary justify-center items-center">
+          <ActivityIndicator size="large" color="#6366f1" />
+          <Text variant="bodyLarge" className="text-t-text-primary mt-4">
+            {phase === 'stopping'
+              ? '録音を停止中...'
+              : phase === 'formatting'
+                ? 'メモを整形中...'
+                : '処理中...'}
+          </Text>
+          {editableTranscript && (
+            <Text
+              variant="bodySmall"
+              className="text-t-text-tertiary mt-2 px-8 text-center"
+              numberOfLines={3}
+            >
+              {`${editableTranscript.slice(0, 100)}...`}
+            </Text>
+          )}
+        </View>
+      </>
+    );
+  }
 
   if (error) {
     return (
-      <View className="flex-1 bg-t-bg-secondary justify-center items-center p-5">
-        <Text variant="bodyLarge" className="text-t-danger-500 mb-5 text-center">
-          {error}
-        </Text>
-        <Button mode="contained" onPress={() => router.back()}>
-          戻る
-        </Button>
-      </View>
+      <>
+        <Stack.Screen options={{ headerShown: false }} />
+        <View className="flex-1 bg-t-bg-secondary justify-center items-center p-5">
+          <Text variant="bodyLarge" className="text-t-danger-500 mb-5 text-center">
+            {error}
+          </Text>
+        </View>
+      </>
+    );
+  }
+
+  // 初期化中または接続中の表示
+  if (isInitializing || phase === 'connecting') {
+    return (
+      <>
+        <Stack.Screen options={{ headerShown: false }} />
+        <View className="flex-1 bg-t-bg-secondary justify-center items-center">
+          <ActivityIndicator size="large" color="#6366f1" />
+          <Text variant="bodyLarge" className="text-t-text-primary mt-4">
+            文字起こしサービスに接続中...
+          </Text>
+        </View>
+      </>
     );
   }
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          headerTitleAlign: 'center',
-          title: formatTime(duration),
-          headerLeft: ({ tintColor }) => (
-            <HeaderButton onPress={handleCancel} accessibilityLabel="録音をキャンセル">
-              <MaterialCommunityIcons name="close" size={24} color={tintColor} />
-            </HeaderButton>
-          ),
-          headerBackVisible: false,
-        }}
-      />
+      <Stack.Screen options={{ headerShown: false }} />
       <View className="flex-1 bg-t-bg-secondary">
-        {/* 波形表示エリア */}
-        <AudioWaveform waveformData={waveformData} isPaused={isPaused} isRecording={isRecording} />
+        {/* カスタムヘッダー */}
+        <RecordingHeader duration={duration} isPaused={isPaused} onCancel={handleCancel} />
 
-        {/* 空白エリア（文字起こしなし） */}
-        <View className="flex-1" />
+        {/* リアルタイム文字起こし表示（編集可能） */}
+        <LiveTranscript
+          editableTranscript={editableTranscript}
+          onChangeText={setEditableTranscript}
+        />
+
+        {/* 接続状態インジケーター */}
+        {connectionState !== 'ready' && connectionState !== 'disconnected' && (
+          <View className="px-4 py-2 bg-t-warning-100">
+            <Text variant="bodySmall" className="text-t-warning-700 text-center">
+              {connectionState === 'connecting' && '文字起こしサービスに接続中...'}
+              {connectionState === 'connected' && '準備中...'}
+              {connectionState === 'error' && '接続エラー'}
+            </Text>
+          </View>
+        )}
+
+        {/* エラー表示 */}
+        {transcriptionError && (
+          <View className="px-4 py-2 bg-t-danger-100">
+            <Text variant="bodySmall" className="text-t-danger-700 text-center">
+              {transcriptionError.message}
+            </Text>
+          </View>
+        )}
 
         {/* コントロール */}
         <RecordingControls
           isPaused={isPaused}
           onTogglePause={handleTogglePause}
           onComplete={handleComplete}
+          isProcessing={isProcessing}
         />
       </View>
+
+      {/* キャンセル確認ダイアログ */}
+      <ConfirmDialog
+        visible={isCancelDialogVisible}
+        title="録音を破棄"
+        message="録音を破棄しますか？"
+        confirmText="破棄"
+        cancelText="キャンセル"
+        onConfirm={handleConfirmCancel}
+        onCancel={() => setIsCancelDialogVisible(false)}
+        variant="warning"
+      />
     </>
   );
 }

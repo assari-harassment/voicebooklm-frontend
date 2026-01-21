@@ -6,7 +6,6 @@ import {
   indexScreenOptions,
   loginScreenOptions,
   noteDetailScreenOptions,
-  processingScreenOptions,
   recordScreenOptions,
   searchScreenOptions,
 } from '@/src/navigation/screen-options';
@@ -30,7 +29,6 @@ export default function RootLayout() {
               <Stack.Screen name="search" options={searchScreenOptions} />
               <Stack.Screen name="note/[id]" options={noteDetailScreenOptions} />
               <Stack.Screen name="record" options={recordScreenOptions} />
-              <Stack.Screen name="processing" options={processingScreenOptions} />
             </Stack>
             <ProcessingToast />
           </View>

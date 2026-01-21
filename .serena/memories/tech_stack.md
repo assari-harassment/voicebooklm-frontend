@@ -10,7 +10,7 @@
 | UI             | React Native Paper               |
 | スタイリング   | NativeWind (Tailwind CSS for RN) |
 | ナビゲーション | React Navigation                 |
-| 音声           | react-native-audio-api           |
+| 音声           | @siteed/expo-audio-studio        |
 | HTTP           | Axios                            |
 | マークダウン   | react-native-markdown-display    |
 

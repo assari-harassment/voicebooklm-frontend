@@ -10,12 +10,13 @@ interface AuthProviderProps {
 /**
  * 認証状態を管理するプロバイダー
  * - hydration 完了を待機
+ * - refreshToken からの accessToken 再取得（Web対応）
  * - トークン存在時は /api/auth/me で検証
  * - 検証中は AuthLoadingScreen を表示
  */
 export function AuthProvider({ children }: AuthProviderProps) {
   const [isInitializing, setIsInitializing] = useState(true);
-  const { isHydrated, accessToken, refreshToken, setUser, logout } = useAuthStore();
+  const { isHydrated, accessToken, refreshToken, setTokens, setUser, logout } = useAuthStore();
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -24,15 +25,38 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return;
       }
 
-      // トークンが存在しない場合は初期化完了
-      if (!accessToken || !refreshToken) {
+      // refreshToken がない場合は未認証として初期化完了
+      if (!refreshToken) {
         setIsInitializing(false);
         return;
       }
 
+      // accessToken がない場合は refreshToken から再取得を試みる
+      // （Web でのページリロード時など）
+      let currentAccessToken = accessToken;
+      if (!currentAccessToken) {
+        try {
+          if (__DEV__) {
+            console.log('[AuthProvider] Refreshing access token from refresh token...');
+          }
+          const tokens = await apiClient.refreshToken(refreshToken);
+          setTokens(tokens);
+          currentAccessToken = tokens.accessToken;
+        } catch (error) {
+          if (__DEV__) {
+            console.error('[AuthProvider] Failed to refresh token:', error);
+          }
+          // リフレッシュ失敗時はログアウト
+          logout();
+          setIsInitializing(false);
+          return;
+        }
+      }
+
+      // accessToken で認証状態を検証
       try {
         // APIクライアントにアクセストークンを設定
-        apiClient.setAccessToken(accessToken);
+        apiClient.setAccessToken(currentAccessToken);
 
         // /api/auth/me でトークンの有効性を検証
         const user = await apiClient.getCurrentUser();
@@ -59,7 +83,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
 
     initializeAuth();
-  }, [isHydrated, accessToken, refreshToken, setUser, logout]);
+  }, [isHydrated, accessToken, refreshToken, setTokens, setUser, logout]);
 
   // 初期化中はローディング画面を表示
   if (!isHydrated || isInitializing) {

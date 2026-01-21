@@ -77,15 +77,6 @@ export const recordScreenOptions: NativeStackNavigationOptions = {
 };
 
 /**
- * processing画面のヘッダー設定
- */
-export const processingScreenOptions: NativeStackNavigationOptions = {
-  title: '処理中',
-  headerBackVisible: false,
-  gestureEnabled: false,
-};
-
-/**
  * search画面のヘッダー設定
  */
 export const searchScreenOptions: NativeStackNavigationOptions = {

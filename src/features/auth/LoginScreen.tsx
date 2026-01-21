@@ -1,53 +1,41 @@
 import { apiClient } from '@/src/api';
 import type { TokenResponse } from '@/src/api/generated/apiSchema';
 import { useAuthStore } from '@/src/shared/stores/authStore';
-import {
-  GoogleSignin,
-  isErrorWithCode,
-  isSuccessResponse,
-  statusCodes,
-} from '@react-native-google-signin/google-signin';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, ScrollView, View } from 'react-native';
 
+import { configureGoogleAuth, signInWithGoogle } from './adapters';
 import { AppLogo } from './app-logo';
 import { FeatureList } from './feature-list';
 import { GoogleLoginButton } from './google-login-button';
-
-// 設定
-GoogleSignin.configure({
-  iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
-});
 
 // コンポーネント
 export function LoginScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuthStore();
 
+  // Google Auth 初期化
+  useEffect(() => {
+    configureGoogleAuth();
+  }, []);
+
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
 
     try {
-      // Google Play Services の確認（iOSでは自動で成功）
-      await GoogleSignin.hasPlayServices();
+      // Google Sign-In を実行（プラットフォーム固有の実装が自動選択）
+      const result = await signInWithGoogle();
 
-      // Google Sign-In を実行
-      const response = await GoogleSignin.signIn();
-
-      if (isSuccessResponse(response)) {
-        const idToken = response.data.idToken;
-
-        if (!idToken) {
-          throw new Error('ID トークンを取得できませんでした');
-        }
-
+      if (result.success && result.idToken) {
         // バックエンド API で認証
-        const tokenResponse = await loginWithBackend(idToken);
-        await handleLoginSuccess(tokenResponse);
+        const tokenResponse = await loginWithBackend(result.idToken);
+        handleLoginSuccess(tokenResponse);
+      } else if (result.error) {
+        handleSignInError(result.error);
       }
     } catch (error) {
-      handleSignInError(error);
+      handleUnexpectedError(error);
     } finally {
       setIsLoading(false);
     }
@@ -66,22 +54,27 @@ export function LoginScreen() {
     router.replace('/home');
   };
 
-  const handleSignInError = (error: unknown) => {
-    if (isErrorWithCode(error)) {
-      switch (error.code) {
-        case statusCodes.SIGN_IN_CANCELLED:
-          // ユーザーがキャンセル
-          break;
-        case statusCodes.IN_PROGRESS:
-          // 既にサインイン処理中
-          break;
-        case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
-          Alert.alert('エラー', 'Google Play Services が利用できません');
-          break;
-        default:
-          Alert.alert('エラー', `サインインに失敗しました: ${error.message}`);
-      }
-    } else if (error instanceof Error) {
+  const handleSignInError = (error: {
+    code: 'CANCELLED' | 'IN_PROGRESS' | 'PLAY_SERVICES_NOT_AVAILABLE' | 'UNKNOWN';
+    message: string;
+  }) => {
+    switch (error.code) {
+      case 'CANCELLED':
+        // ユーザーがキャンセル（何もしない）
+        break;
+      case 'IN_PROGRESS':
+        // 既にサインイン処理中（何もしない）
+        break;
+      case 'PLAY_SERVICES_NOT_AVAILABLE':
+        Alert.alert('エラー', 'Google Play Services が利用できません');
+        break;
+      default:
+        Alert.alert('エラー', `サインインに失敗しました: ${error.message}`);
+    }
+  };
+
+  const handleUnexpectedError = (error: unknown) => {
+    if (error instanceof Error) {
       Alert.alert('エラー', error.message);
     } else {
       Alert.alert('エラー', '予期しないエラーが発生しました');
