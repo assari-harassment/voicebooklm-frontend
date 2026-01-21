@@ -122,6 +122,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bg.primary,
     borderRadius: 16,
     marginHorizontal: 24,
+    maxWidth: 400,
+    alignSelf: 'center',
+    width: '100%',
   },
   content: {
     alignItems: 'center',

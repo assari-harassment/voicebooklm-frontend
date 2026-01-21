@@ -10,49 +10,6 @@
  * ---------------------------------------------------------------
  */
 
-export interface FallbackUsageResponse {
-  transcription: boolean;
-  formatting: boolean;
-}
-
-export interface ProcessingTimeResponse {
-  /** @format int64 */
-  transcription: number;
-  /** @format int64 */
-  formatting: number;
-  /** @format int64 */
-  persistence: number;
-  /** @format int64 */
-  total: number;
-}
-
-export interface VoiceMemoCreatedResponse {
-  /** @format uuid */
-  memoId: string;
-  title: string;
-  content: string;
-  tags: string[];
-  transcription?: string;
-  transcriptionStatus: string;
-  formattingStatus: string;
-  processingTimeMillis: ProcessingTimeResponse;
-  fallback: FallbackUsageResponse;
-}
-
-/** エラーレスポンス */
-export interface ErrorResponse {
-  /**
-   * エラーメッセージ
-   * @example "認証に失敗しました"
-   */
-  error: string;
-  /**
-   * エラーコード
-   * @example "UNAUTHORIZED"
-   */
-  code: string;
-}
-
 export interface FolderInfo {
   /** @format uuid */
   id: string;
@@ -76,8 +33,47 @@ export interface MemoDetailResponse {
   updatedAt: string;
 }
 
+/** エラーレスポンス */
+export interface ErrorResponse {
+  /**
+   * エラーメッセージ
+   * @example "認証に失敗しました"
+   */
+  error: string;
+  /**
+   * エラーコード
+   * @example "UNAUTHORIZED"
+   */
+  code: string;
+}
+
 export interface ResummarizeRequest {
   editedTranscription: string;
+}
+
+export interface FormatMemoResponse {
+  /** @format uuid */
+  memoId: string;
+  title: string;
+  content: string;
+  tags: string[];
+  formattingStatus: string;
+  processingTimeMillis: FormatProcessingTimeResponse;
+  fallbackUsed: boolean;
+}
+
+export interface FormatProcessingTimeResponse {
+  /** @format int64 */
+  formatting: number;
+  /** @format int64 */
+  persistence: number;
+  /** @format int64 */
+  total: number;
+}
+
+export interface FormatMemoRequest {
+  transcription: string;
+  language?: string;
 }
 
 export interface FolderResponse {
@@ -434,36 +430,6 @@ export class HttpClient<SecurityDataType = unknown> {
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
   api = {
     /**
-     * @description multipart/form-data で音声ファイルをアップロードし、文字起こし→AI整形→保存を行う。60秒以内のレスポンスを想定。
-     *
-     * @tags Voice
-     * @name CreateMemo
-     * @summary 音声ファイルからメモを生成する
-     * @request POST:/api/voice/memos
-     * @secure
-     */
-    createMemo: (
-      data: {
-        /** @format binary */
-        file: File;
-      },
-      query?: {
-        language?: string;
-      },
-      params: RequestParams = {}
-    ) =>
-      this.request<VoiceMemoCreatedResponse, ErrorResponse>({
-        path: `/api/voice/memos`,
-        method: 'POST',
-        query: query,
-        body: data,
-        secure: true,
-        type: ContentType.FormData,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
      * @description 編集された文字起こしテキストから再度AI整形（要約）を行います。
      *
      * @tags Memo
@@ -475,6 +441,25 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     resummarize: (id: string, data: ResummarizeRequest, params: RequestParams = {}) =>
       this.request<MemoDetailResponse, ErrorResponse>({
         path: `/api/memos/${id}/resummarize`,
+        method: 'POST',
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description WebSocketで受信した文字起こしテキストをAI整形し、メモとして保存します。
+     *
+     * @tags Memo
+     * @name FormatMemo
+     * @summary 文字起こしテキストをAI整形してメモ保存
+     * @request POST:/api/memos/format
+     * @secure
+     */
+    formatMemo: (data: FormatMemoRequest, params: RequestParams = {}) =>
+      this.request<FormatMemoResponse, ErrorResponse>({
+        path: `/api/memos/format`,
         method: 'POST',
         body: data,
         secure: true,

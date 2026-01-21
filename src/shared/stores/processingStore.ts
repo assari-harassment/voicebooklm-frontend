@@ -1,4 +1,4 @@
-import type { VoiceMemoCreatedResponse } from '@/src/api/generated/apiSchema';
+import type { FormatMemoResponse } from '@/src/api/generated/apiSchema';
 import { apiClient } from '@/src/api';
 import { create } from 'zustand';
 
@@ -7,15 +7,15 @@ export type ProcessingStatus = 'idle' | 'processing' | 'completed' | 'error';
 interface ProcessingState {
   // 状態
   status: ProcessingStatus;
-  memoResult: VoiceMemoCreatedResponse | null;
+  memoResult: FormatMemoResponse | null;
   error: string | null;
-  filePath: string | null;
+  transcript: string | null;
   language: string | null;
 
   // アクション
-  startProcessing: (filePath: string, language?: string) => Promise<void>;
+  startProcessing: (transcript: string, language?: string) => Promise<void>;
   retry: () => Promise<void>;
-  setCompleted: (result: VoiceMemoCreatedResponse) => void;
+  setCompleted: (result: FormatMemoResponse) => void;
   setError: (error: string) => void;
   reset: () => void;
   dismissBanner: () => void;
@@ -26,11 +26,11 @@ export const useProcessingStore = create<ProcessingState>()((set, get) => ({
   status: 'idle',
   memoResult: null,
   error: null,
-  filePath: null,
+  transcript: null,
   language: null,
 
   // 処理開始（バックグラウンドでAPI呼び出し）
-  startProcessing: async (filePath: string, language = 'ja-JP') => {
+  startProcessing: async (transcript: string, language = 'ja-JP') => {
     // 既に処理中の場合は何もしない
     if (get().status === 'processing') {
       return;
@@ -40,13 +40,13 @@ export const useProcessingStore = create<ProcessingState>()((set, get) => ({
       status: 'processing',
       memoResult: null,
       error: null,
-      filePath,
+      transcript,
       language,
     });
 
     try {
-      // APIを呼び出してメモを生成
-      const result = await apiClient.createMemoFromAudio(filePath, language);
+      // formatMemo APIを呼び出してメモを生成
+      const result = await apiClient.formatMemo(transcript, language);
 
       set({
         status: 'completed',
@@ -54,7 +54,7 @@ export const useProcessingStore = create<ProcessingState>()((set, get) => ({
         error: null,
       });
     } catch (err) {
-      if (__DEV__) console.error('Failed to process audio:', err);
+      if (__DEV__) console.error('Failed to format memo:', err);
       const errorMessage = err instanceof Error ? err.message : '処理に失敗しました';
 
       set({
@@ -67,8 +67,8 @@ export const useProcessingStore = create<ProcessingState>()((set, get) => ({
 
   // 再試行
   retry: async () => {
-    const { filePath, language } = get();
-    if (!filePath) {
+    const { transcript, language } = get();
+    if (!transcript) {
       return;
     }
 
@@ -79,7 +79,7 @@ export const useProcessingStore = create<ProcessingState>()((set, get) => ({
     });
 
     try {
-      const result = await apiClient.createMemoFromAudio(filePath, language ?? 'ja-JP');
+      const result = await apiClient.formatMemo(transcript, language ?? 'ja-JP');
 
       set({
         status: 'completed',
@@ -87,7 +87,7 @@ export const useProcessingStore = create<ProcessingState>()((set, get) => ({
         error: null,
       });
     } catch (err) {
-      if (__DEV__) console.error('Failed to process audio (retry):', err);
+      if (__DEV__) console.error('Failed to format memo (retry):', err);
       const errorMessage = err instanceof Error ? err.message : '処理に失敗しました';
 
       set({
@@ -99,7 +99,7 @@ export const useProcessingStore = create<ProcessingState>()((set, get) => ({
   },
 
   // 処理完了（手動設定用）
-  setCompleted: (result: VoiceMemoCreatedResponse) => {
+  setCompleted: (result: FormatMemoResponse) => {
     set({
       status: 'completed',
       memoResult: result,
@@ -122,7 +122,7 @@ export const useProcessingStore = create<ProcessingState>()((set, get) => ({
       status: 'idle',
       memoResult: null,
       error: null,
-      filePath: null,
+      transcript: null,
       language: null,
     });
   },

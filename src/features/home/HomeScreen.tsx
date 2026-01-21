@@ -1,17 +1,12 @@
 import { router } from 'expo-router';
 import { ScrollView, View } from 'react-native';
 
-import { useProcessingStore } from '@/src/shared/stores/processingStore';
-
 import { FolderList } from './folder-list';
 import { RecentNotes, useRecentMemos } from './recent-notes';
 import { RecordFab } from './record-fab';
 
 export function HomeScreen() {
   const { memos, isLoading, error } = useRecentMemos();
-
-  // トースト表示中はFABを無効化
-  const isToastVisible = useProcessingStore((state) => state.status !== 'idle');
 
   const handleMemoClick = (memoId: string) => {
     router.push(`/note/${memoId}`);
@@ -37,7 +32,7 @@ export function HomeScreen() {
       </ScrollView>
 
       {/* 録音ボタン (FAB) */}
-      <RecordFab onPress={handleStartRecording} disabled={isToastVisible} />
+      <RecordFab onPress={handleStartRecording} />
     </View>
   );
 }

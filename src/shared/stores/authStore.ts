@@ -78,9 +78,10 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'auth-storage',
       storage: createJSONStorage(() => secureStorage),
-      // トークンのみ永続化（ユーザー情報は除外）
+      // refreshToken のみ永続化
+      // accessToken は永続化せずメモリのみで保持することで、XSS攻撃時のトークン漏洩リスクを軽減
+      // ページリロード時は AuthProvider が refreshToken から accessToken を再取得する
       partialize: (state) => ({
-        accessToken: state.accessToken,
         refreshToken: state.refreshToken,
       }),
       // hydration 完了時のコールバック
@@ -89,10 +90,11 @@ export const useAuthStore = create<AuthState>()(
           if (error && __DEV__) {
             console.error('Auth hydration failed:', error);
           }
-          const hasTokens = Boolean(state?.accessToken && state?.refreshToken);
+          // refreshToken の存在に関わらず isAuthenticated は false で初期化
+          // accessToken は後で AuthProvider が refresh で取得し、そこで isAuthenticated が true になる
           useAuthStore.setState({
             isHydrated: true,
-            isAuthenticated: hasTokens,
+            isAuthenticated: false,
           });
         };
       },

@@ -1,8 +1,7 @@
 import { apiClient } from '@/src/api';
 import type { FolderResponse, MemoListItemResponse } from '@/src/api/generated/apiSchema';
-import { useProcessingStore } from '@/src/shared/stores/processingStore';
 import { useFocusEffect } from '@react-navigation/native';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type { FolderTreeNode, UseFolderTreeResult } from './types';
 
 /**
@@ -67,8 +66,6 @@ export function useFolderTree(): UseFolderTreeResult {
   const [isLoadingFolders, setIsLoadingFolders] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const hasLoadedRef = useRef(false);
-
-  const processingStatus = useProcessingStore((state) => state.status);
 
   // フォルダ一覧を取得
   const fetchFolders = useCallback(async () => {
@@ -161,13 +158,6 @@ export function useFolderTree(): UseFolderTreeResult {
       fetchFolders();
     }, [fetchFolders])
   );
-
-  // AI整形完了時に再取得
-  useEffect(() => {
-    if (processingStatus === 'completed') {
-      fetchFolders();
-    }
-  }, [processingStatus, fetchFolders]);
 
   return {
     rootFolders,

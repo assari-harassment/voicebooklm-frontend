@@ -1,5 +1,5 @@
 import { apiClient } from '@/src/api';
-import type { MemoDetailResponse, VoiceMemoCreatedResponse } from '@/src/api/generated/apiSchema';
+import type { FormatMemoResponse, MemoDetailResponse } from '@/src/api/generated/apiSchema';
 import { ConfirmDialog } from '@/src/shared/components';
 import { colors } from '@/src/shared/constants';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -47,14 +47,16 @@ export function NoteDetailScreen() {
   const parsedMemoData = useMemo<MemoDetailResponse | null>(() => {
     if (memoData) {
       try {
-        const parsed: VoiceMemoCreatedResponse = JSON.parse(memoData);
+        const parsed: FormatMemoResponse = JSON.parse(memoData);
         return {
           memoId: parsed.memoId,
           title: parsed.title,
           content: parsed.content,
           tags: parsed.tags || [],
-          transcriptionText: parsed.transcription,
-          transcriptionStatus: parsed.transcriptionStatus,
+          // リアルタイム文字起こしではtranscriptionTextは使用しない
+          // (showTranscription=falseで表示されないため、undefinedで問題なし)
+          transcriptionText: undefined,
+          transcriptionStatus: 'COMPLETED', // ストリーミング文字起こし完了済み
           formattingStatus: parsed.formattingStatus,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),

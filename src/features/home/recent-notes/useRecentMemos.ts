@@ -1,8 +1,7 @@
 import { apiClient } from '@/src/api';
 import type { MemoListItemResponse } from '@/src/api/generated/apiSchema';
-import { useProcessingStore } from '@/src/shared/stores/processingStore';
 import { useFocusEffect } from '@react-navigation/native';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 interface UseRecentMemosResult {
   memos: MemoListItemResponse[];
@@ -20,8 +19,6 @@ export function useRecentMemos(): UseRecentMemosResult {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const hasLoadedRef = useRef(false);
-
-  const processingStatus = useProcessingStore((state) => state.status);
 
   const fetchMemos = useCallback(async () => {
     try {
@@ -55,13 +52,6 @@ export function useRecentMemos(): UseRecentMemosResult {
       fetchMemos();
     }, [fetchMemos])
   );
-
-  // AI整形完了時に再取得
-  useEffect(() => {
-    if (processingStatus === 'completed') {
-      fetchMemos();
-    }
-  }, [processingStatus, fetchMemos]);
 
   return {
     memos,

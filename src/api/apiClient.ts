@@ -1,15 +1,13 @@
-import axios, { isAxiosError } from 'axios';
 import {
   Api,
+  FormatMemoResponse,
   ListFoldersResponse,
   ListMemosResponse,
   MemoDetailResponse,
   TagsResponse,
   TokenResponse,
   UpdateMemoRequest,
-  VoiceMemoCreatedResponse,
 } from './generated/apiSchema';
-import { File } from 'expo-file-system';
 import { setupAxiosInterceptors } from './interceptors';
 import { useAuthStore } from '@/src/shared/stores/authStore';
 
@@ -48,62 +46,6 @@ class ApiClient {
 
   getAccessToken(): string | null {
     return this.accessToken;
-  }
-
-  /**
-   * 音声ファイルからメモを生成
-   * React Native用のFormData送信方式を使用
-   */
-  async createMemoFromAudio(
-    audioFilePath: string,
-    language: string = 'ja-JP'
-  ): Promise<VoiceMemoCreatedResponse> {
-    // ファイルの存在確認
-    const file = new File(audioFilePath);
-    if (!file.exists) {
-      throw new Error(`Audio file not found: ${audioFilePath}`);
-    }
-
-    // React Native用のFormDataを作成
-    const formData = new FormData();
-
-    // React Nativeでは、uri/type/nameを持つオブジェクトをappendする
-    // 注意: MIMEタイプは "audio/wav" を明示的に指定
-    // iOSは "audio/vnd.wave" を送信することがあるため
-    formData.append('file', {
-      uri: audioFilePath,
-      type: 'audio/wav', // audio/vnd.wave ではなく audio/wav を使用
-      name: 'recording.wav',
-    } as unknown as Blob);
-
-    // axiosで直接送信（生成されたAPIクライアントはFormData処理に問題があるため）
-    try {
-      if (__DEV__) {
-        console.log('Uploading audio file:', audioFilePath);
-        console.log('Token:', this.accessToken ? 'Set' : 'Not set');
-      }
-
-      const response = await axios.post<VoiceMemoCreatedResponse>(
-        `${API_BASE_URL}/api/voice/memos`,
-        formData,
-        {
-          params: { language },
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${this.accessToken}`,
-          },
-        }
-      );
-
-      return response.data;
-    } catch (error) {
-      if (__DEV__ && isAxiosError(error)) {
-        console.error('API Error Status:', error.response?.status);
-        console.error('API Error Data:', JSON.stringify(error.response?.data));
-        console.error('API Error Headers:', JSON.stringify(error.response?.headers));
-      }
-      throw error;
-    }
   }
 
   /**
@@ -195,6 +137,19 @@ class ApiClient {
    */
   async listFolders(): Promise<ListFoldersResponse> {
     const response = await this.api.api.listFolders({ secure: true });
+    return response.data;
+  }
+
+  /**
+   * 文字起こし結果を整形してメモを作成
+   * POST /api/memos/format
+   */
+  async formatMemo(transcription: string, language: string = 'ja-JP'): Promise<FormatMemoResponse> {
+    if (__DEV__) {
+      console.log('Formatting transcript, length:', transcription.length);
+    }
+
+    const response = await this.api.api.formatMemo({ transcription, language }, { secure: true });
     return response.data;
   }
 }

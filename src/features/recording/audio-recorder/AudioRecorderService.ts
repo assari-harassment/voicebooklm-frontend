@@ -1,14 +1,20 @@
-import { File } from 'expo-file-system';
-import { AudioContext, AudioManager, AudioRecorder } from 'react-native-audio-api';
+import {
+  ExpoAudioStreamModule,
+  AudioRecording,
+  RecordingConfig,
+  AudioDataEvent,
+} from '@siteed/expo-audio-studio';
+import { streamingTranscriptionService } from '../services/StreamingTranscriptionService';
 
 // Google Speech to Text推奨設定: LINEAR16, 16kHz, mono
 const SAMPLE_RATE = 16000;
-const BUFFER_LENGTH_IN_SAMPLES = SAMPLE_RATE; // 1秒分のバッファ
+const BUFFER_DURATION_SECONDS = 0.1; // 100ms (iOS最小値)
 
 // 型定義
 export interface RecordingResult {
-  filePath: string;
+  fileUri: string;
   duration: number;
+  transcript: string;
 }
 
 export interface AudioLevel {
@@ -16,24 +22,23 @@ export interface AudioLevel {
 }
 
 type AudioLevelCallback = (data: AudioLevel) => void;
+type AudioChunkCallback = (pcmData: ArrayBuffer) => void;
 
 // サービスクラス
 class AudioRecorderService {
-  private audioContext: AudioContext | null = null;
-  private recorder: AudioRecorder | null = null;
   private isRecording = false;
   private isPaused = false;
   private startTime: number = 0;
   private pausedDuration: number = 0;
   private pauseStartTime: number = 0;
-  private outputPath: string | null = null;
   private audioLevelCallbacks: AudioLevelCallback[] = [];
-  private audioBuffers: Float32Array[] = [];
+  private audioChunkCallbacks: AudioChunkCallback[] = [];
+  private lastRecordingResult: AudioRecording | null = null;
 
   async requestPermissions(): Promise<boolean> {
     try {
-      const permission = await AudioManager.requestRecordingPermissions();
-      return permission === 'Granted';
+      const result = await ExpoAudioStreamModule.requestPermissionsAsync();
+      return result.status === 'granted';
     } catch (error) {
       if (__DEV__) console.error('Permission request failed:', error);
       return false;
@@ -42,15 +47,15 @@ class AudioRecorderService {
 
   async checkPermissions(): Promise<boolean> {
     try {
-      const permission = await AudioManager.checkRecordingPermissions();
-      return permission === 'Granted';
+      const result = await ExpoAudioStreamModule.getPermissionsAsync();
+      return result.status === 'granted';
     } catch (error) {
       if (__DEV__) console.error('Permission check failed:', error);
       return false;
     }
   }
 
-  async startRecording(outputFilePath: string): Promise<void> {
+  async startRecording(): Promise<void> {
     if (this.isRecording) {
       if (__DEV__) console.warn('Already recording');
       return;
@@ -65,68 +70,81 @@ class AudioRecorderService {
       }
     }
 
-    // オーディオセッション設定
-    AudioManager.setAudioSessionOptions({
-      iosCategory: 'playAndRecord',
-      iosMode: 'measurement', // 音声認識用に最適化（オーディオ処理の介入を最小化）
-      iosOptions: ['defaultToSpeaker', 'allowBluetooth'],
-    });
-
-    // オーディオセッションを有効化
-    await AudioManager.setAudioSessionActivity(true);
-
-    // AudioContext作成
-    this.audioContext = new AudioContext({ sampleRate: SAMPLE_RATE });
-
-    // レコーダー作成 (0.11.x: パラメータなしコンストラクタ)
-    this.recorder = new AudioRecorder();
-
-    // RecorderAdapterを通じて接続
-    const recorderAdapter = this.audioContext.createRecorderAdapter();
-    this.recorder.connect(recorderAdapter);
-    recorderAdapter.connect(this.audioContext.destination);
-
-    // オーディオデータの収集 (0.11.x: 2引数形式)
-    this.audioBuffers = [];
-    this.recorder.onAudioReady(
-      { sampleRate: SAMPLE_RATE, bufferLength: BUFFER_LENGTH_IN_SAMPLES, channelCount: 1 },
-      (event) => {
+    const config: RecordingConfig = {
+      sampleRate: SAMPLE_RATE,
+      channels: 1,
+      encoding: 'pcm_16bit',
+      bufferDurationSeconds: BUFFER_DURATION_SECONDS,
+      enableProcessing: true,
+      keepAwake: true,
+      output: {
+        primary: {
+          enabled: false, // ファイル保存なし（ストリーミングのみ）
+        },
+      },
+      onAudioStream: async (event: AudioDataEvent) => {
         if (this.isPaused) return;
 
-        // バッファをコピーして保存
-        const channelData = event.buffer.getChannelData(0);
-        const bufferCopy = new Float32Array(channelData.length);
-        bufferCopy.set(channelData);
-        this.audioBuffers.push(bufferCopy);
-
         // 音量レベルを計算してコールバック
-        const level = this.calculateAudioLevel(channelData);
-        this.notifyAudioLevel(level);
-      }
-    );
+        if (event.data) {
+          const level = this.calculateAudioLevelFromAmplitude(event);
+          this.notifyAudioLevel(level);
+        }
 
-    // 録音開始 (0.11.x: 戻り値チェック)
-    const startResult = this.recorder.start();
-    if (startResult.status === 'error') {
-      throw new Error(`Recording failed to start: ${startResult.message}`);
+        // PCMデータをWebSocketに送信
+        if (event.data && typeof event.data === 'string') {
+          // base64からArrayBufferに変換
+          const pcmBuffer = this.base64ToArrayBuffer(event.data);
+          this.notifyAudioChunk(pcmBuffer);
+
+          // StreamingTranscriptionServiceに送信
+          streamingTranscriptionService.sendAudioChunk(pcmBuffer);
+        }
+      },
+      onAudioAnalysis: async (analysisEvent) => {
+        // 解析データから音量レベルを取得（より精度の高い値）
+        if (analysisEvent.amplitudeRange) {
+          const { max } = analysisEvent.amplitudeRange;
+          // 0-100に正規化
+          const level = Math.min(100, Math.max(0, Math.abs(max) * 100));
+          this.notifyAudioLevel(level);
+        }
+      },
+    };
+
+    const startResult = await ExpoAudioStreamModule.startRecording(config);
+
+    if (!startResult) {
+      throw new Error('Failed to start recording');
     }
+
     this.isRecording = true;
     this.isPaused = false;
     this.startTime = Date.now();
     this.pausedDuration = 0;
-    this.outputPath = outputFilePath;
+
+    if (__DEV__) {
+      console.log('[AudioRecorderService] Recording started');
+    }
   }
 
-  private calculateAudioLevel(samples: Float32Array): number {
-    // RMS（二乗平均平方根）で音量を計算
-    let sum = 0;
-    for (let i = 0; i < samples.length; i++) {
-      sum += samples[i] * samples[i];
+  private base64ToArrayBuffer(base64: string): ArrayBuffer {
+    const binaryString = atob(base64);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
     }
-    const rms = Math.sqrt(sum / samples.length);
-    // 0-100に正規化（-60dB〜0dBの範囲を想定）
-    const db = 20 * Math.log10(Math.max(rms, 0.000001));
-    return Math.min(100, Math.max(0, ((db + 60) / 60) * 100));
+    return bytes.buffer;
+  }
+
+  private calculateAudioLevelFromAmplitude(event: AudioDataEvent): number {
+    // イベントデータサイズから相対的な音量を推定
+    // 注意: これはフォールバック用の簡易推定、より正確な音量はonAudioAnalysisで取得
+    const dataSize = event.eventDataSize || 0;
+    const expectedSize = SAMPLE_RATE * BUFFER_DURATION_SECONDS * 2; // 16bit = 2bytes
+    const ratio = Math.min(1, dataSize / expectedSize);
+    return ratio * 50 + 25; // 25-75の範囲に正規化
   }
 
   private notifyAudioLevel(level: number): void {
@@ -135,152 +153,77 @@ class AudioRecorderService {
     });
   }
 
+  private notifyAudioChunk(pcmData: ArrayBuffer): void {
+    this.audioChunkCallbacks.forEach((callback) => {
+      callback(pcmData);
+    });
+  }
+
   pauseRecording(): void {
     if (!this.isRecording || this.isPaused) return;
+
+    ExpoAudioStreamModule.pauseRecording();
     this.isPaused = true;
     this.pauseStartTime = Date.now();
+
+    if (__DEV__) {
+      console.log('[AudioRecorderService] Recording paused');
+    }
   }
 
   resumeRecording(): void {
     if (!this.isRecording || !this.isPaused) return;
+
+    ExpoAudioStreamModule.resumeRecording();
     this.isPaused = false;
     this.pausedDuration += Date.now() - this.pauseStartTime;
+
+    if (__DEV__) {
+      console.log('[AudioRecorderService] Recording resumed');
+    }
   }
 
   async stopRecording(): Promise<RecordingResult | null> {
-    if (!this.isRecording || !this.recorder) {
+    if (!this.isRecording) {
       return null;
     }
 
-    // 録音停止 (0.11.x: clearOnAudioReady追加)
-    this.recorder.clearOnAudioReady();
-    this.recorder.stop();
-    this.recorder.disconnect();
+    const result = await ExpoAudioStreamModule.stopRecording();
+    this.lastRecordingResult = result;
 
     const duration = Math.floor((Date.now() - this.startTime - this.pausedDuration) / 1000);
-
-    // WAVファイルを生成して保存
-    if (this.outputPath && this.audioBuffers.length > 0) {
-      await this.saveAsWav(this.outputPath);
-    }
-
-    // AudioContext終了
-    if (this.audioContext) {
-      this.audioContext.close();
-      this.audioContext = null;
-    }
-
-    // オーディオセッションを無効化
-    await AudioManager.setAudioSessionActivity(false);
-
-    const result: RecordingResult = {
-      filePath: this.outputPath!,
-      duration,
-    };
 
     // リセット
     this.isRecording = false;
     this.isPaused = false;
-    this.recorder = null;
-    this.outputPath = null;
     this.audioLevelCallbacks = [];
-    this.audioBuffers = [];
+    this.audioChunkCallbacks = [];
 
-    return result;
-  }
-
-  private async saveAsWav(filePath: string): Promise<void> {
-    // 全バッファを結合
-    const totalLength = this.audioBuffers.reduce((acc, buf) => acc + buf.length, 0);
-    const combinedBuffer = new Float32Array(totalLength);
-    let offset = 0;
-    for (const buffer of this.audioBuffers) {
-      combinedBuffer.set(buffer, offset);
-      offset += buffer.length;
+    if (__DEV__) {
+      console.log('[AudioRecorderService] Recording stopped, duration:', duration);
     }
 
-    // WAVファイルを生成
-    const wavData = this.encodeWav(combinedBuffer, SAMPLE_RATE);
-
-    // Uint8Arrayに変換してファイルに書き込み
-    const uint8Array = new Uint8Array(wavData);
-    const file = new File(filePath);
-    await file.write(uint8Array);
-  }
-
-  private encodeWav(samples: Float32Array, sampleRate: number): ArrayBuffer {
-    const numChannels = 1;
-    const bitsPerSample = 16;
-    const bytesPerSample = bitsPerSample / 8;
-    const blockAlign = numChannels * bytesPerSample;
-    const byteRate = sampleRate * blockAlign;
-    const dataSize = samples.length * bytesPerSample;
-    const bufferSize = 44 + dataSize;
-
-    const buffer = new ArrayBuffer(bufferSize);
-    const view = new DataView(buffer);
-
-    // WAVヘッダー
-    // RIFF chunk
-    this.writeString(view, 0, 'RIFF');
-    view.setUint32(4, bufferSize - 8, true);
-    this.writeString(view, 8, 'WAVE');
-
-    // fmt chunk
-    this.writeString(view, 12, 'fmt ');
-    view.setUint32(16, 16, true); // chunk size
-    view.setUint16(20, 1, true); // PCM format
-    view.setUint16(22, numChannels, true);
-    view.setUint32(24, sampleRate, true);
-    view.setUint32(28, byteRate, true);
-    view.setUint16(32, blockAlign, true);
-    view.setUint16(34, bitsPerSample, true);
-
-    // data chunk
-    this.writeString(view, 36, 'data');
-    view.setUint32(40, dataSize, true);
-
-    // PCMデータを書き込み（Float32 → Int16変換）
-    let writeOffset = 44;
-    for (let i = 0; i < samples.length; i++) {
-      const sample = Math.max(-1, Math.min(1, samples[i]));
-      const int16Sample = sample < 0 ? sample * 0x8000 : sample * 0x7fff;
-      view.setInt16(writeOffset, int16Sample, true);
-      writeOffset += 2;
-    }
-
-    return buffer;
-  }
-
-  private writeString(view: DataView, offset: number, str: string): void {
-    for (let i = 0; i < str.length; i++) {
-      view.setUint8(offset + i, str.charCodeAt(i));
-    }
+    return {
+      fileUri: result?.fileUri || '',
+      duration,
+      transcript: streamingTranscriptionService.getFinalTranscript(),
+    };
   }
 
   async cancelRecording(): Promise<void> {
     if (!this.isRecording) return;
 
-    if (this.recorder) {
-      this.recorder.clearOnAudioReady();
-      this.recorder.stop();
-      this.recorder.disconnect();
-      this.recorder = null;
-    }
+    await ExpoAudioStreamModule.stopRecording();
 
-    if (this.audioContext) {
-      this.audioContext.close();
-      this.audioContext = null;
-    }
-
-    // オーディオセッションを無効化
-    await AudioManager.setAudioSessionActivity(false);
-
+    // リセット
     this.isRecording = false;
     this.isPaused = false;
-    this.outputPath = null;
     this.audioLevelCallbacks = [];
-    this.audioBuffers = [];
+    this.audioChunkCallbacks = [];
+
+    if (__DEV__) {
+      console.log('[AudioRecorderService] Recording cancelled');
+    }
   }
 
   onAudioLevel(callback: AudioLevelCallback): () => void {
@@ -289,6 +232,16 @@ class AudioRecorderService {
       const index = this.audioLevelCallbacks.indexOf(callback);
       if (index > -1) {
         this.audioLevelCallbacks.splice(index, 1);
+      }
+    };
+  }
+
+  onAudioChunk(callback: AudioChunkCallback): () => void {
+    this.audioChunkCallbacks.push(callback);
+    return () => {
+      const index = this.audioChunkCallbacks.indexOf(callback);
+      if (index > -1) {
+        this.audioChunkCallbacks.splice(index, 1);
       }
     };
   }

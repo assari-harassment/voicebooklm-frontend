@@ -31,10 +31,9 @@
     "plugins": [
       "expo-router",
       [
-        "react-native-audio-api",
+        "@siteed/expo-audio-studio",
         {
-          "iosMicrophonePermission": "音声メモの録音にマイクを使用します",
-          "androidPermissions": ["android.permission.RECORD_AUDIO"]
+          "microphonePermission": "音声メモの録音にマイクを使用します"
         }
       ],
       [
