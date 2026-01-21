@@ -35,18 +35,51 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // （Web でのページリロード時など）
       let currentAccessToken = accessToken;
       if (!currentAccessToken) {
-        try {
-          if (__DEV__) {
-            console.log('[AuthProvider] Refreshing access token from refresh token...');
+        const maxRetries = 2;
+        let lastError: unknown;
+
+        for (let attempt = 0; attempt <= maxRetries; attempt++) {
+          try {
+            if (__DEV__) {
+              console.log(
+                `[AuthProvider] Refreshing access token from refresh token... (attempt ${attempt + 1}/${maxRetries + 1})`
+              );
+            }
+            const tokens = await apiClient.refreshToken(refreshToken);
+            setTokens(tokens);
+            currentAccessToken = tokens.accessToken;
+            break; // 成功したらループを抜ける
+          } catch (error) {
+            lastError = error;
+            const status = (error as { response?: { status?: number } })?.response?.status;
+
+            // 401/403はリトライ不要（トークン自体が無効）
+            if (status === 401 || status === 403) {
+              if (__DEV__) {
+                console.error('[AuthProvider] Refresh token is invalid:', error);
+              }
+              logout();
+              setIsInitializing(false);
+              return;
+            }
+
+            // 最後の試行でなければ待機してリトライ
+            if (attempt < maxRetries) {
+              if (__DEV__) {
+                console.warn(
+                  `[AuthProvider] Failed to refresh token, retrying in 1s... (attempt ${attempt + 1}/${maxRetries + 1})`
+                );
+              }
+              await new Promise((resolve) => setTimeout(resolve, 1000));
+            }
           }
-          const tokens = await apiClient.refreshToken(refreshToken);
-          setTokens(tokens);
-          currentAccessToken = tokens.accessToken;
-        } catch (error) {
+        }
+
+        // 全リトライ失敗
+        if (!currentAccessToken) {
           if (__DEV__) {
-            console.error('[AuthProvider] Failed to refresh token:', error);
+            console.error('[AuthProvider] Failed to refresh token after retries:', lastError);
           }
-          // リフレッシュ失敗時はログアウト
           logout();
           setIsInitializing(false);
           return;

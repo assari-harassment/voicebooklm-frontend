@@ -139,8 +139,8 @@ class AudioRecorderService {
   }
 
   private calculateAudioLevelFromAmplitude(event: AudioDataEvent): number {
-    // 位置情報から推定（正確な音量はonAudioAnalysisで取得）
-    // イベントサイズから相対的な音量を推定
+    // イベントデータサイズから相対的な音量を推定
+    // 注意: これはフォールバック用の簡易推定、より正確な音量はonAudioAnalysisで取得
     const dataSize = event.eventDataSize || 0;
     const expectedSize = SAMPLE_RATE * BUFFER_DURATION_SECONDS * 2; // 16bit = 2bytes
     const ratio = Math.min(1, dataSize / expectedSize);

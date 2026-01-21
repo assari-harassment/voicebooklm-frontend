@@ -25,12 +25,15 @@ function base64ToArrayBuffer(base64: string): ArrayBuffer {
   return bytes.buffer;
 }
 
-// WAVヘッダーかどうかを判定 (RIFFシグネチャをチェック)
+// WAVヘッダーかどうかを判定 ("RIFF" および "WAVE" シグネチャをチェック)
 function isWavHeader(buffer: ArrayBuffer): boolean {
-  if (buffer.byteLength < 4) return false;
+  // "RIFF" (0-3), ChunkSize (4-7), "WAVE" (8-11) を確認するため最低12バイト必要
+  if (buffer.byteLength < 12) return false;
   const view = new Uint8Array(buffer);
-  // "RIFF" = 0x52, 0x49, 0x46, 0x46
-  return view[0] === 0x52 && view[1] === 0x49 && view[2] === 0x46 && view[3] === 0x46;
+  // "RIFF" = 0x52, 0x49, 0x46, 0x46 / "WAVE" = 0x57, 0x41, 0x56, 0x45
+  const isRiff = view[0] === 0x52 && view[1] === 0x49 && view[2] === 0x46 && view[3] === 0x46;
+  const isWave = view[8] === 0x57 && view[9] === 0x41 && view[10] === 0x56 && view[11] === 0x45;
+  return isRiff && isWave;
 }
 
 export function RecordingScreen() {
@@ -62,13 +65,20 @@ export function RecordingScreen() {
     initializeRecording();
     return () => {
       // 画面離脱時にクリーンアップ
-      // handleComplete等で既にstopRecording()が呼ばれている場合はエラーを無視
-      stopRecording().catch(() => {
-        // 録音が既に停止している場合のエラーは無視
-      });
-      streamingTranscriptionService.disconnect();
-      reset();
+      (async () => {
+        try {
+          // handleComplete等で既にstopRecording()が呼ばれている場合はエラーを無視
+          await stopRecording();
+        } catch {
+          // 録音が既に停止している場合のエラーは無視
+        } finally {
+          streamingTranscriptionService.disconnect();
+          reset();
+        }
+      })();
     };
+    // NOTE: 録音・文字起こしの初期化は画面マウント時に一度だけ実行したいので依存配列は空のままとする。
+    //       initializeRecording 内で参照している関数・値（apiClient, connect など）はマウント中に変化しない前提。
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -100,88 +110,95 @@ export function RecordingScreen() {
           },
         },
         onAudioStream: async (event) => {
-          if (__DEV__) {
-            console.log(
-              '[Recording] onAudioStream called, data type:',
-              typeof event.data,
-              'size:',
-              event.eventDataSize
-            );
-          }
-
-          // PCMデータをWebSocketに送信
-          if (event.data) {
-            let pcmBuffer: ArrayBuffer;
-
-            if (typeof event.data === 'string') {
-              // Native: Base64文字列
-              pcmBuffer = base64ToArrayBuffer(event.data);
-            } else if (event.data instanceof ArrayBuffer) {
-              // Web: ArrayBuffer直接
-              pcmBuffer = event.data;
-            } else if (event.data instanceof Uint8Array) {
-              // Web: Uint8Array - 正しいバイト範囲をコピー
-              pcmBuffer = event.data.buffer.slice(
-                event.data.byteOffset,
-                event.data.byteOffset + event.data.byteLength
+          try {
+            if (__DEV__) {
+              console.log(
+                '[Recording] onAudioStream called, data type:',
+                typeof event.data,
+                'size:',
+                event.eventDataSize
               );
-            } else if (event.data instanceof Int16Array) {
-              // Web: Int16Array - すでにPCM 16bit、正しいバイト範囲をコピー
-              pcmBuffer = event.data.buffer.slice(
-                event.data.byteOffset,
-                event.data.byteOffset + event.data.byteLength
-              );
-            } else if (event.data instanceof Float32Array) {
-              // Web: Float32Array - PCM 16bitに変換
-              const float32 = event.data;
-              const int16 = new Int16Array(float32.length);
-              for (let i = 0; i < float32.length; i++) {
-                const s = Math.max(-1, Math.min(1, float32[i]));
-                int16[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
-              }
-              pcmBuffer = int16.buffer;
-            } else {
-              if (__DEV__) {
-                console.log(
-                  '[Recording] Unknown data format:',
-                  event.data?.constructor?.name,
-                  event.data
-                );
-              }
-              return;
             }
 
-            // Web環境の場合、追加の処理が必要
-            if (Platform.OS === 'web') {
-              // WAVヘッダー（44バイト）またはRIFFシグネチャはスキップ
-              if (pcmBuffer.byteLength === 44 || isWavHeader(pcmBuffer)) {
+            // PCMデータをWebSocketに送信
+            if (event.data) {
+              let pcmBuffer: ArrayBuffer;
+
+              if (typeof event.data === 'string') {
+                // Native: Base64文字列
+                pcmBuffer = base64ToArrayBuffer(event.data);
+              } else if (event.data instanceof ArrayBuffer) {
+                // Web: ArrayBuffer直接
+                pcmBuffer = event.data;
+              } else if (event.data instanceof Uint8Array) {
+                // Web: Uint8Array - 正しいバイト範囲をコピー
+                pcmBuffer = event.data.buffer.slice(
+                  event.data.byteOffset,
+                  event.data.byteOffset + event.data.byteLength
+                );
+              } else if (event.data instanceof Int16Array) {
+                // Web: Int16Array - すでにPCM 16bit、正しいバイト範囲をコピー
+                pcmBuffer = event.data.buffer.slice(
+                  event.data.byteOffset,
+                  event.data.byteOffset + event.data.byteLength
+                );
+              } else if (event.data instanceof Float32Array) {
+                // Web: Float32Array - PCM 16bitに変換
+                const float32 = event.data;
+                const int16 = new Int16Array(float32.length);
+                for (let i = 0; i < float32.length; i++) {
+                  const s = Math.max(-1, Math.min(1, float32[i]));
+                  int16[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+                }
+                pcmBuffer = int16.buffer;
+              } else {
                 if (__DEV__) {
-                  console.log('[Recording] Skipping WAV header, size:', pcmBuffer.byteLength);
+                  console.log(
+                    '[Recording] Unknown data format:',
+                    event.data?.constructor?.name,
+                    event.data
+                  );
                 }
                 return;
               }
 
-              // 小さすぎるチャンクはスキップ（不完全なデータやメタデータの可能性）
-              // 最小サイズ: 16kHz × 10ms × 2バイト = 320バイト
-              const minChunkSize = 320;
-              if (pcmBuffer.byteLength < minChunkSize) {
-                if (__DEV__) {
-                  console.log('[Recording] Skipping small chunk, size:', pcmBuffer.byteLength);
+              // Web環境の場合、追加の処理が必要
+              if (Platform.OS === 'web') {
+                // WAVヘッダー（44バイト以上でRIFF+WAVEシグネチャ）はスキップ
+                if (isWavHeader(pcmBuffer)) {
+                  if (__DEV__) {
+                    console.log('[Recording] Skipping WAV header, size:', pcmBuffer.byteLength);
+                  }
+                  return;
                 }
-                return;
+
+                // 小さすぎるチャンクはスキップ（不完全なデータやメタデータの可能性）
+                // 最小サイズ: 16kHz × 10ms × 2バイト = 320バイト
+                const minChunkSize = 320;
+                if (pcmBuffer.byteLength < minChunkSize) {
+                  if (__DEV__) {
+                    console.log('[Recording] Skipping small chunk, size:', pcmBuffer.byteLength);
+                  }
+                  return;
+                }
+
+                if (__DEV__) {
+                  console.log(
+                    '[Recording] Web: Sending PCM data, size:',
+                    pcmBuffer.byteLength,
+                    'samples:',
+                    pcmBuffer.byteLength / 2
+                  );
+                }
               }
 
-              if (__DEV__) {
-                console.log(
-                  '[Recording] Web: Sending PCM data, size:',
-                  pcmBuffer.byteLength,
-                  'samples:',
-                  pcmBuffer.byteLength / 2
-                );
-              }
+              streamingTranscriptionService.sendAudioChunk(pcmBuffer);
             }
-
-            streamingTranscriptionService.sendAudioChunk(pcmBuffer);
+          } catch (err) {
+            // データ変換エラーは録音を中断せず、ログ出力のみ
+            if (__DEV__) {
+              console.error('[Recording] Error processing audio stream:', err);
+            }
           }
         },
       });
@@ -216,12 +233,14 @@ export function RecordingScreen() {
   }, []);
 
   const handleConfirmCancel = useCallback(async () => {
-    await stopRecording();
+    if (isRecording) {
+      await stopRecording();
+    }
     cancel();
     setDuration(0);
     setIsCancelDialogVisible(false);
     router.back();
-  }, [cancel, stopRecording]);
+  }, [cancel, isRecording, stopRecording]);
 
   const handleComplete = async () => {
     try {

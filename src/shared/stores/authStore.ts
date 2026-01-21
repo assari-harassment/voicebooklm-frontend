@@ -78,7 +78,9 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'auth-storage',
       storage: createJSONStorage(() => secureStorage),
-      // refreshToken のみ永続化（accessToken はメモリのみで Web セキュリティ向上）
+      // refreshToken のみ永続化
+      // accessToken は永続化せずメモリのみで保持することで、XSS攻撃時のトークン漏洩リスクを軽減
+      // ページリロード時は AuthProvider が refreshToken から accessToken を再取得する
       partialize: (state) => ({
         refreshToken: state.refreshToken,
       }),

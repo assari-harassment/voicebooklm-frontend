@@ -23,6 +23,10 @@ export function LiveTranscript({ editableTranscript, onChangeText }: LiveTranscr
   }, []);
 
   const handleScrollEndDrag = useCallback(() => {
+    // 既存のタイムアウトをクリアしてから新しいタイムアウトを設定
+    if (userScrollTimeoutRef.current) {
+      clearTimeout(userScrollTimeoutRef.current);
+    }
     // ユーザーがスクロールを止めてから2秒後に自動スクロールを再開
     userScrollTimeoutRef.current = setTimeout(() => {
       setIsUserScrolling(false);
@@ -51,8 +55,11 @@ export function LiveTranscript({ editableTranscript, onChangeText }: LiveTranscr
 
   const hasContent = Boolean(editableTranscript);
 
-  // テキストエリアの最小高さを画面の50%に設定
-  const minTextAreaHeight = Math.max(windowHeight * 0.5, 300);
+  // テキストエリアの最小高さをレスポンシブに設定
+  // 小さな画面（高さ667px未満、iPhone SE等）: 40%、大きな画面: 45%
+  // 絶対最小値: 200px、絶対最大値: 400px
+  const heightRatio = windowHeight < 667 ? 0.4 : 0.45;
+  const minTextAreaHeight = Math.min(Math.max(windowHeight * heightRatio, 200), 400);
 
   return (
     <ScrollView

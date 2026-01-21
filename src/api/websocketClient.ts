@@ -31,9 +31,7 @@ export class TranscriptionWebSocket {
   private ws: WebSocket | null = null;
   private callbacks: TranscriptionWebSocketCallbacks | null = null;
   private _connectionState: ConnectionState = 'disconnected';
-  private reconnectAttempts = 0;
-  private maxReconnectAttempts = 3;
-  private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+  private audioSendCount = 0;
 
   get connectionState(): ConnectionState {
     return this._connectionState;
@@ -70,7 +68,6 @@ export class TranscriptionWebSocket {
         console.log('[WebSocket] Connected');
       }
       this.setConnectionState('connected');
-      this.reconnectAttempts = 0;
     };
 
     this.ws.onmessage = (event: WebSocketMessageEvent) => {
@@ -155,8 +152,6 @@ export class TranscriptionWebSocket {
     }
   }
 
-  private audioSendCount = 0;
-
   sendAudio(pcmData: ArrayBuffer): void {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
       return;
@@ -189,10 +184,8 @@ export class TranscriptionWebSocket {
   }
 
   disconnect(): void {
-    if (this.reconnectTimeout) {
-      clearTimeout(this.reconnectTimeout);
-      this.reconnectTimeout = null;
-    }
+    // カウンタをリセット
+    this.audioSendCount = 0;
 
     if (this.ws) {
       this.ws.onclose = null;

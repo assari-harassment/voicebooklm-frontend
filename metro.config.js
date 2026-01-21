@@ -10,6 +10,10 @@ const webMocks = {
 };
 
 // ESM の exports フィールドを無視して CJS を使用（import.meta 問題回避）
+// 注意: この設定は一部のパッケージが ESM exports を使用する際に
+// Metro の Web バンドル時に import.meta が解決できない問題を回避するために必要
+// 主な対象: @siteed/expo-audio-studio および関連パッケージ
+// TODO: Metro の ESM サポートが改善されたら、この設定を削除して個別対応を検討
 config.resolver.unstable_enablePackageExports = false;
 
 // Web 向けのモジュール解決設定

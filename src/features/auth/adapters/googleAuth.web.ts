@@ -10,8 +10,11 @@ export interface GoogleSignInResult {
 // Google OAuth ライブラリの状態
 let googleAuthLoaded = false;
 
-// グローバルに resolve/reject を保持
-let currentResolve: ((result: GoogleSignInResult) => void) | null = null;
+// サインイン進行中フラグ（競合状態防止）
+let isSignInInProgress = false;
+
+// 現在のサインインセッションID（競合状態検出用）
+let currentSessionId: string | null = null;
 
 /**
  * Google Sign-In の設定（Web 向け）
@@ -49,14 +52,15 @@ function initializeGoogleAuth(clientId: string): void {
   });
 }
 
+// Google One Tap用のコールバック（現在未使用だが将来的な拡張用に保持）
 function handleCredentialResponse(response: google.accounts.id.CredentialResponse): void {
-  if (currentResolve && response.credential) {
-    currentResolve({
-      success: true,
-      idToken: response.credential,
-    });
-    currentResolve = null;
+  // One Tapからの認証レスポンス処理
+  // 現在はポップアップ認証のみ使用しているため、この関数は呼ばれない
+  if (__DEV__) {
+    console.log('[GoogleAuth] One Tap credential response received');
   }
+  // Note: One Tap使用時はここで適切なresolve処理を実装する
+  void response;
 }
 
 /**
@@ -70,6 +74,17 @@ export async function signInWithGoogle(): Promise<GoogleSignInResult> {
       error: {
         code: 'UNKNOWN',
         message: 'ブラウザ環境でのみ利用可能です',
+      },
+    };
+  }
+
+  // 進行中のサインインがある場合はエラーを返す
+  if (isSignInInProgress) {
+    return {
+      success: false,
+      error: {
+        code: 'IN_PROGRESS',
+        message: 'サインインが進行中です',
       },
     };
   }
@@ -95,15 +110,22 @@ export async function signInWithGoogle(): Promise<GoogleSignInResult> {
     };
   }
 
-  return new Promise((resolve) => {
-    currentResolve = resolve;
+  // サインイン開始
+  isSignInInProgress = true;
+  const sessionId = generateNonce(); // ユニークなセッションID
+  currentSessionId = sessionId;
 
+  return new Promise((resolve) => {
     // FedCM/One Tap は localhost で動作しないため、直接ポップアップを使用
-    showSignInPopup(clientId, resolve);
+    showSignInPopup(clientId, resolve, sessionId);
   });
 }
 
-function showSignInPopup(clientId: string, resolve: (result: GoogleSignInResult) => void): void {
+function showSignInPopup(
+  clientId: string,
+  resolve: (result: GoogleSignInResult) => void,
+  sessionId: string
+): void {
   // OAuth 2.0 Authorization Code Flow (Popup)
   const width = 500;
   const height = 600;
@@ -124,6 +146,8 @@ function showSignInPopup(clientId: string, resolve: (result: GoogleSignInResult)
   );
 
   if (!popup) {
+    isSignInInProgress = false;
+    currentSessionId = null;
     resolve({
       success: false,
       error: {
@@ -134,6 +158,17 @@ function showSignInPopup(clientId: string, resolve: (result: GoogleSignInResult)
     return;
   }
 
+  // 完了処理のヘルパー関数
+  const finishSignIn = (result: GoogleSignInResult) => {
+    // このセッションがまだ有効かチェック
+    if (currentSessionId !== sessionId) {
+      return; // 別のセッションに置き換わっている
+    }
+    isSignInInProgress = false;
+    currentSessionId = null;
+    resolve(result);
+  };
+
   // ポップアップからのメッセージを待機
   const handleMessage = (event: MessageEvent) => {
     if (event.origin !== window.location.origin) return;
@@ -141,14 +176,14 @@ function showSignInPopup(clientId: string, resolve: (result: GoogleSignInResult)
     if (event.data?.type === 'GOOGLE_AUTH_SUCCESS' && event.data?.idToken) {
       window.removeEventListener('message', handleMessage);
       popup.close();
-      resolve({
+      finishSignIn({
         success: true,
         idToken: event.data.idToken,
       });
     } else if (event.data?.type === 'GOOGLE_AUTH_ERROR') {
       window.removeEventListener('message', handleMessage);
       popup.close();
-      resolve({
+      finishSignIn({
         success: false,
         error: {
           code: 'UNKNOWN',
@@ -166,15 +201,14 @@ function showSignInPopup(clientId: string, resolve: (result: GoogleSignInResult)
       clearInterval(checkClosed);
       window.removeEventListener('message', handleMessage);
       // メッセージが来なかった場合はキャンセル扱い
-      if (currentResolve === resolve) {
-        resolve({
+      if (currentSessionId === sessionId) {
+        finishSignIn({
           success: false,
           error: {
             code: 'CANCELLED',
             message: 'ユーザーがキャンセルしました',
           },
         });
-        currentResolve = null;
       }
     }
   }, 500);

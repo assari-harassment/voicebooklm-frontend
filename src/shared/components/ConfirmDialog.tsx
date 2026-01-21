@@ -1,4 +1,4 @@
-import { Platform, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Button, Dialog, Icon, Portal, Text } from 'react-native-paper';
 
 import { colors } from '@/src/shared/constants';
@@ -122,11 +122,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bg.primary,
     borderRadius: 16,
     marginHorizontal: 24,
-    ...(Platform.OS === 'web' && {
-      maxWidth: 400,
-      alignSelf: 'center',
-      width: '100%',
-    }),
+    maxWidth: 400,
+    alignSelf: 'center',
+    width: '100%',
   },
   content: {
     alignItems: 'center',

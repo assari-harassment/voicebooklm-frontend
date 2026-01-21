@@ -53,7 +53,9 @@ export function NoteDetailScreen() {
           title: parsed.title,
           content: parsed.content,
           tags: parsed.tags || [],
-          transcriptionText: undefined, // FormatMemoResponseにはtranscriptionがない
+          // リアルタイム文字起こしではtranscriptionTextは使用しない
+          // (showTranscription=falseで表示されないため、undefinedで問題なし)
+          transcriptionText: undefined,
           transcriptionStatus: 'COMPLETED', // ストリーミング文字起こし完了済み
           formattingStatus: parsed.formattingStatus,
           createdAt: new Date().toISOString(),

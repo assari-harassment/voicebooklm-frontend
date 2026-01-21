@@ -29,6 +29,9 @@ interface RecordingState {
   // ユーザー編集可能なテキスト
   editableTranscript: string;
 
+  // 前回の確定テキスト長（差分検出用）
+  prevFinalTranscriptLength: number;
+
   // エラー情報
   error: { code: string; message: string } | null;
 
@@ -44,8 +47,8 @@ interface RecordingState {
   setEditableTranscript: (text: string) => void;
 }
 
-// 前回の確定テキスト長を追跡（差分検出用）
-let prevFinalTranscriptLength = 0;
+// 購読解除関数を保持
+let unsubscribeStateChange: (() => void) | null = null;
 
 export const useRecordingStore = create<RecordingState>()((set, get) => {
   return {
@@ -56,6 +59,7 @@ export const useRecordingStore = create<RecordingState>()((set, get) => {
     finalTranscripts: [],
     fullTranscript: '',
     editableTranscript: '',
+    prevFinalTranscriptLength: 0,
     error: null,
     memoId: null,
 
@@ -83,11 +87,24 @@ export const useRecordingStore = create<RecordingState>()((set, get) => {
 
     // 停止して整形
     stopAndFormat: async () => {
+      // まず録音停止フェーズに遷移
       set({ phase: 'stopping' });
 
       try {
-        set({ phase: 'formatting' });
-        const result = await streamingTranscriptionService.stopAndFormat();
+        // stopAndFormat内でSTOP送信→500ms待機→API呼び出しが行われる
+        // 500ms待機のタイミングでformattingに遷移
+        const formattingPromise = new Promise<void>((resolve) => {
+          setTimeout(() => {
+            set({ phase: 'formatting' });
+            resolve();
+          }, 500);
+        });
+
+        // 整形処理と並行してフェーズ遷移
+        const [result] = await Promise.all([
+          streamingTranscriptionService.stopAndFormat(),
+          formattingPromise,
+        ]);
 
         set({
           phase: 'completed',
@@ -108,7 +125,6 @@ export const useRecordingStore = create<RecordingState>()((set, get) => {
     // キャンセル
     cancel: () => {
       streamingTranscriptionService.disconnect();
-      prevFinalTranscriptLength = 0;
       set({
         phase: 'idle',
         connectionState: 'disconnected',
@@ -116,6 +132,7 @@ export const useRecordingStore = create<RecordingState>()((set, get) => {
         finalTranscripts: [],
         fullTranscript: '',
         editableTranscript: '',
+        prevFinalTranscriptLength: 0,
         error: null,
         memoId: null,
       });
@@ -123,7 +140,6 @@ export const useRecordingStore = create<RecordingState>()((set, get) => {
 
     // リセット
     reset: () => {
-      prevFinalTranscriptLength = 0;
       set({
         phase: 'idle',
         connectionState: 'disconnected',
@@ -131,6 +147,7 @@ export const useRecordingStore = create<RecordingState>()((set, get) => {
         finalTranscripts: [],
         fullTranscript: '',
         editableTranscript: '',
+        prevFinalTranscriptLength: 0,
         error: null,
         memoId: null,
       });
@@ -144,29 +161,53 @@ export const useRecordingStore = create<RecordingState>()((set, get) => {
 });
 
 // ストア作成後にTranscriptionServiceの状態変更を購読
-streamingTranscriptionService.onStateChange((state: TranscriptionState) => {
-  const store = useRecordingStore.getState();
-  const currentEditableTranscript = store.editableTranscript;
-
-  // 各確定テキストをトリムして結合
-  const newFinalTranscript = state.finalTranscripts.map((t) => t.trim()).join('');
-
-  // 新しい確定テキストがあれば末尾に追記
-  let updatedEditableTranscript = currentEditableTranscript;
-  if (newFinalTranscript.length > prevFinalTranscriptLength) {
-    const newText = newFinalTranscript.slice(prevFinalTranscriptLength).trim();
-    if (newText) {
-      updatedEditableTranscript = currentEditableTranscript + newText;
-    }
-    prevFinalTranscriptLength = newFinalTranscript.length;
+const setupStateChangeSubscription = () => {
+  // 既存の購読があれば解除
+  if (unsubscribeStateChange) {
+    unsubscribeStateChange();
   }
 
-  useRecordingStore.setState({
-    connectionState: state.connectionState,
-    interimTranscript: state.interimTranscript,
-    finalTranscripts: state.finalTranscripts,
-    fullTranscript: state.fullTranscript,
-    editableTranscript: updatedEditableTranscript,
-    error: state.error,
-  });
-});
+  unsubscribeStateChange = streamingTranscriptionService.onStateChange(
+    (state: TranscriptionState) => {
+      const store = useRecordingStore.getState();
+      const currentEditableTranscript = store.editableTranscript;
+      const prevLength = store.prevFinalTranscriptLength;
+
+      // 各確定テキストをトリムして結合
+      const newFinalTranscript = state.finalTranscripts.map((t) => t.trim()).join('');
+
+      // 新しい確定テキストがあれば末尾に追記
+      let updatedEditableTranscript = currentEditableTranscript;
+      let newPrevLength = prevLength;
+
+      if (newFinalTranscript.length > prevLength) {
+        const newText = newFinalTranscript.slice(prevLength).trim();
+        if (newText) {
+          updatedEditableTranscript = currentEditableTranscript + newText;
+        }
+        newPrevLength = newFinalTranscript.length;
+      }
+
+      useRecordingStore.setState({
+        connectionState: state.connectionState,
+        interimTranscript: state.interimTranscript,
+        finalTranscripts: state.finalTranscripts,
+        fullTranscript: state.fullTranscript,
+        editableTranscript: updatedEditableTranscript,
+        prevFinalTranscriptLength: newPrevLength,
+        error: state.error,
+      });
+    }
+  );
+};
+
+// 購読を設定
+setupStateChangeSubscription();
+
+// 購読解除関数をエクスポート（テスト用など）
+export const unsubscribeRecordingStore = () => {
+  if (unsubscribeStateChange) {
+    unsubscribeStateChange();
+    unsubscribeStateChange = null;
+  }
+};
