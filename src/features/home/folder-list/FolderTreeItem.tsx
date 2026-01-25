@@ -19,6 +19,8 @@ interface FolderTreeItemProps {
   folderMemos: Record<string, MemoListItemResponse[]>;
   onToggle: (folderId: string) => void;
   onMemoClick: (memoId: string) => void;
+  /** コンパクト表示モード（サイドバー用） */
+  compact?: boolean;
 }
 
 /**
@@ -34,6 +36,7 @@ export function FolderTreeItem({
   folderMemos,
   onToggle,
   onMemoClick,
+  compact = false,
 }: FolderTreeItemProps) {
   const hasChildren = folder.children.length > 0;
   const hasContent = hasChildren || memos.length > 0 || isLoadingMemos;
@@ -105,6 +108,7 @@ export function FolderTreeItem({
               folderMemos={folderMemos}
               onToggle={onToggle}
               onMemoClick={onMemoClick}
+              compact={compact}
             />
           ))}
 

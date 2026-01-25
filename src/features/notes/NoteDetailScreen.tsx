@@ -347,6 +347,9 @@ export function NoteDetailScreen() {
           paddingHorizontal: 16,
           paddingTop: headerHeight,
           paddingBottom: 32,
+          maxWidth: 768,
+          alignSelf: 'center',
+          width: '100%',
         }}
         keyboardShouldPersistTaps="handled"
       >
