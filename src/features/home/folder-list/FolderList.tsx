@@ -70,7 +70,6 @@ export function FolderList({ onMemoClick, isSidebar = false }: FolderListProps) 
               folderMemos={folderMemos}
               onToggle={toggleFolder}
               onMemoClick={onMemoClick}
-              compact={isSidebar}
             />
           ))}
         </View>

@@ -352,7 +352,7 @@ export function NoteDetailScreen() {
   return (
     <TwoColumnLayout maxContentWidth={768} headerTransparent>
       <ScrollView
-        style={{ flex: 1 }}
+        className="flex-1"
         contentContainerStyle={{
           paddingHorizontal: 16,
           paddingTop: headerHeight,
