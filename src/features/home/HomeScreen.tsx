@@ -1,8 +1,6 @@
 import { router } from 'expo-router';
 import { ScrollView, View } from 'react-native';
 
-import { TwoColumnLayout } from '@/src/shared/components';
-
 import { FolderList } from './folder-list';
 import { RecentNotes, useRecentMemos } from './recent-notes';
 import { RecordFab } from './record-fab';
@@ -19,7 +17,7 @@ export function HomeScreen() {
   };
 
   return (
-    <TwoColumnLayout>
+    <View className="flex-1 bg-t-bg-secondary">
       <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 96 }}>
         {/* 最近のメモ */}
         <RecentNotes
@@ -29,14 +27,12 @@ export function HomeScreen() {
           error={error}
         />
 
-        {/* フォルダ一覧: モバイルのみ表示 */}
-        <View className="md:hidden">
-          <FolderList onMemoClick={handleMemoClick} />
-        </View>
+        {/* フォルダ一覧 */}
+        <FolderList onMemoClick={handleMemoClick} />
       </ScrollView>
 
       {/* 録音ボタン (FAB) */}
       <RecordFab onPress={handleStartRecording} />
-    </TwoColumnLayout>
+    </View>
   );
 }

@@ -5,14 +5,12 @@ import { useFolderTree } from './useFolderTree';
 
 interface FolderListProps {
   onMemoClick: (memoId: string) => void;
-  /** サイドバーモードで表示するか（デスクトップ用） */
-  isSidebar?: boolean;
 }
 
 /**
  * フォルダツリーとメモ一覧を表示するコンポーネント
  */
-export function FolderList({ onMemoClick, isSidebar = false }: FolderListProps) {
+export function FolderList({ onMemoClick }: FolderListProps) {
   const {
     rootFolders,
     expandedFolderIds,
@@ -24,14 +22,11 @@ export function FolderList({ onMemoClick, isSidebar = false }: FolderListProps) 
   } = useFolderTree();
 
   return (
-    <View className={isSidebar ? 'px-3' : 'px-4 mb-6'}>
+    <View className="px-4 mb-6">
       {/* セクションヘッダー */}
-      <View className={`flex-row items-center gap-2 ${isSidebar ? 'mb-2' : 'mb-3'}`}>
+      <View className="flex-row items-center gap-2 mb-3">
         <View className="w-1 h-5 rounded-sm bg-t-success-500" />
-        <Text
-          variant={isSidebar ? 'titleSmall' : 'titleMedium'}
-          className="font-bold text-t-text-primary"
-        >
+        <Text variant="titleMedium" className="font-bold text-t-text-primary">
           フォルダ
         </Text>
       </View>

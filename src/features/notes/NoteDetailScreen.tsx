@@ -1,6 +1,6 @@
 import { apiClient } from '@/src/api';
 import type { FormatMemoResponse, MemoDetailResponse } from '@/src/api/generated/apiSchema';
-import { ConfirmDialog, TwoColumnLayout } from '@/src/shared/components';
+import { ConfirmDialog } from '@/src/shared/components';
 import { colors } from '@/src/shared/constants';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useHeaderHeight } from '@react-navigation/elements';
@@ -304,53 +304,43 @@ export function NoteDetailScreen() {
   // ローディング状態
   if (isLoading && !parsedMemoData) {
     return (
-      <TwoColumnLayout maxContentWidth={768} headerTransparent>
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color={colors.brand[500]} />
-          <Text variant="bodyMedium" className="text-t-text-secondary mt-4">
-            メモを読み込み中...
-          </Text>
-        </View>
-      </TwoColumnLayout>
+      <View className="flex-1 bg-t-bg-secondary items-center justify-center">
+        <ActivityIndicator size="large" color={colors.brand[500]} />
+        <Text variant="bodyMedium" className="text-t-text-secondary mt-4">
+          メモを読み込み中...
+        </Text>
+      </View>
     );
   }
 
   // エラー状態
   if (error && !parsedMemoData) {
     return (
-      <TwoColumnLayout maxContentWidth={768} headerTransparent>
-        <View className="flex-1 items-center justify-center px-4">
-          <MaterialCommunityIcons
-            name="alert-circle-outline"
-            size={48}
-            color={colors.danger[500]}
-          />
-          <Text variant="bodyMedium" className="text-t-danger-500 mt-4 text-center">
-            メモの取得に失敗しました
-          </Text>
-          <Text variant="bodySmall" className="text-t-text-tertiary mt-2 text-center">
-            {error.message}
-          </Text>
-        </View>
-      </TwoColumnLayout>
+      <View className="flex-1 bg-t-bg-secondary items-center justify-center px-4">
+        <MaterialCommunityIcons name="alert-circle-outline" size={48} color={colors.danger[500]} />
+        <Text variant="bodyMedium" className="text-t-danger-500 mt-4 text-center">
+          メモの取得に失敗しました
+        </Text>
+        <Text variant="bodySmall" className="text-t-text-tertiary mt-2 text-center">
+          {error.message}
+        </Text>
+      </View>
     );
   }
 
   // メモがない場合
   if (!memo) {
     return (
-      <TwoColumnLayout maxContentWidth={768} headerTransparent>
-        <View className="flex-1 items-center justify-center">
-          <Text variant="bodyMedium" className="text-t-text-tertiary">
-            メモが見つかりません
-          </Text>
-        </View>
-      </TwoColumnLayout>
+      <View className="flex-1 bg-t-bg-secondary items-center justify-center">
+        <Text variant="bodyMedium" className="text-t-text-tertiary">
+          メモが見つかりません
+        </Text>
+      </View>
     );
   }
 
   return (
-    <TwoColumnLayout maxContentWidth={768} headerTransparent>
+    <View className="flex-1 bg-t-bg-secondary">
       <ScrollView
         className="flex-1"
         contentContainerStyle={{
@@ -410,6 +400,6 @@ export function NoteDetailScreen() {
         onCancel={() => setIsDeleteDialogVisible(false)}
         variant="danger"
       />
-    </TwoColumnLayout>
+    </View>
   );
 }

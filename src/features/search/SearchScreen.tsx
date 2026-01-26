@@ -149,80 +149,77 @@ export function SearchScreen() {
 
   return (
     <View className="flex-1 bg-t-bg-secondary">
-      {/* レスポンシブコンテナ */}
-      <View style={{ maxWidth: 768, alignSelf: 'center', width: '100%', flex: 1 }}>
-        {/* 検索バー */}
-        <View className="px-4 pt-4">
-          <Surface elevation={1} style={{ backgroundColor: colors.bg.primary, borderRadius: 16 }}>
-            <View className="flex-row items-center h-12 px-4">
-              <MaterialCommunityIcons name="magnify" size={20} color={colors.text.secondary} />
-              <TextInput
-                className="flex-1 ml-3"
-                style={{ fontSize: 16, color: colors.text.primary }}
-                placeholder="メモを検索..."
-                placeholderTextColor={colors.text.tertiary}
-                value={searchText}
-                onChangeText={handleSearchChange}
-                autoFocus
-                returnKeyType="search"
+      {/* 検索バー */}
+      <View className="px-4 pt-4">
+        <Surface elevation={1} style={{ backgroundColor: colors.bg.primary, borderRadius: 16 }}>
+          <View className="flex-row items-center h-12 px-4">
+            <MaterialCommunityIcons name="magnify" size={20} color={colors.text.secondary} />
+            <TextInput
+              className="flex-1 ml-3"
+              style={{ fontSize: 16, color: colors.text.primary }}
+              placeholder="メモを検索..."
+              placeholderTextColor={colors.text.tertiary}
+              value={searchText}
+              onChangeText={handleSearchChange}
+              autoFocus
+              returnKeyType="search"
+            />
+            {searchText.length > 0 && (
+              <IconButton
+                icon="close-circle"
+                size={20}
+                iconColor={colors.text.secondary}
+                onPress={handleClearSearch}
+                className="m-0"
               />
-              {searchText.length > 0 && (
-                <IconButton
-                  icon="close-circle"
-                  size={20}
-                  iconColor={colors.text.secondary}
-                  onPress={handleClearSearch}
-                  className="m-0"
-                />
-              )}
-            </View>
-          </Surface>
-        </View>
-
-        {/* ローディング状態（初回取得時のみ） */}
-        {isLoading && memos.length === 0 && (
-          <View className="flex-1 justify-center items-center">
-            <ActivityIndicator size="small" />
+            )}
           </View>
-        )}
-
-        {/* エラー状態 */}
-        {error && !isLoading && (
-          <View className="flex-1 justify-center items-center">
-            <Text variant="bodyMedium" className="text-t-danger-500">
-              検索に失敗しました
-            </Text>
-          </View>
-        )}
-
-        {/* 初期状態（検索前）- 人気タグを表示 */}
-        {isInitialState && (
-          <>
-            {/* 人気タグセクション */}
-            <PopularTags onTagPress={handleTagPress} />
-
-            {/* プレースホルダ */}
-            <InitialSearchState />
-          </>
-        )}
-
-        {/* 検索結果 */}
-        {!(isLoading && memos.length === 0) && !error && hasSearchText && (
-          <FlatList
-            data={memos}
-            keyExtractor={keyExtractor}
-            renderItem={renderItem}
-            ItemSeparatorComponent={ItemSeparator}
-            ListHeaderComponent={ListHeader}
-            ListEmptyComponent={ListEmpty}
-            ListFooterComponent={ListFooter}
-            onEndReached={loadMore}
-            onEndReachedThreshold={0.1}
-            contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 16 }}
-            showsVerticalScrollIndicator={false}
-          />
-        )}
+        </Surface>
       </View>
+
+      {/* ローディング状態（初回取得時のみ） */}
+      {isLoading && memos.length === 0 && (
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="small" />
+        </View>
+      )}
+
+      {/* エラー状態 */}
+      {error && !isLoading && (
+        <View className="flex-1 justify-center items-center">
+          <Text variant="bodyMedium" className="text-t-danger-500">
+            検索に失敗しました
+          </Text>
+        </View>
+      )}
+
+      {/* 初期状態（検索前）- 人気タグを表示 */}
+      {isInitialState && (
+        <>
+          {/* 人気タグセクション */}
+          <PopularTags onTagPress={handleTagPress} />
+
+          {/* プレースホルダ */}
+          <InitialSearchState />
+        </>
+      )}
+
+      {/* 検索結果 */}
+      {!(isLoading && memos.length === 0) && !error && hasSearchText && (
+        <FlatList
+          data={memos}
+          keyExtractor={keyExtractor}
+          renderItem={renderItem}
+          ItemSeparatorComponent={ItemSeparator}
+          ListHeaderComponent={ListHeader}
+          ListEmptyComponent={ListEmpty}
+          ListFooterComponent={ListFooter}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.1}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 16 }}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
     </View>
   );
 }
