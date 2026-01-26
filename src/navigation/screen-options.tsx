@@ -67,6 +67,20 @@ export const noteDetailScreenOptions: NativeStackNavigationOptions = {
     backgroundColor: 'transparent',
   },
   headerBlurEffect: undefined,
+  headerLeft: ({ tintColor }) => (
+    <HeaderButton
+      onPress={() => {
+        if (router.canGoBack()) {
+          router.back();
+        } else {
+          router.replace('/home');
+        }
+      }}
+      accessibilityLabel="戻る"
+    >
+      <MaterialCommunityIcons name="arrow-left" size={24} color={tintColor} />
+    </HeaderButton>
+  ),
 };
 
 /**
