@@ -1,6 +1,6 @@
 import { colors } from '@/src/shared/constants';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 
 import { TagChip } from './TagChip';
 import { TagInput } from './TagInput';
@@ -25,11 +25,13 @@ export function TagSection({ tags, onAddTag, onRemoveTag }: TagSectionProps) {
   } = useTagSection({ tags, onAddTag, onRemoveTag });
 
   return (
-    <Pressable
-      onPress={handleSectionPress}
+    <View
       style={styles.container}
-      accessibilityRole="button"
       accessibilityLabel="タグセクション"
+      // Web向け: コンテナタップで入力欄にフォーカス
+      {...(Platform.OS === 'web'
+        ? { onClick: handleSectionPress }
+        : { onTouchEnd: handleSectionPress })}
     >
       {/* アイコン */}
       <MaterialCommunityIcons
@@ -57,7 +59,7 @@ export function TagSection({ tags, onAddTag, onRemoveTag }: TagSectionProps) {
           onKeyPress={handleKeyPress}
         />
       </View>
-    </Pressable>
+    </View>
   );
 }
 
