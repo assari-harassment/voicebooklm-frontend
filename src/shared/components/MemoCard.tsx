@@ -1,7 +1,7 @@
 import type { MemoListItemResponse } from '@/src/api/generated/apiSchema';
 import { colors } from '@/src/shared/constants';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, Pressable, View } from 'react-native';
 import { Portal, Surface, Text, TouchableRipple } from 'react-native-paper';
 
@@ -30,11 +30,12 @@ export function MemoCard({ memo, onPress, onDeleteRequest }: MemoCardProps) {
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const isMenuEnabled = Boolean(onDeleteRequest);
   const [menuPosition, setMenuPosition] = useState<{ left: number; top: number } | null>(null);
+  const [menuSize, setMenuSize] = useState({ width: 0, height: 0 });
   const cardRef = useRef<View>(null);
   const anchorRef = useRef<View>(null);
   const menuAnimation = useRef(new Animated.Value(0)).current;
-  const menuWidth = 112;
-  const menuHeight = 36;
+  const menuWidth = menuSize.width;
+  const menuHeight = menuSize.height;
   const menuPadding = 8;
   const menuOffsetX = 8;
   const menuOffsetY = -10;
@@ -53,7 +54,7 @@ export function MemoCard({ memo, onPress, onDeleteRequest }: MemoCardProps) {
     }
   }, [isMenuVisible, menuAnimation]);
 
-  const handleOpenMenu = () => {
+  const handleOpenMenu = useCallback(() => {
     if (!isMenuEnabled) return;
     if (!anchorRef.current) return;
 
@@ -81,7 +82,7 @@ export function MemoCard({ memo, onPress, onDeleteRequest }: MemoCardProps) {
         setIsMenuVisible(true);
       });
     });
-  };
+  }, [isMenuEnabled, menuWidth, menuHeight, menuOffsetX, menuOffsetY, menuPadding]);
 
   const handleCloseMenu = () => {
     setIsMenuVisible(false);
@@ -92,6 +93,22 @@ export function MemoCard({ memo, onPress, onDeleteRequest }: MemoCardProps) {
     handleCloseMenu();
     onDeleteRequest?.(memo);
   };
+
+  useEffect(() => {
+    if (isMenuVisible && menuSize.width > 0 && menuSize.height > 0) {
+      handleOpenMenu();
+    }
+  }, [handleOpenMenu, isMenuVisible, menuSize.height, menuSize.width]);
+
+  const handleMenuLayout = useCallback(
+    (event: { nativeEvent: { layout: { width: number; height: number } } }) => {
+      const { width, height } = event.nativeEvent.layout;
+      setMenuSize((prev) =>
+        prev.width === width && prev.height === height ? prev : { width, height }
+      );
+    },
+    []
+  );
 
   return (
     <>
@@ -176,7 +193,7 @@ export function MemoCard({ memo, onPress, onDeleteRequest }: MemoCardProps) {
               position: 'absolute',
               top: menuPosition.top,
               left: menuPosition.left,
-              width: menuWidth,
+              width: menuSize.width > 0 ? menuSize.width : undefined,
               opacity: menuAnimation,
               transform: [
                 {
@@ -196,6 +213,7 @@ export function MemoCard({ memo, onPress, onDeleteRequest }: MemoCardProps) {
                 borderWidth: 1,
                 borderColor: colors.border.primary,
               }}
+              onLayout={handleMenuLayout}
             >
               <TouchableRipple onPress={handleDeletePress} borderless>
                 <View
