@@ -1,13 +1,15 @@
+import { apiClient } from '@/src/api';
 import type { MemoListItemResponse } from '@/src/api/generated/apiSchema';
+import { ConfirmDialog } from '@/src/shared/components';
 import { MemoCard } from '@/src/shared/components/MemoCard';
 import { colors } from '@/src/shared/constants';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { FlatList, TextInput, View } from 'react-native';
+import { Alert, FlatList, TextInput, View } from 'react-native';
 import { ActivityIndicator, IconButton, Surface, Text } from 'react-native-paper';
 import { PopularTags } from './popular-tags';
-import { useSearchMemos } from './useSearchMemos';
+import { clearSearchCache, useSearchMemos } from './useSearchMemos';
 
 /**
  * 検索結果がない場合の表示
@@ -48,6 +50,9 @@ function ItemSeparator() {
 
 export function SearchScreen() {
   const [searchText, setSearchText] = useState('');
+  const [memoToDelete, setMemoToDelete] = useState<MemoListItemResponse | null>(null);
+  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const {
     memos,
     isLoading,
@@ -84,11 +89,42 @@ export function SearchScreen() {
     router.push(`/note/${memoId}`);
   }, []);
 
+  const handleDeleteRequest = useCallback((memo: MemoListItemResponse) => {
+    setMemoToDelete(memo);
+    setIsDeleteDialogVisible(true);
+  }, []);
+
+  const handleDeleteCancel = useCallback(() => {
+    if (isDeleting) return;
+    setIsDeleteDialogVisible(false);
+    setMemoToDelete(null);
+  }, [isDeleting]);
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!memoToDelete || isDeleting) return;
+
+    setIsDeleting(true);
+    try {
+      await apiClient.deleteMemo(memoToDelete.memoId);
+      setIsDeleteDialogVisible(false);
+      setMemoToDelete(null);
+      clearSearchCache();
+      if (searchText.trim().length > 0) {
+        search(searchText);
+      }
+    } catch (err) {
+      if (__DEV__) console.error('Failed to delete memo:', err);
+      Alert.alert('エラー', 'メモの削除に失敗しました。もう一度お試しください。');
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [memoToDelete, isDeleting, searchText, search]);
+
   const renderItem = useCallback(
     ({ item }: { item: MemoListItemResponse }) => (
-      <MemoCard memo={item} onPress={handleMemoPress} />
+      <MemoCard memo={item} onPress={handleMemoPress} onDeleteRequest={handleDeleteRequest} />
     ),
-    [handleMemoPress]
+    [handleMemoPress, handleDeleteRequest]
   );
 
   const keyExtractor = useCallback((item: MemoListItemResponse) => item.memoId, []);
@@ -220,6 +256,22 @@ export function SearchScreen() {
           showsVerticalScrollIndicator={false}
         />
       )}
+
+      {/* 削除確認ダイアログ */}
+      <ConfirmDialog
+        visible={isDeleteDialogVisible}
+        title="メモを削除"
+        message={
+          memoToDelete
+            ? `「${memoToDelete.title?.trim() || '無題のメモ'}」を本当に削除してもいいですか？`
+            : ''
+        }
+        confirmText="削除"
+        cancelText="キャンセル"
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+        variant="danger"
+      />
     </View>
   );
 }
