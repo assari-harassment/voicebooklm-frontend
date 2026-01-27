@@ -6,11 +6,18 @@ import { ActivityIndicator, Text } from 'react-native-paper';
 interface RecentNotesProps {
   memos: MemoListItemResponse[];
   onMemoClick: (memoId: string) => void;
+  onDeleteRequest?: (memo: MemoListItemResponse) => void;
   isLoading?: boolean;
   error?: Error | null;
 }
 
-export function RecentNotes({ memos, onMemoClick, isLoading, error }: RecentNotesProps) {
+export function RecentNotes({
+  memos,
+  onMemoClick,
+  onDeleteRequest,
+  isLoading,
+  error,
+}: RecentNotesProps) {
   return (
     <View className="px-4 pt-4 mb-6">
       {/* セクションヘッダー */}
@@ -37,7 +44,12 @@ export function RecentNotes({ memos, onMemoClick, isLoading, error }: RecentNote
         /* メモカード一覧 */
         <View className="gap-2">
           {memos.map((memo) => (
-            <MemoCard key={memo.memoId} memo={memo} onPress={onMemoClick} />
+            <MemoCard
+              key={memo.memoId}
+              memo={memo}
+              onPress={onMemoClick}
+              onDeleteRequest={onDeleteRequest}
+            />
           ))}
 
           {/* メモがない場合 */}

@@ -1,13 +1,15 @@
 import type { MemoListItemResponse } from '@/src/api/generated/apiSchema';
+import { ConfirmDialog } from '@/src/shared/components';
 import { MemoCard } from '@/src/shared/components/MemoCard';
 import { colors } from '@/src/shared/constants';
+import { useDeleteMemoFlow } from '@/src/shared/hooks/useDeleteMemoFlow';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { FlatList, TextInput, View } from 'react-native';
 import { ActivityIndicator, IconButton, Surface, Text } from 'react-native-paper';
 import { PopularTags } from './popular-tags';
-import { useSearchMemos } from './useSearchMemos';
+import { clearSearchCache, useSearchMemos } from './useSearchMemos';
 
 /**
  * 検索結果がない場合の表示
@@ -59,6 +61,19 @@ export function SearchScreen() {
     totalCount,
     hasMore,
   } = useSearchMemos();
+  const handleAfterDelete = useCallback(() => {
+    clearSearchCache();
+    if (searchText.trim().length > 0) {
+      search(searchText);
+    }
+  }, [searchText, search]);
+  const {
+    memoToDelete,
+    isDeleteDialogVisible,
+    handleDeleteRequest,
+    handleDeleteCancel,
+    handleDeleteConfirm,
+  } = useDeleteMemoFlow({ onDeleted: handleAfterDelete });
 
   const handleSearchChange = (text: string) => {
     setSearchText(text);
@@ -86,9 +101,9 @@ export function SearchScreen() {
 
   const renderItem = useCallback(
     ({ item }: { item: MemoListItemResponse }) => (
-      <MemoCard memo={item} onPress={handleMemoPress} />
+      <MemoCard memo={item} onPress={handleMemoPress} onDeleteRequest={handleDeleteRequest} />
     ),
-    [handleMemoPress]
+    [handleMemoPress, handleDeleteRequest]
   );
 
   const keyExtractor = useCallback((item: MemoListItemResponse) => item.memoId, []);
@@ -220,6 +235,22 @@ export function SearchScreen() {
           showsVerticalScrollIndicator={false}
         />
       )}
+
+      {/* 削除確認ダイアログ */}
+      <ConfirmDialog
+        visible={isDeleteDialogVisible}
+        title="メモを削除"
+        message={
+          memoToDelete
+            ? `「${memoToDelete.title?.trim() || '無題のメモ'}」を本当に削除してもいいですか？`
+            : ''
+        }
+        confirmText="削除"
+        cancelText="キャンセル"
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+        variant="danger"
+      />
     </View>
   );
 }
