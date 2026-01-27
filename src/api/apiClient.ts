@@ -1,3 +1,4 @@
+import { useAuthStore } from '@/src/shared/stores/authStore';
 import {
   Api,
   FormatMemoResponse,
@@ -6,11 +7,11 @@ import {
   MemoDetailResponse,
   TagsResponse,
   TokenResponse,
+  TranscriptionResponse,
   UpdateMemoRequest,
   UserResponse,
 } from './generated/apiSchema';
 import { setupAxiosInterceptors } from './interceptors';
-import { useAuthStore } from '@/src/shared/stores/authStore';
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8080';
 
@@ -119,6 +120,14 @@ class ApiClient {
   }
 
   /**
+   * 文字起こしテキストを取得
+   */
+  async getTranscription(memoId: string): Promise<TranscriptionResponse> {
+    const response = await this.api.api.getTranscription(memoId, { secure: true });
+    return response.data;
+  }
+
+  /**
    * メモを削除
    */
   async deleteMemo(memoId: string): Promise<void> {
@@ -130,6 +139,18 @@ class ApiClient {
    */
   async updateMemo(memoId: string, data: UpdateMemoRequest): Promise<MemoDetailResponse> {
     const response = await this.api.api.updateMemo(memoId, data, { secure: true });
+    return response.data;
+  }
+
+  /**
+   * 編集済み文字起こしで再AI整形
+   */
+  async resummarizeMemo(memoId: string, editedTranscription: string): Promise<MemoDetailResponse> {
+    const response = await this.api.api.resummarize(
+      memoId,
+      { editedTranscription },
+      { secure: true }
+    );
     return response.data;
   }
 
