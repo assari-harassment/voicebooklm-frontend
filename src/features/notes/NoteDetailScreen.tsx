@@ -2,12 +2,13 @@ import { apiClient } from '@/src/api';
 import type { FormatMemoResponse, MemoDetailResponse } from '@/src/api/generated/apiSchema';
 import { ConfirmDialog } from '@/src/shared/components';
 import { colors } from '@/src/shared/constants';
+import { useProcessingStore } from '@/src/shared/stores/processingStore';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
-import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
-import { Alert, ScrollView, TouchableOpacity, View } from 'react-native';
-import { ActivityIndicator, Text } from 'react-native-paper';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { Alert, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Button, Text } from 'react-native-paper';
 
 import { NoteContent } from './note-content';
 import { TagSection } from './note-tags';
@@ -45,9 +46,12 @@ export function NoteDetailScreen() {
 
   // 録音後の直接遷移時はmemoDataからパース、それ以外はAPIから取得
   const parsedMemoData = useMemo<MemoDetailResponse | null>(() => {
-    if (memoData) {
-      try {
-        const parsed: FormatMemoResponse = JSON.parse(memoData);
+    if (!memoData) return null;
+
+    try {
+      const parsed = JSON.parse(memoData) as MemoDetailResponse | FormatMemoResponse;
+
+      if ('processingTimeMillis' in parsed) {
         return {
           memoId: parsed.memoId,
           title: parsed.title,
@@ -56,15 +60,18 @@ export function NoteDetailScreen() {
           // リアルタイム文字起こしではtranscriptionTextは使用しない
           // (showTranscription=falseで表示されないため、undefinedで問題なし)
           transcriptionText: undefined,
-          transcriptionStatus: 'COMPLETED', // ストリーミング文字起こし完了済み
+          transcriptionStatus: 'COMPLETED',
           formattingStatus: parsed.formattingStatus,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
-      } catch (e) {
-        if (__DEV__) console.error('Failed to parse memoData:', e);
-        return null;
       }
+
+      if ('transcriptionStatus' in parsed) {
+        return parsed;
+      }
+    } catch (e) {
+      if (__DEV__) console.error('Failed to parse memoData:', e);
     }
     return null;
   }, [memoData]);
@@ -82,14 +89,60 @@ export function NoteDetailScreen() {
   const [localTitle, setLocalTitle] = useState('');
   const [localContent, setLocalContent] = useState('');
 
+  // タブ状態
+  const [activeTab, setActiveTab] = useState<'memo' | 'transcription'>('memo');
+
+  // 文字起こし編集状態
+  const [transcriptionText, setTranscriptionText] = useState('');
+  const [initialTranscriptionText, setInitialTranscriptionText] = useState('');
+  const [isTranscriptionDirty, setIsTranscriptionDirty] = useState(false);
+  const [isTranscriptionLoading, setIsTranscriptionLoading] = useState(false);
+  const [hasFetchedTranscription, setHasFetchedTranscription] = useState(false);
+  const [isDiscardDialogVisible, setIsDiscardDialogVisible] = useState(false);
+  const pendingNavigationActionRef = useRef<any>(null);
+
+  const processingStatus = useProcessingStore((state) => state.status);
+  const startResummarize = useProcessingStore((state) => state.startResummarize);
+
   // メモが取得できたら初期化
   useEffect(() => {
     if (memo) {
       setLocalTags(memo.tags);
       setLocalTitle(memo.title || '');
       setLocalContent(memo.content || '');
+      const initialTranscript = memo.transcriptionText || '';
+      setTranscriptionText(initialTranscript);
+      setInitialTranscriptionText(initialTranscript);
+      setIsTranscriptionDirty(false);
+      setHasFetchedTranscription(Boolean(memo.transcriptionText));
     }
   }, [memo]);
+
+  const loadTranscription = useCallback(async () => {
+    if (!memo || hasFetchedTranscription || isTranscriptionLoading) {
+      return;
+    }
+
+    setIsTranscriptionLoading(true);
+    try {
+      const result = await apiClient.getTranscription(memo.memoId);
+      setTranscriptionText(result.transcription);
+      setInitialTranscriptionText(result.transcription);
+      setIsTranscriptionDirty(false);
+      setHasFetchedTranscription(true);
+    } catch (err) {
+      if (__DEV__) console.error('Failed to load transcription:', err);
+      Alert.alert('エラー', '文字起こしの取得に失敗しました');
+    } finally {
+      setIsTranscriptionLoading(false);
+    }
+  }, [memo, hasFetchedTranscription, isTranscriptionLoading]);
+
+  useEffect(() => {
+    if (activeTab === 'transcription') {
+      loadTranscription();
+    }
+  }, [activeTab, loadTranscription]);
 
   // タイトル保存処理（再試行機能付き）
   const handleSaveTitle = useCallback(
@@ -186,25 +239,13 @@ export function NoteDetailScreen() {
   });
 
   // 画面を離れる前に未保存の変更をflush
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
-      // すでに保存処理中であれば、これ以上ブロックせず遷移を許可する
-      if (isSavingOnLeave) {
-        return;
-      }
-
-      // 未保存の変更がない場合は、そのまま遷移を許可する
-      if (!isDirtyTitle && !isDirtyContent) {
-        return;
-      }
-
-      // 未保存の変更がある場合は、画面遷移を一時停止して保存を完了させる
-      e.preventDefault();
+  const attemptLeaveWithSave = useCallback(
+    (action: any) => {
       setIsSavingOnLeave(true);
-
       Promise.all([flushTitle(), flushContent()])
         .then(() => {
-          navigation.dispatch(e.data.action);
+          setIsSavingOnLeave(false);
+          navigation.dispatch(action);
         })
         .catch((error) => {
           if (__DEV__) {
@@ -226,15 +267,49 @@ export function NoteDetailScreen() {
                 style: 'destructive',
                 onPress: () => {
                   setIsSavingOnLeave(false);
-                  navigation.dispatch(e.data.action);
+                  navigation.dispatch(action);
                 },
               },
             ]
           );
         });
+    },
+    [flushTitle, flushContent, navigation]
+  );
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      // すでに保存処理中であれば、これ以上ブロックせず遷移を許可する
+      if (isSavingOnLeave) {
+        return;
+      }
+
+      if (activeTab === 'transcription' && isTranscriptionDirty) {
+        e.preventDefault();
+        pendingNavigationActionRef.current = e.data.action;
+        setIsDiscardDialogVisible(true);
+        return;
+      }
+
+      // 未保存の変更がない場合は、そのまま遷移を許可する
+      if (!isDirtyTitle && !isDirtyContent) {
+        return;
+      }
+
+      // 未保存の変更がある場合は、画面遷移を一時停止して保存を完了させる
+      e.preventDefault();
+      attemptLeaveWithSave(e.data.action);
     });
     return unsubscribe;
-  }, [navigation, flushTitle, flushContent, isSavingOnLeave, isDirtyTitle, isDirtyContent]);
+  }, [
+    navigation,
+    attemptLeaveWithSave,
+    isSavingOnLeave,
+    isDirtyTitle,
+    isDirtyContent,
+    activeTab,
+    isTranscriptionDirty,
+  ]);
 
   // 削除処理
   const handleDelete = useCallback(async () => {
@@ -301,6 +376,52 @@ export function NoteDetailScreen() {
     }
   };
 
+  const handleTabPress = (tab: 'memo' | 'transcription') => {
+    if (tab === activeTab) return;
+
+    if (tab === 'memo' && activeTab === 'transcription' && isTranscriptionDirty) {
+      setTranscriptionText(initialTranscriptionText);
+      setIsTranscriptionDirty(false);
+    }
+
+    setActiveTab(tab);
+  };
+
+  const handleTranscriptionChange = useCallback(
+    (value: string) => {
+      setTranscriptionText(value);
+      setIsTranscriptionDirty(value !== initialTranscriptionText);
+    },
+    [initialTranscriptionText]
+  );
+
+  const handleConfirmResummarize = () => {
+    if (!memo) return;
+    if (!transcriptionText.trim()) {
+      Alert.alert('エラー', '文字起こしが空です');
+      return;
+    }
+
+    startResummarize(memo.memoId, transcriptionText);
+    router.replace('/home');
+  };
+
+  const handleDiscardTranscription = () => {
+    setIsDiscardDialogVisible(false);
+    setTranscriptionText(initialTranscriptionText);
+    setIsTranscriptionDirty(false);
+
+    const pendingAction = pendingNavigationActionRef.current;
+    pendingNavigationActionRef.current = null;
+    if (pendingAction) {
+      if (!isDirtyTitle && !isDirtyContent) {
+        navigation.dispatch(pendingAction);
+      } else {
+        attemptLeaveWithSave(pendingAction);
+      }
+    }
+  };
+
   // ローディング状態
   if (isLoading && !parsedMemoData) {
     return (
@@ -350,43 +471,106 @@ export function NoteDetailScreen() {
         }}
         keyboardShouldPersistTaps="handled"
       >
-        {/* タイトル（編集可能） */}
-        <EditableTitle value={localTitle} onChange={setLocalTitle} onBlur={flushTitle} />
-
-        {/* メタ情報 */}
-        <View className="mb-4">
-          {/* フォルダ情報 */}
-          {memo.folder && (
-            <View className="flex-row items-center gap-1 mb-1">
-              <MaterialCommunityIcons
-                name="folder-outline"
-                size={16}
-                color={colors.text.secondary}
-              />
-              <Text variant="bodyMedium" className="text-t-text-secondary">
-                {memo.folder.path}
-              </Text>
-            </View>
-          )}
-
-          {/* 日時 */}
-          <Text variant="bodySmall" className="text-t-text-tertiary">
-            {formatDate(memo.updatedAt)}
-          </Text>
+        {/* タブ切り替え */}
+        <View style={styles.tabsContainer}>
+          <TouchableOpacity
+            style={[styles.tabButton, activeTab === 'memo' && styles.tabButtonActive]}
+            onPress={() => handleTabPress('memo')}
+            accessibilityRole="button"
+            accessibilityLabel="メモタブ"
+          >
+            <Text style={[styles.tabText, activeTab === 'memo' && styles.tabTextActive]}>メモ</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tabButton, activeTab === 'transcription' && styles.tabButtonActive]}
+            onPress={() => handleTabPress('transcription')}
+            accessibilityRole="button"
+            accessibilityLabel="文字起こしタブ"
+          >
+            <Text style={[styles.tabText, activeTab === 'transcription' && styles.tabTextActive]}>
+              文字起こし
+            </Text>
+          </TouchableOpacity>
         </View>
 
-        {/* タグ一覧 */}
-        <TagSection tags={localTags} onAddTag={handleAddTag} onRemoveTag={handleRemoveTag} />
+        {activeTab === 'memo' ? (
+          <>
+            {/* タイトル（編集可能） */}
+            <EditableTitle value={localTitle} onChange={setLocalTitle} onBlur={flushTitle} />
 
-        {/* 本文（編集可能） */}
-        <NoteContent
-          value={localContent}
-          onChange={setLocalContent}
-          onBlur={flushContent}
-          transcription={memo.transcriptionText}
-          showTranscription={false}
-          editable
-        />
+            {/* メタ情報 */}
+            <View className="mb-4">
+              {/* フォルダ情報 */}
+              {memo.folder && (
+                <View className="flex-row items-center gap-1 mb-1">
+                  <MaterialCommunityIcons
+                    name="folder-outline"
+                    size={16}
+                    color={colors.text.secondary}
+                  />
+                  <Text variant="bodyMedium" className="text-t-text-secondary">
+                    {memo.folder.path}
+                  </Text>
+                </View>
+              )}
+
+              {/* 日時 */}
+              <Text variant="bodySmall" className="text-t-text-tertiary">
+                {formatDate(memo.updatedAt)}
+              </Text>
+            </View>
+
+            {/* タグ一覧 */}
+            <TagSection tags={localTags} onAddTag={handleAddTag} onRemoveTag={handleRemoveTag} />
+
+            {/* 本文（編集可能） */}
+            <NoteContent
+              value={localContent}
+              onChange={setLocalContent}
+              onBlur={flushContent}
+              transcription={memo.transcriptionText}
+              showTranscription={false}
+              editable
+            />
+          </>
+        ) : (
+          <View>
+            <View style={styles.transcriptionCard}>
+              {isTranscriptionLoading ? (
+                <View style={styles.transcriptionLoading}>
+                  <ActivityIndicator size="small" color={colors.brand[500]} />
+                  <Text variant="bodySmall" className="text-t-text-tertiary">
+                    文字起こしを読み込み中...
+                  </Text>
+                </View>
+              ) : (
+                <TextInput
+                  value={transcriptionText}
+                  onChangeText={handleTranscriptionChange}
+                  multiline
+                  placeholder="文字起こしを編集できます"
+                  placeholderTextColor={colors.text.tertiary}
+                  style={styles.transcriptionInput}
+                  accessibilityLabel="文字起こしテキスト"
+                  accessibilityHint="文字起こし内容を編集します"
+                />
+              )}
+            </View>
+            <Text style={styles.transcriptionHint}>
+              誤字を修正して「確定」を押すと、AI整形を再実行します。
+            </Text>
+            <Button
+              mode="contained"
+              style={styles.actionButton}
+              contentStyle={styles.actionButtonContent}
+              labelStyle={styles.actionButtonLabel}
+              onPress={handleConfirmResummarize}
+              disabled={!isTranscriptionDirty || processingStatus === 'processing'}
+            >
+              確定してAI整形
+            </Button>
+          </View>
+        )}
       </ScrollView>
 
       {/* 削除確認ダイアログ */}
@@ -400,6 +584,84 @@ export function NoteDetailScreen() {
         onCancel={() => setIsDeleteDialogVisible(false)}
         variant="danger"
       />
+
+      <ConfirmDialog
+        visible={isDiscardDialogVisible}
+        title="変更を破棄しますか？"
+        message="編集した文字起こしの変更は失われます。"
+        confirmText="破棄する"
+        cancelText="キャンセル"
+        onConfirm={handleDiscardTranscription}
+        onCancel={() => setIsDiscardDialogVisible(false)}
+        variant="warning"
+      />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  tabsContainer: {
+    flexDirection: 'row',
+    backgroundColor: colors.bg.primary,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border.primary,
+    padding: 4,
+    marginBottom: 16,
+  },
+  tabButton: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  tabButtonActive: {
+    backgroundColor: colors.brand[600],
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text.secondary,
+  },
+  tabTextActive: {
+    color: colors.text.inverse,
+  },
+  transcriptionCard: {
+    backgroundColor: colors.bg.primary,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border.primary,
+    padding: 12,
+    minHeight: 240,
+  },
+  transcriptionInput: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: colors.text.primary,
+    textAlignVertical: 'top',
+    minHeight: 200,
+    padding: 0,
+  },
+  transcriptionLoading: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  transcriptionHint: {
+    marginTop: 8,
+    fontSize: 12,
+    color: colors.text.tertiary,
+  },
+  actionButton: {
+    marginTop: 16,
+    borderRadius: 10,
+  },
+  actionButtonContent: {
+    height: 44,
+  },
+  actionButtonLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+});
