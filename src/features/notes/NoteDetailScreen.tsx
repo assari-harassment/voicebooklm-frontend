@@ -32,9 +32,10 @@ function formatDate(isoString: string) {
 export function NoteDetailScreen() {
   const navigation = useNavigation();
   const headerHeight = useHeaderHeight();
-  const { id, memoData } = useLocalSearchParams<{
+  const { id, memoData, fromProcessing } = useLocalSearchParams<{
     id: string;
     memoData?: string;
+    fromProcessing?: string;
   }>();
 
   // 削除確認ダイアログの状態
@@ -330,6 +331,29 @@ export function NoteDetailScreen() {
   // ヘッダーの設定
   useLayoutEffect(() => {
     navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity
+          onPress={() => {
+            if (fromProcessing === '1') {
+              router.replace('/home');
+              return;
+            }
+            if (navigation.canGoBack()) {
+              router.back();
+            } else {
+              router.replace('/home');
+            }
+          }}
+          className="flex-row items-center px-3 py-2"
+          accessibilityRole="button"
+          accessibilityLabel="戻る"
+        >
+          <MaterialCommunityIcons name="chevron-left" size={22} color={colors.text.primary} />
+          <Text variant="bodyMedium" style={{ color: colors.text.primary, marginLeft: 2 }}>
+            戻る
+          </Text>
+        </TouchableOpacity>
+      ),
       headerRight: () => (
         <View className="flex-row items-center">
           {/* 削除ボタン */}
