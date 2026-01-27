@@ -10,16 +10,26 @@ import {
   searchScreenOptions,
 } from '@/src/navigation/screen-options';
 import { ProcessingToast } from '@/src/shared/components';
+import { colors } from '@/src/shared/constants';
 import { AuthProvider } from '@/src/shared/providers/AuthProvider';
 import { Stack } from 'expo-router';
-import { PaperProvider } from 'react-native-paper';
+import { MD3LightTheme, PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import '../global.css';
+
+const theme = {
+  ...MD3LightTheme,
+  colors: {
+    ...MD3LightTheme.colors,
+    onSurface: colors.text.primary,
+    onSurfaceVariant: colors.text.secondary,
+  },
+};
 
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <PaperProvider>
+      <PaperProvider theme={theme}>
         <AuthProvider>
           <View style={{ flex: 1 }}>
             <Stack screenOptions={defaultScreenOptions}>
