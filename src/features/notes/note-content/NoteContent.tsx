@@ -1,11 +1,29 @@
 import { colors } from '@/src/shared/constants';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useCallback, useRef, useState } from 'react';
+import taskLists from 'markdown-it-task-lists';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { TouchableOpacity, View } from 'react-native';
-import Markdown from 'react-native-markdown-display';
+import Markdown, { MarkdownIt, RenderRules } from 'react-native-markdown-display';
 import { Surface, Text } from 'react-native-paper';
 
 import { MarkdownEditor, type MarkdownEditorRef } from './MarkdownEditor';
+
+// タスクリストのチェックボックス用カスタムレンダリングルール
+const customRules: RenderRules = {
+  html_inline: (node, _children, _parent, styles) => {
+    const content = node.content || '';
+    // チェックボックスのHTMLを検出
+    if (content.includes('task-list-item-checkbox')) {
+      const isChecked = content.includes('checked');
+      return (
+        <Text key={node.key} style={styles.text}>
+          {isChecked ? '☑ ' : '☐ '}
+        </Text>
+      );
+    }
+    return null;
+  },
+};
 
 // スタイル
 const markdownStyles = {
@@ -76,6 +94,11 @@ export function NoteContent({
   const [isEditing, setIsEditing] = useState(false);
   const editorRef = useRef<MarkdownEditorRef>(null);
 
+  const markdownItInstance = useMemo(
+    () => MarkdownIt({ typographer: true }).use(taskLists, { enabled: true }),
+    []
+  );
+
   const handlePress = useCallback(() => {
     if (editable) {
       setIsEditing(true);
@@ -132,7 +155,9 @@ export function NoteContent({
         {showTranscription && transcription ? (
           <Text className="text-t-text-primary text-base leading-6 p-2">{transcription}</Text>
         ) : (
-          <Markdown style={markdownStyles}>{value || 'メモをタップして編集...'}</Markdown>
+          <Markdown style={markdownStyles} markdownit={markdownItInstance} rules={customRules}>
+            {value || 'メモをタップして編集...'}
+          </Markdown>
         )}
       </Surface>
     </TouchableOpacity>
