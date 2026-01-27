@@ -1,12 +1,12 @@
-import { apiClient } from '@/src/api';
 import type { MemoListItemResponse } from '@/src/api/generated/apiSchema';
 import { ConfirmDialog } from '@/src/shared/components';
 import { MemoCard } from '@/src/shared/components/MemoCard';
 import { colors } from '@/src/shared/constants';
+import { useDeleteMemoFlow } from '@/src/shared/hooks/useDeleteMemoFlow';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Alert, FlatList, TextInput, View } from 'react-native';
+import { FlatList, TextInput, View } from 'react-native';
 import { ActivityIndicator, IconButton, Surface, Text } from 'react-native-paper';
 import { PopularTags } from './popular-tags';
 import { clearSearchCache, useSearchMemos } from './useSearchMemos';
@@ -50,9 +50,6 @@ function ItemSeparator() {
 
 export function SearchScreen() {
   const [searchText, setSearchText] = useState('');
-  const [memoToDelete, setMemoToDelete] = useState<MemoListItemResponse | null>(null);
-  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const {
     memos,
     isLoading,
@@ -64,6 +61,19 @@ export function SearchScreen() {
     totalCount,
     hasMore,
   } = useSearchMemos();
+  const handleAfterDelete = useCallback(() => {
+    clearSearchCache();
+    if (searchText.trim().length > 0) {
+      search(searchText);
+    }
+  }, [searchText, search]);
+  const {
+    memoToDelete,
+    isDeleteDialogVisible,
+    handleDeleteRequest,
+    handleDeleteCancel,
+    handleDeleteConfirm,
+  } = useDeleteMemoFlow({ onDeleted: handleAfterDelete });
 
   const handleSearchChange = (text: string) => {
     setSearchText(text);
@@ -88,37 +98,6 @@ export function SearchScreen() {
   const handleMemoPress = useCallback((memoId: string) => {
     router.push(`/note/${memoId}`);
   }, []);
-
-  const handleDeleteRequest = useCallback((memo: MemoListItemResponse) => {
-    setMemoToDelete(memo);
-    setIsDeleteDialogVisible(true);
-  }, []);
-
-  const handleDeleteCancel = useCallback(() => {
-    if (isDeleting) return;
-    setIsDeleteDialogVisible(false);
-    setMemoToDelete(null);
-  }, [isDeleting]);
-
-  const handleDeleteConfirm = useCallback(async () => {
-    if (!memoToDelete || isDeleting) return;
-
-    setIsDeleting(true);
-    try {
-      await apiClient.deleteMemo(memoToDelete.memoId);
-      setIsDeleteDialogVisible(false);
-      setMemoToDelete(null);
-      clearSearchCache();
-      if (searchText.trim().length > 0) {
-        search(searchText);
-      }
-    } catch (err) {
-      if (__DEV__) console.error('Failed to delete memo:', err);
-      Alert.alert('エラー', 'メモの削除に失敗しました。もう一度お試しください。');
-    } finally {
-      setIsDeleting(false);
-    }
-  }, [memoToDelete, isDeleting, searchText, search]);
 
   const renderItem = useCallback(
     ({ item }: { item: MemoListItemResponse }) => (
