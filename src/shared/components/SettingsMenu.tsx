@@ -1,4 +1,5 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { Menu, TouchableRipple, Text, IconButton } from 'react-native-paper';
 
@@ -30,16 +31,18 @@ export function SettingsMenu({ tintColor = '#000' }: SettingsMenuProps) {
     // 例: { icon: 'account', label: 'アカウント設定', onPress: () => {} },
   ];
 
-  // メニュー項目がない場合は歯車アイコンのみ表示（クリックしても何もしない）
+  const handleSettingsPress = () => {
+    router.push('/settings');
+  };
+
+  // メニュー項目がない場合は歯車アイコンのみ表示（設定画面へ遷移）
   if (menuItems.length === 0) {
     return (
       <IconButton
         icon="cog"
         iconColor={tintColor}
         size={24}
-        onPress={() => {
-          // TODO: 設定機能が追加されたらメニューを開く
-        }}
+        onPress={handleSettingsPress}
         accessibilityLabel="設定"
       />
     );

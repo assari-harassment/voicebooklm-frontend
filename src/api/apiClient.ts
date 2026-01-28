@@ -7,6 +7,7 @@ import {
   TagsResponse,
   TokenResponse,
   UpdateMemoRequest,
+  UserResponse,
 } from './generated/apiSchema';
 import { setupAxiosInterceptors } from './interceptors';
 import { useAuthStore } from '@/src/shared/stores/authStore';
@@ -150,6 +151,18 @@ class ApiClient {
     }
 
     const response = await this.api.api.formatMemo({ transcription, language }, { secure: true });
+    return response.data;
+  }
+
+  /**
+   * プロフィールを更新
+   */
+  async updateProfile(data: { name: string }): Promise<UserResponse> {
+    const response = await this.api.instance.patch<UserResponse>('/api/profile', data, {
+      headers: {
+        Authorization: `Bearer ${this.accessToken}`,
+      },
+    });
     return response.data;
   }
 }
