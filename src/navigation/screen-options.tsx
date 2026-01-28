@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import { Linking, Pressable, Text, View } from 'react-native';
 
 import { SettingsMenu } from '@/src/shared/components';
+import { colors } from '@/src/shared/constants';
 
 const FEEDBACK_FORM_URL = 'https://forms.gle/PXkrsrkpikbKXHUk6';
 
@@ -72,12 +73,14 @@ export const homeScreenOptions: NativeStackNavigationOptions = {
           paddingHorizontal: 12,
           borderRadius: 20,
           borderWidth: 1,
-          borderColor: '#d1d5db',
-          backgroundColor: '#fff',
+          borderColor: colors.border.primary,
+          backgroundColor: colors.bg.primary,
         }}
       >
-        <MaterialCommunityIcons name="message-draw" size={16} color="#6b7280" />
-        <Text style={{ marginLeft: 6, fontSize: 13, color: '#374151' }}>フィードバック</Text>
+        <MaterialCommunityIcons name="message-draw" size={16} color={colors.text.primary} />
+        <Text style={{ marginLeft: 6, fontSize: 13, color: colors.text.primary }}>
+          フィードバック
+        </Text>
       </Pressable>
       <SettingsMenu tintColor={tintColor} />
     </View>
