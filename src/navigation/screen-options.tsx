@@ -2,6 +2,22 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { HeaderButton } from '@react-navigation/elements';
 import type { NativeStackNavigationOptions } from '@react-navigation/native-stack';
 import { router } from 'expo-router';
+import { Linking, Pressable, Text, View } from 'react-native';
+
+import { SettingsMenu } from '@/src/shared/components';
+import { colors } from '@/src/shared/constants';
+
+const FEEDBACK_FORM_URL = 'https://forms.gle/PXkrsrkpikbKXHUk6';
+
+const openFeedbackForm = async () => {
+  try {
+    await Linking.openURL(FEEDBACK_FORM_URL);
+  } catch (error) {
+    if (__DEV__) {
+      console.error('Failed to open feedback form:', error);
+    }
+  }
+};
 
 /**
  * 全画面共通のヘッダー設定
@@ -46,14 +62,28 @@ export const homeScreenOptions: NativeStackNavigationOptions = {
     </HeaderButton>
   ),
   headerRight: ({ tintColor }) => (
-    <HeaderButton
-      onPress={() => {
-        // TODO: Navigate to settings
-      }}
-      accessibilityLabel="設定"
-    >
-      <MaterialCommunityIcons name="cog" size={24} color={tintColor} />
-    </HeaderButton>
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <Pressable
+        onPress={openFeedbackForm}
+        accessibilityLabel="フィードバック"
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingVertical: 6,
+          paddingHorizontal: 12,
+          borderRadius: 20,
+          borderWidth: 1,
+          borderColor: colors.border.primary,
+          backgroundColor: colors.bg.primary,
+        }}
+      >
+        <MaterialCommunityIcons name="message-draw" size={16} color={colors.text.primary} />
+        <Text style={{ marginLeft: 6, fontSize: 13, color: colors.text.primary }}>
+          フィードバック
+        </Text>
+      </Pressable>
+      <SettingsMenu tintColor={tintColor} />
+    </View>
   ),
 };
 
