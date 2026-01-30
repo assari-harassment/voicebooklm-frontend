@@ -112,3 +112,10 @@ export const recordScreenOptions: NativeStackNavigationOptions = {
 export const searchScreenOptions: NativeStackNavigationOptions = {
   title: '検索',
 };
+
+/**
+ * settings画面のヘッダー設定
+ */
+export const settingsScreenOptions: NativeStackNavigationOptions = {
+  title: 'アカウント設定',
+};

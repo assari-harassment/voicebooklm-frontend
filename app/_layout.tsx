@@ -8,6 +8,7 @@ import {
   noteDetailScreenOptions,
   recordScreenOptions,
   searchScreenOptions,
+  settingsScreenOptions,
 } from '@/src/navigation/screen-options';
 import { ProcessingToast } from '@/src/shared/components';
 import { colors } from '@/src/shared/constants';
@@ -39,6 +40,7 @@ export default function RootLayout() {
               <Stack.Screen name="search" options={searchScreenOptions} />
               <Stack.Screen name="note/[id]" options={noteDetailScreenOptions} />
               <Stack.Screen name="record" options={recordScreenOptions} />
+              <Stack.Screen name="settings" options={settingsScreenOptions} />
             </Stack>
             <ProcessingToast />
           </View>
