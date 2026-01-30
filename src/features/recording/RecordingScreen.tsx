@@ -246,15 +246,19 @@ export function RecordingScreen() {
     try {
       setIsProcessing(true);
 
+      // 最新の編集テキストを取得（レンダー時点のスナップショットではなく最新の状態）
+      const latestTranscript = useRecordingStore.getState().editableTranscript;
+
       // 録音停止
       await stopRecording();
 
-      // WebSocket切断して文字起こしテキストを取得
-      const transcript = streamingTranscriptionService.stopWithoutFormat();
+      // WebSocket切断
+      streamingTranscriptionService.stopAndDisconnect();
 
-      if (transcript && transcript.trim().length > 0) {
+      // ユーザーが編集したテキストを使用
+      if (latestTranscript && latestTranscript.trim().length > 0) {
         // バックグラウンドでAI整形を開始
-        useProcessingStore.getState().startProcessing(transcript, 'ja-JP');
+        useProcessingStore.getState().startProcessing(latestTranscript, 'ja-JP');
       }
 
       // ホーム画面に戻る
