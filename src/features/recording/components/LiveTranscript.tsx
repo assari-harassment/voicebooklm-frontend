@@ -74,36 +74,48 @@ export function LiveTranscript({ editableTranscript, onChangeText }: LiveTranscr
       indicatorStyle="black"
       contentContainerStyle={{ flexGrow: 1 }}
     >
-      {hasContent ? (
-        <View style={{ minHeight: minTextAreaHeight }}>
+      <View
+        style={{
+          minHeight: minTextAreaHeight,
+          backgroundColor: colors.bg.tertiary,
+          borderRadius: 12,
+          borderWidth: 2,
+          borderColor: colors.text.tertiary,
+          padding: 12,
+        }}
+      >
+        {hasContent ? (
           <TextInput
             value={editableTranscript}
             onChangeText={onChangeText}
             multiline
             placeholder=""
             placeholderTextColor={colors.text.tertiary}
+            selectionColor="transparent"
+            className="outline-none"
             style={{
               fontSize: 17,
               lineHeight: 30,
               color: colors.text.primary,
               textAlignVertical: 'top',
               padding: 0,
-              minHeight: minTextAreaHeight,
+              minHeight: minTextAreaHeight - 24, // padding分を引く
+              borderWidth: 0,
             }}
             accessibilityLabel="文字起こしテキスト"
             accessibilityHint="タップして編集できます"
           />
-        </View>
-      ) : (
-        <View
-          className="flex-1 justify-center items-center"
-          style={{ minHeight: minTextAreaHeight }}
-        >
-          <Text variant="bodyMedium" className="text-t-text-tertiary text-center">
-            {'話し始めると文字起こしが表示されます\nテキストはタップして編集できます'}
-          </Text>
-        </View>
-      )}
+        ) : (
+          <View
+            className="flex-1 justify-center items-center"
+            style={{ minHeight: minTextAreaHeight - 24 }}
+          >
+            <Text variant="bodyMedium" className="text-t-text-tertiary text-center">
+              {'話し始めると文字起こしが表示されます\nテキストはタップして編集できます'}
+            </Text>
+          </View>
+        )}
+      </View>
     </ScrollView>
   );
 }
