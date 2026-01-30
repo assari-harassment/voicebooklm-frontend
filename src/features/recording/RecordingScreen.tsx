@@ -249,12 +249,13 @@ export function RecordingScreen() {
       // 録音停止
       await stopRecording();
 
-      // WebSocket切断して文字起こしテキストを取得
-      const transcript = streamingTranscriptionService.stopWithoutFormat();
+      // WebSocket切断
+      streamingTranscriptionService.stopWithoutFormat();
 
-      if (transcript && transcript.trim().length > 0) {
+      // ユーザーが編集したテキストを使用
+      if (editableTranscript && editableTranscript.trim().length > 0) {
         // バックグラウンドでAI整形を開始
-        useProcessingStore.getState().startProcessing(transcript, 'ja-JP');
+        useProcessingStore.getState().startProcessing(editableTranscript, 'ja-JP');
       }
 
       // ホーム画面に戻る
