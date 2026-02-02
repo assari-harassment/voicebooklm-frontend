@@ -60,6 +60,8 @@ export function LiveTranscript({ editableTranscript, onChangeText }: LiveTranscr
   // 絶対最小値: 200px、絶対最大値: 400px
   const heightRatio = windowHeight < 667 ? 0.4 : 0.45;
   const minTextAreaHeight = Math.min(Math.max(windowHeight * heightRatio, 200), 400);
+  const containerPadding = 12;
+  const innerMinHeight = minTextAreaHeight - containerPadding * 2;
 
   return (
     <ScrollView
@@ -74,36 +76,47 @@ export function LiveTranscript({ editableTranscript, onChangeText }: LiveTranscr
       indicatorStyle="black"
       contentContainerStyle={{ flexGrow: 1 }}
     >
-      {hasContent ? (
-        <View style={{ minHeight: minTextAreaHeight }}>
+      <View
+        style={{
+          minHeight: minTextAreaHeight,
+          backgroundColor: colors.bg.tertiary,
+          borderRadius: 12,
+          borderWidth: 2,
+          borderColor: colors.border.primary,
+          padding: containerPadding,
+        }}
+      >
+        {hasContent ? (
           <TextInput
             value={editableTranscript}
             onChangeText={onChangeText}
             multiline
             placeholder=""
             placeholderTextColor={colors.text.tertiary}
+            className="outline-none"
             style={{
               fontSize: 17,
               lineHeight: 30,
               color: colors.text.primary,
               textAlignVertical: 'top',
               padding: 0,
-              minHeight: minTextAreaHeight,
+              minHeight: innerMinHeight,
+              borderWidth: 0,
             }}
             accessibilityLabel="文字起こしテキスト"
             accessibilityHint="タップして編集できます"
           />
-        </View>
-      ) : (
-        <View
-          className="flex-1 justify-center items-center"
-          style={{ minHeight: minTextAreaHeight }}
-        >
-          <Text variant="bodyMedium" className="text-t-text-tertiary text-center">
-            {'話し始めると文字起こしが表示されます\nテキストはタップして編集できます'}
-          </Text>
-        </View>
-      )}
+        ) : (
+          <View
+            className="flex-1 justify-center items-center"
+            style={{ minHeight: innerMinHeight }}
+          >
+            <Text variant="bodyMedium" className="text-t-text-tertiary text-center">
+              {'話し始めると文字起こしが表示されます\nテキストはタップして編集できます'}
+            </Text>
+          </View>
+        )}
+      </View>
     </ScrollView>
   );
 }

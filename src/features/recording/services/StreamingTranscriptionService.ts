@@ -143,6 +143,11 @@ class StreamingTranscriptionService {
     return this.finalTranscripts.join('');
   }
 
+  stopAndDisconnect(): void {
+    transcriptionWebSocket.stop();
+    transcriptionWebSocket.disconnect();
+  }
+
   disconnect(): void {
     transcriptionWebSocket.disconnect();
     this.reset();
