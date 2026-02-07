@@ -1,3 +1,4 @@
+import { colors } from '@/src/shared/constants';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { HeaderButton } from '@react-navigation/elements';
 import type { NativeStackNavigationOptions } from '@react-navigation/native-stack';
@@ -94,9 +95,8 @@ export const noteDetailScreenOptions: NativeStackNavigationOptions = {
   title: '',
   headerTransparent: true,
   headerStyle: {
-    backgroundColor: 'transparent',
+    backgroundColor: colors.bg.secondary,
   },
-  headerBlurEffect: undefined,
 };
 
 /**

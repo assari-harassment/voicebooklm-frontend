@@ -63,6 +63,7 @@ export function EditableTitle({ value, onChange, onBlur }: EditableTitleProps) {
       <Text
         variant="titleLarge"
         className="font-semibold text-t-text-primary flex-1"
+        style={{ color: colors.text.primary }}
         numberOfLines={2}
       >
         {displayTitle}
