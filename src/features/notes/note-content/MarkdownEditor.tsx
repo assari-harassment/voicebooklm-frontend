@@ -1,5 +1,5 @@
 import { colors } from '@/src/shared/constants';
-import { forwardRef, useImperativeHandle, useRef } from 'react';
+import { forwardRef, useImperativeHandle, useMemo, useRef } from 'react';
 import { TextInput } from 'react-native';
 
 interface MarkdownEditorProps {
@@ -18,6 +18,10 @@ export interface MarkdownEditorRef {
 export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>(
   ({ value, onChangeText, onBlur, placeholder, autoFocus }, ref) => {
     const inputRef = useRef<TextInput>(null);
+    const lineHeight = 24;
+    const verticalPadding = 12;
+    const lineCount = useMemo(() => value.split('\n').length, [value]);
+    const editorHeight = Math.max(1, lineCount) * lineHeight + verticalPadding * 2;
 
     useImperativeHandle(ref, () => ({
       focus: () => inputRef.current?.focus(),
@@ -37,13 +41,12 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
         accessibilityLabel="メモの本文"
         accessibilityHint="メモの内容を入力してください"
         style={{
-          flex: 1,
           fontSize: 16,
-          lineHeight: 24,
+          lineHeight,
           color: colors.text.primary,
-          minHeight: 200,
+          height: editorHeight,
           textAlignVertical: 'top',
-          padding: 12,
+          padding: verticalPadding,
         }}
       />
     );
