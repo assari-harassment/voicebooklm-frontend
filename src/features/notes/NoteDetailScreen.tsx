@@ -90,9 +90,6 @@ export function NoteDetailScreen() {
   const [localTitle, setLocalTitle] = useState('');
   const [localContent, setLocalContent] = useState('');
 
-  // タブ状態
-  const [activeTab, setActiveTab] = useState<'memo' | 'transcription'>('memo');
-
   // 文字起こし編集状態
   const [transcriptionText, setTranscriptionText] = useState('');
   const [initialTranscriptionText, setInitialTranscriptionText] = useState('');
@@ -100,6 +97,7 @@ export function NoteDetailScreen() {
   const [isTranscriptionLoading, setIsTranscriptionLoading] = useState(false);
   const [hasFetchedTranscription, setHasFetchedTranscription] = useState(false);
   const [isDiscardDialogVisible, setIsDiscardDialogVisible] = useState(false);
+  const [isTranscriptionOpen, setIsTranscriptionOpen] = useState(false);
   const pendingNavigationActionRef = useRef<any>(null);
 
   const processingStatus = useProcessingStore((state) => state.status);
@@ -140,15 +138,18 @@ export function NoteDetailScreen() {
   }, [memo, hasFetchedTranscription, isTranscriptionLoading]);
 
   useEffect(() => {
-    if (activeTab === 'transcription') {
+    if (memo && isTranscriptionOpen) {
       loadTranscription();
     }
-  }, [activeTab, loadTranscription]);
+  }, [memo, isTranscriptionOpen, loadTranscription]);
 
   // タイトル保存処理（再試行機能付き）
   const handleSaveTitle = useCallback(
     async (newTitle: string) => {
       if (!memo) return;
+      if (newTitle.trim() === '') {
+        return;
+      }
 
       const attemptSave = async (): Promise<void> => {
         try {
@@ -188,6 +189,9 @@ export function NoteDetailScreen() {
   const handleSaveContent = useCallback(
     async (newContent: string) => {
       if (!memo) return;
+      if (newContent.trim() === '') {
+        return;
+      }
 
       const attemptSave = async (): Promise<void> => {
         try {
@@ -285,7 +289,7 @@ export function NoteDetailScreen() {
         return;
       }
 
-      if (activeTab === 'transcription' && isTranscriptionDirty) {
+      if (isTranscriptionDirty) {
         e.preventDefault();
         pendingNavigationActionRef.current = e.data.action;
         setIsDiscardDialogVisible(true);
@@ -308,7 +312,6 @@ export function NoteDetailScreen() {
     isSavingOnLeave,
     isDirtyTitle,
     isDirtyContent,
-    activeTab,
     isTranscriptionDirty,
   ]);
 
@@ -400,17 +403,6 @@ export function NoteDetailScreen() {
     }
   };
 
-  const handleTabPress = (tab: 'memo' | 'transcription') => {
-    if (tab === activeTab) return;
-
-    if (tab === 'memo' && activeTab === 'transcription' && isTranscriptionDirty) {
-      setTranscriptionText(initialTranscriptionText);
-      setIsTranscriptionDirty(false);
-    }
-
-    setActiveTab(tab);
-  };
-
   const handleTranscriptionChange = useCallback(
     (value: string) => {
       setTranscriptionText(value);
@@ -418,6 +410,15 @@ export function NoteDetailScreen() {
     },
     [initialTranscriptionText]
   );
+
+  const transcriptionLineHeight = 24;
+  const transcriptionPadding = 12;
+  const transcriptionLineCount = useMemo(
+    () => transcriptionText.split('\n').length,
+    [transcriptionText]
+  );
+  const transcriptionHeight =
+    Math.max(1, transcriptionLineCount) * transcriptionLineHeight + transcriptionPadding * 2;
 
   const handleConfirmResummarize = () => {
     if (!memo) return;
@@ -487,114 +488,150 @@ export function NoteDetailScreen() {
   return (
     <View className="flex-1 bg-t-bg-secondary">
       <ScrollView
-        className="flex-1"
+        className="flex-1 bg-t-bg-secondary"
         contentContainerStyle={{
           paddingHorizontal: 16,
-          paddingTop: headerHeight,
+          paddingTop: headerHeight + 16,
           paddingBottom: 32,
         }}
         keyboardShouldPersistTaps="handled"
       >
-        {/* タブ切り替え */}
-        <View style={styles.tabsContainer}>
-          <TouchableOpacity
-            style={[styles.tabButton, activeTab === 'memo' && styles.tabButtonActive]}
-            onPress={() => handleTabPress('memo')}
-            accessibilityRole="button"
-            accessibilityLabel="メモタブ"
-          >
-            <Text style={[styles.tabText, activeTab === 'memo' && styles.tabTextActive]}>メモ</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tabButton, activeTab === 'transcription' && styles.tabButtonActive]}
-            onPress={() => handleTabPress('transcription')}
-            accessibilityRole="button"
-            accessibilityLabel="文字起こしタブ"
-          >
-            <Text style={[styles.tabText, activeTab === 'transcription' && styles.tabTextActive]}>
-              文字起こし
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <View className="w-full max-w-[1200px] mx-auto">
+          <View className="flex flex-col gap-6 md:flex-row md:gap-8 md:items-start">
+            <View className="flex-1 md:flex-[6] md:pr-2">
+              {/* タイトル（編集可能） */}
+              <EditableTitle value={localTitle} onChange={setLocalTitle} onBlur={flushTitle} />
 
-        {activeTab === 'memo' ? (
-          <>
-            {/* タイトル（編集可能） */}
-            <EditableTitle value={localTitle} onChange={setLocalTitle} onBlur={flushTitle} />
+              {/* メタ情報 */}
+              <View className="mb-4">
+                {/* フォルダ情報 */}
+                {memo.folder && (
+                  <View className="flex-row items-center gap-1 mb-1">
+                    <MaterialCommunityIcons
+                      name="folder-outline"
+                      size={16}
+                      color={colors.text.secondary}
+                    />
+                    <Text
+                      variant="bodyMedium"
+                      className="text-t-text-secondary"
+                      style={{ color: colors.text.secondary }}
+                    >
+                      {memo.folder.path}
+                    </Text>
+                  </View>
+                )}
 
-            {/* メタ情報 */}
-            <View className="mb-4">
-              {/* フォルダ情報 */}
-              {memo.folder && (
-                <View className="flex-row items-center gap-1 mb-1">
-                  <MaterialCommunityIcons
-                    name="folder-outline"
-                    size={16}
-                    color={colors.text.secondary}
-                  />
-                  <Text variant="bodyMedium" className="text-t-text-secondary">
-                    {memo.folder.path}
-                  </Text>
+                {/* 日時 */}
+                <Text
+                  variant="bodySmall"
+                  className="text-t-text-tertiary"
+                  style={{ color: colors.text.tertiary }}
+                >
+                  {formatDate(memo.updatedAt)}
+                </Text>
+              </View>
+
+              {/* タグ一覧 */}
+              <TagSection tags={localTags} onAddTag={handleAddTag} onRemoveTag={handleRemoveTag} />
+
+              {/* 本文（編集可能） */}
+              <NoteContent
+                value={localContent}
+                onChange={setLocalContent}
+                onBlur={flushContent}
+                transcription={memo.transcriptionText}
+                showTranscription={false}
+                editable
+              />
+              {!isTranscriptionOpen && (
+                <View className="mt-4">
+                  <Button
+                    mode="outlined"
+                    style={styles.secondaryButton}
+                    contentStyle={styles.secondaryButtonContent}
+                    labelStyle={styles.secondaryButtonLabel}
+                    onPress={() => setIsTranscriptionOpen(true)}
+                    textColor={colors.text.primary}
+                  >
+                    文字起こしを開く
+                  </Button>
                 </View>
               )}
-
-              {/* 日時 */}
-              <Text variant="bodySmall" className="text-t-text-tertiary">
-                {formatDate(memo.updatedAt)}
-              </Text>
             </View>
 
-            {/* タグ一覧 */}
-            <TagSection tags={localTags} onAddTag={handleAddTag} onRemoveTag={handleRemoveTag} />
-
-            {/* 本文（編集可能） */}
-            <NoteContent
-              value={localContent}
-              onChange={setLocalContent}
-              onBlur={flushContent}
-              transcription={memo.transcriptionText}
-              showTranscription={false}
-              editable
-            />
-          </>
-        ) : (
-          <View>
-            <View style={styles.transcriptionCard}>
-              {isTranscriptionLoading ? (
-                <View style={styles.transcriptionLoading}>
-                  <ActivityIndicator size="small" color={colors.brand[500]} />
-                  <Text variant="bodySmall" className="text-t-text-tertiary">
-                    文字起こしを読み込み中...
+            {isTranscriptionOpen && (
+              <View className="flex-1 md:flex-[4] md:pl-2">
+                <View className="flex-row items-center justify-between mb-2">
+                  <Text
+                    variant="titleSmall"
+                    className="text-t-text-primary"
+                    style={{ color: colors.text.primary }}
+                  >
+                    文字起こし
                   </Text>
+                  <TouchableOpacity
+                    onPress={() => setIsTranscriptionOpen(false)}
+                    className="flex-row items-center px-2 py-1"
+                    accessibilityRole="button"
+                    accessibilityLabel="文字起こしを閉じる"
+                  >
+                    <Text variant="bodySmall" style={{ color: colors.text.secondary }}>
+                      閉じる
+                    </Text>
+                  </TouchableOpacity>
                 </View>
-              ) : (
-                <TextInput
-                  value={transcriptionText}
-                  onChangeText={handleTranscriptionChange}
-                  multiline
-                  placeholder="文字起こしを編集できます"
-                  placeholderTextColor={colors.text.tertiary}
-                  style={styles.transcriptionInput}
-                  accessibilityLabel="文字起こしテキスト"
-                  accessibilityHint="文字起こし内容を編集します"
-                />
-              )}
-            </View>
-            <Text style={styles.transcriptionHint}>
-              誤字を修正して「確定」を押すと、AI整形を再実行します。
-            </Text>
-            <Button
-              mode="contained"
-              style={styles.actionButton}
-              contentStyle={styles.actionButtonContent}
-              labelStyle={styles.actionButtonLabel}
-              onPress={handleConfirmResummarize}
-              disabled={!isTranscriptionDirty || processingStatus === 'processing'}
-            >
-              確定してAI整形
-            </Button>
+                <View className="bg-t-bg-primary border border-t-border-primary rounded-xl p-1">
+                  {isTranscriptionLoading ? (
+                    <View style={styles.transcriptionLoading}>
+                      <ActivityIndicator size="small" color={colors.brand[500]} />
+                      <Text
+                        variant="bodySmall"
+                        className="text-t-text-tertiary"
+                        style={{ color: colors.text.tertiary }}
+                      >
+                        文字起こしを読み込み中...
+                      </Text>
+                    </View>
+                  ) : (
+                    <TextInput
+                      value={transcriptionText}
+                      onChangeText={handleTranscriptionChange}
+                      multiline
+                      placeholder="文字起こしを編集できます"
+                      placeholderTextColor={colors.text.tertiary}
+                      style={[
+                        styles.transcriptionInput,
+                        {
+                          height: transcriptionHeight,
+                          lineHeight: transcriptionLineHeight,
+                          padding: transcriptionPadding,
+                        },
+                      ]}
+                      className="text-base leading-6 md:text-[17px] md:leading-[26px]"
+                      accessibilityLabel="文字起こしテキスト"
+                      accessibilityHint="文字起こし内容を編集します"
+                    />
+                  )}
+                </View>
+                <View className="mt-3 md:items-end">
+                  <Button
+                    mode="contained"
+                    style={styles.actionButton}
+                    contentStyle={styles.actionButtonContent}
+                    labelStyle={styles.actionButtonLabel}
+                    onPress={handleConfirmResummarize}
+                    disabled={processingStatus === 'processing'}
+                    buttonColor={colors.brand[600]}
+                    textColor={colors.text.inverse}
+                  >
+                    AIで再整形
+                  </Button>
+                </View>
+              </View>
+            )}
           </View>
-        )}
+        </View>
       </ScrollView>
 
       {/* 削除確認ダイアログ */}
@@ -624,47 +661,9 @@ export function NoteDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  tabsContainer: {
-    flexDirection: 'row',
-    backgroundColor: colors.bg.primary,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border.primary,
-    padding: 4,
-    marginBottom: 16,
-  },
-  tabButton: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 8,
-    borderRadius: 10,
-  },
-  tabButtonActive: {
-    backgroundColor: colors.brand[600],
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.text.secondary,
-  },
-  tabTextActive: {
-    color: colors.text.inverse,
-  },
-  transcriptionCard: {
-    backgroundColor: colors.bg.primary,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border.primary,
-    padding: 12,
-    minHeight: 240,
-  },
   transcriptionInput: {
-    fontSize: 16,
-    lineHeight: 24,
     color: colors.text.primary,
     textAlignVertical: 'top',
-    minHeight: 200,
-    padding: 0,
   },
   transcriptionLoading: {
     flex: 1,
@@ -672,14 +671,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
   },
-  transcriptionHint: {
-    marginTop: 8,
-    fontSize: 12,
-    color: colors.text.tertiary,
-  },
   actionButton: {
-    marginTop: 16,
+    marginTop: 12,
     borderRadius: 10,
+  },
+  secondaryButton: {
+    borderRadius: 10,
+    borderColor: colors.border.primary,
+    width: '100%',
+  },
+  secondaryButtonContent: {
+    height: 40,
+  },
+  secondaryButtonLabel: {
+    fontSize: 14,
+    fontWeight: '600',
   },
   actionButtonContent: {
     height: 44,
