@@ -116,8 +116,6 @@ export function NoteContent({
   if (isEditing && editable) {
     return (
       <Surface className="bg-t-bg-primary rounded-xl p-1" elevation={0}>
-        {/* 表示モードの鉛筆アイコン行と同じ高さのスペーサー */}
-        <View className="flex-row items-center justify-end px-2 pt-1 h-5" />
         <MarkdownEditor
           ref={editorRef}
           value={value}
@@ -139,10 +137,10 @@ export function NoteContent({
       accessibilityRole={editable ? 'button' : undefined}
       accessibilityLabel={editable ? 'メモを編集' : undefined}
     >
-      <Surface className="bg-t-bg-primary rounded-xl p-1" elevation={0}>
+      <Surface className="bg-t-bg-primary rounded-xl p-1 relative" elevation={0}>
         {/* 編集可能ヒント */}
         {editable && (
-          <View className="flex-row items-center justify-end px-2 pt-1">
+          <View className="absolute right-3 top-2">
             <MaterialCommunityIcons
               name="pencil-outline"
               size={14}
@@ -152,13 +150,15 @@ export function NoteContent({
           </View>
         )}
 
-        {showTranscription && transcription ? (
-          <Text className="text-t-text-primary text-base leading-6 p-2">{transcription}</Text>
-        ) : (
-          <Markdown style={markdownStyles} markdownit={markdownItInstance} rules={customRules}>
-            {value || 'メモをタップして編集...'}
-          </Markdown>
-        )}
+        <View style={{ padding: 12 }}>
+          {showTranscription && transcription ? (
+            <Text className="text-t-text-primary text-base leading-6">{transcription}</Text>
+          ) : (
+            <Markdown style={markdownStyles} markdownit={markdownItInstance} rules={customRules}>
+              {value || 'メモをタップして編集...'}
+            </Markdown>
+          )}
+        </View>
       </Surface>
     </TouchableOpacity>
   );
