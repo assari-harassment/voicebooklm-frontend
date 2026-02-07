@@ -20,8 +20,12 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
     const inputRef = useRef<TextInput>(null);
     const lineHeight = 24;
     const verticalPadding = 12;
+    const minEditorHeight = 200;
     const lineCount = useMemo(() => value.split('\n').length, [value]);
-    const editorHeight = Math.max(1, lineCount) * lineHeight + verticalPadding * 2;
+    const editorHeight = Math.max(
+      minEditorHeight,
+      Math.max(1, lineCount) * lineHeight + verticalPadding * 2
+    );
 
     useImperativeHandle(ref, () => ({
       focus: () => inputRef.current?.focus(),
