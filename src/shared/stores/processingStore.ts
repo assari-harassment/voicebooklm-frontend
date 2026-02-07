@@ -115,6 +115,15 @@ export const useProcessingStore = create<ProcessingState>()((set, get) => ({
       return;
     }
 
+    if (actionType === 'resummarize' && !memoId) {
+      set({
+        status: 'error',
+        memoResult: null,
+        error: 'メモIDが不足しているため再試行できません',
+      });
+      return;
+    }
+
     set({
       status: 'processing',
       memoResult: null,
@@ -124,7 +133,7 @@ export const useProcessingStore = create<ProcessingState>()((set, get) => ({
     try {
       const result =
         actionType === 'resummarize'
-          ? await apiClient.resummarizeMemo(memoId ?? '', transcript)
+          ? await apiClient.resummarizeMemo(memoId!, transcript)
           : await apiClient.formatMemo(transcript, language ?? 'ja-JP');
 
       set({
