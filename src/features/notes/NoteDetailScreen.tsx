@@ -405,6 +405,12 @@ export function NoteDetailScreen() {
     [initialTranscriptionText]
   );
 
+  const handleCloseTranscription = useCallback(() => {
+    setTranscriptionText(initialTranscriptionText);
+    setIsTranscriptionDirty(false);
+    setIsTranscriptionOpen(false);
+  }, [initialTranscriptionText]);
+
   const transcriptionLineHeight = 24;
   const transcriptionPadding = 12;
   const transcriptionLineCount = useMemo(
@@ -565,7 +571,7 @@ export function NoteDetailScreen() {
                     文字起こし
                   </Text>
                   <TouchableOpacity
-                    onPress={() => setIsTranscriptionOpen(false)}
+                    onPress={handleCloseTranscription}
                     className="flex-row items-center px-2 py-1"
                     accessibilityRole="button"
                     accessibilityLabel="文字起こしを閉じる"
