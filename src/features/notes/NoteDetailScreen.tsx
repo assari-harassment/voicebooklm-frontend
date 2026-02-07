@@ -147,9 +147,6 @@ export function NoteDetailScreen() {
   const handleSaveTitle = useCallback(
     async (newTitle: string) => {
       if (!memo) return;
-      if (newTitle.trim() === '') {
-        return;
-      }
 
       const attemptSave = async (): Promise<void> => {
         try {
@@ -189,9 +186,6 @@ export function NoteDetailScreen() {
   const handleSaveContent = useCallback(
     async (newContent: string) => {
       if (!memo) return;
-      if (newContent.trim() === '') {
-        return;
-      }
 
       const attemptSave = async (): Promise<void> => {
         try {
