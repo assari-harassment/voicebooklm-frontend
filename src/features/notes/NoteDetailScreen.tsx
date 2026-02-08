@@ -570,16 +570,6 @@ export function NoteDetailScreen() {
                   >
                     文字起こし
                   </Text>
-                  <TouchableOpacity
-                    onPress={handleCloseTranscription}
-                    className="flex-row items-center px-2 py-1"
-                    accessibilityRole="button"
-                    accessibilityLabel="文字起こしを閉じる"
-                  >
-                    <Text variant="bodySmall" style={{ color: colors.text.secondary }}>
-                      閉じる
-                    </Text>
-                  </TouchableOpacity>
                 </View>
                 <View className="bg-t-bg-primary border border-t-border-primary rounded-xl p-1">
                   {isTranscriptionLoading ? (
@@ -626,6 +616,18 @@ export function NoteDetailScreen() {
                     textColor={colors.text.inverse}
                   >
                     AIで再整形
+                  </Button>
+                </View>
+                <View className="mt-3">
+                  <Button
+                    mode="outlined"
+                    style={styles.secondaryButton}
+                    contentStyle={styles.secondaryButtonContent}
+                    labelStyle={styles.secondaryButtonLabel}
+                    onPress={handleCloseTranscription}
+                    textColor={colors.text.primary}
+                  >
+                    文字起こしを閉じる
                   </Button>
                 </View>
               </View>
