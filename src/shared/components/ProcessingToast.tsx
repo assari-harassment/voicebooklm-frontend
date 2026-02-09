@@ -20,6 +20,7 @@ export function ProcessingToast() {
   // 処理状態を取得
   const status = useProcessingStore((state) => state.status);
   const memoResult = useProcessingStore((state) => state.memoResult);
+  const actionType = useProcessingStore((state) => state.actionType);
   const retry = useProcessingStore((state) => state.retry);
   const dismissBanner = useProcessingStore((state) => state.dismissBanner);
 
@@ -142,6 +143,7 @@ export function ProcessingToast() {
         params: {
           id: memoResult.memoId,
           memoData: JSON.stringify(memoResult),
+          fromProcessing: actionType === 'resummarize' ? '1' : undefined,
         },
       });
     } else {

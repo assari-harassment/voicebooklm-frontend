@@ -1,3 +1,4 @@
+import { colors } from '@/src/shared/constants';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { HeaderButton } from '@react-navigation/elements';
 import type { NativeStackNavigationOptions } from '@react-navigation/native-stack';
@@ -5,7 +6,6 @@ import { router } from 'expo-router';
 import { Linking, Pressable, Text, View } from 'react-native';
 
 import { SettingsMenu } from '@/src/shared/components';
-import { colors } from '@/src/shared/constants';
 
 const FEEDBACK_FORM_URL = 'https://forms.gle/PXkrsrkpikbKXHUk6';
 
@@ -94,9 +94,8 @@ export const noteDetailScreenOptions: NativeStackNavigationOptions = {
   title: '',
   headerTransparent: true,
   headerStyle: {
-    backgroundColor: 'transparent',
+    backgroundColor: colors.bg.secondary,
   },
-  headerBlurEffect: undefined,
 };
 
 /**

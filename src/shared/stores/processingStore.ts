@@ -1,5 +1,5 @@
-import type { FormatMemoResponse } from '@/src/api/generated/apiSchema';
 import { apiClient } from '@/src/api';
+import type { FormatMemoResponse, MemoDetailResponse } from '@/src/api/generated/apiSchema';
 import { create } from 'zustand';
 
 export type ProcessingStatus = 'idle' | 'processing' | 'completed' | 'error';
@@ -7,15 +7,18 @@ export type ProcessingStatus = 'idle' | 'processing' | 'completed' | 'error';
 interface ProcessingState {
   // 状態
   status: ProcessingStatus;
-  memoResult: FormatMemoResponse | null;
+  memoResult: MemoDetailResponse | FormatMemoResponse | null;
   error: string | null;
   transcript: string | null;
   language: string | null;
+  memoId: string | null;
+  actionType: 'format' | 'resummarize' | null;
 
   // アクション
   startProcessing: (transcript: string, language?: string) => Promise<void>;
+  startResummarize: (memoId: string, editedTranscription: string) => Promise<void>;
   retry: () => Promise<void>;
-  setCompleted: (result: FormatMemoResponse) => void;
+  setCompleted: (result: MemoDetailResponse | FormatMemoResponse) => void;
   setError: (error: string) => void;
   reset: () => void;
   dismissBanner: () => void;
@@ -28,6 +31,8 @@ export const useProcessingStore = create<ProcessingState>()((set, get) => ({
   error: null,
   transcript: null,
   language: null,
+  memoId: null,
+  actionType: null,
 
   // 処理開始（バックグラウンドでAPI呼び出し）
   startProcessing: async (transcript: string, language = 'ja-JP') => {
@@ -42,6 +47,8 @@ export const useProcessingStore = create<ProcessingState>()((set, get) => ({
       error: null,
       transcript,
       language,
+      memoId: null,
+      actionType: 'format',
     });
 
     try {
@@ -65,10 +72,55 @@ export const useProcessingStore = create<ProcessingState>()((set, get) => ({
     }
   },
 
+  // 再AI整形を開始（編集済み文字起こし）
+  startResummarize: async (memoId: string, editedTranscription: string) => {
+    if (get().status === 'processing') {
+      return;
+    }
+
+    set({
+      status: 'processing',
+      memoResult: null,
+      error: null,
+      transcript: editedTranscription,
+      language: null,
+      memoId,
+      actionType: 'resummarize',
+    });
+
+    try {
+      const result = await apiClient.resummarizeMemo(memoId, editedTranscription);
+
+      set({
+        status: 'completed',
+        memoResult: result,
+        error: null,
+      });
+    } catch (err) {
+      if (__DEV__) console.error('Failed to resummarize memo:', err);
+      const errorMessage = err instanceof Error ? err.message : '処理に失敗しました';
+
+      set({
+        status: 'error',
+        memoResult: null,
+        error: errorMessage,
+      });
+    }
+  },
+
   // 再試行
   retry: async () => {
-    const { transcript, language } = get();
-    if (!transcript) {
+    const { transcript, language, actionType, memoId } = get();
+    if (!transcript || !actionType) {
+      return;
+    }
+
+    if (actionType === 'resummarize' && !memoId) {
+      set({
+        status: 'error',
+        memoResult: null,
+        error: 'メモIDが不足しているため再試行できません',
+      });
       return;
     }
 
@@ -79,7 +131,10 @@ export const useProcessingStore = create<ProcessingState>()((set, get) => ({
     });
 
     try {
-      const result = await apiClient.formatMemo(transcript, language ?? 'ja-JP');
+      const result =
+        actionType === 'resummarize'
+          ? await apiClient.resummarizeMemo(memoId!, transcript)
+          : await apiClient.formatMemo(transcript, language ?? 'ja-JP');
 
       set({
         status: 'completed',
@@ -87,7 +142,7 @@ export const useProcessingStore = create<ProcessingState>()((set, get) => ({
         error: null,
       });
     } catch (err) {
-      if (__DEV__) console.error('Failed to format memo (retry):', err);
+      if (__DEV__) console.error('Failed to process memo (retry):', err);
       const errorMessage = err instanceof Error ? err.message : '処理に失敗しました';
 
       set({
@@ -99,7 +154,7 @@ export const useProcessingStore = create<ProcessingState>()((set, get) => ({
   },
 
   // 処理完了（手動設定用）
-  setCompleted: (result: FormatMemoResponse) => {
+  setCompleted: (result: MemoDetailResponse | FormatMemoResponse) => {
     set({
       status: 'completed',
       memoResult: result,
@@ -124,6 +179,8 @@ export const useProcessingStore = create<ProcessingState>()((set, get) => ({
       error: null,
       transcript: null,
       language: null,
+      memoId: null,
+      actionType: null,
     });
   },
 
